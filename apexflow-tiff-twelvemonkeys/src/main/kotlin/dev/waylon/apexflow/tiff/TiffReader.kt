@@ -11,7 +11,6 @@ import javax.imageio.stream.ImageInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import org.slf4j.LoggerFactory
 
 /**
  * TIFF file reader implementation using TwelveMonkeys ImageIO library
@@ -27,9 +26,6 @@ class TiffReader(
     private var inputPath: String
 ) : FileWorkflowReader<BufferedImage> {
 
-    // Lazy logger initialization for better startup performance
-    private val logger by lazy { LoggerFactory.getLogger(TiffReader::class.java) }
-
     /**
      * Set the input TIFF file path
      *
@@ -37,9 +33,6 @@ class TiffReader(
      */
     override fun setInput(filePath: String) {
         this.inputPath = filePath
-        if (logger.isDebugEnabled) {
-            logger.debug("Set TIFF input file: {}", filePath)
-        }
     }
 
     /**
@@ -49,9 +42,6 @@ class TiffReader(
      */
     fun setIoBufferSize(bufferSize: Int) {
         this.ioBufferSize = bufferSize
-        if (logger.isDebugEnabled) {
-            logger.debug("Set TIFF reader IO buffer size: {} bytes", bufferSize)
-        }
     }
 
     /**
@@ -65,11 +55,6 @@ class TiffReader(
     override fun read(): Flow<BufferedImage> = flow<BufferedImage> { // Explicit type declaration
         // Step 1: Validate input path and get File object
         val file = validateInput()
-        val path = file.absolutePath
-
-        if (logger.isInfoEnabled) {
-            logger.info("Reading image file: {}, size: {} bytes", path, file.length())
-        }
 
         // Step 2: Create optimized ImageInputStream with buffered IO
         createOptimizedImageInputStream(file).use { input ->
@@ -81,43 +66,20 @@ class TiffReader(
                 imageReader.input = input
 
                 val numPages = imageReader.getNumImages(true)
-                if (logger.isInfoEnabled) {
-                    logger.info("Image file contains {} pages", numPages)
-                }
 
                 // Create optimized read param once
                 val readParam = imageReader.defaultReadParam
 
                 // Read each page with optimized parameters
                 repeat(numPages) { pageIndex ->
-                    if (logger.isDebugEnabled) {
-                        logger.debug("Reading page {}/{} from: {}", pageIndex + 1, numPages, path)
-                    }
-
                     // Optimized image reading
                     val image = imageReader.read(pageIndex, readParam)
-
-                    if (logger.isDebugEnabled) {
-                        logger.debug(
-                            "Successfully read page {}/{}: {}x{}",
-                            pageIndex + 1,
-                            numPages,
-                            image.width,
-                            image.height
-                        )
-                    }
-
                     emit(image)
-                }
-
-                if (logger.isInfoEnabled) {
-                    logger.info("Completed reading all {} pages from: {}", numPages, path)
                 }
             }
         }
     }.catch {
         // Centralized error handling
-        logger.error("Error reading image file: {}", inputPath, it)
         throw it
     }
 
@@ -129,10 +91,6 @@ class TiffReader(
     private fun validateInput(): File {
         // Step 1: Validate input path is set
         val path = inputPath
-
-        if (logger.isDebugEnabled) {
-            logger.debug("Starting image reading: {}", path)
-        }
 
         // Step 2: Validate file exists and is a file
         return File(path).also {
@@ -163,11 +121,7 @@ class TiffReader(
     private fun getImageReader(input: ImageInputStream, file: File): ImageReader {
         val readers = ImageIO.getImageReaders(input)
         return if (readers.hasNext()) {
-            val reader = readers.next()
-            if (logger.isDebugEnabled) {
-                logger.debug("Found ImageReader: {}", reader::class.simpleName)
-            }
-            reader
+            readers.next()
         } else {
             val fileExtension = file.extension.lowercase()
             throw IllegalStateException(

@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
-import org.slf4j.LoggerFactory
 
 /**
  * PDF writer implementation using PDFBox library
@@ -23,9 +22,6 @@ class PdfWriter(
     private val jpegQuality: Float = 85f
 ) : FileWorkflowWriter<BufferedImage> {
 
-    // Lazy logger initialization for better startup performance
-    private val logger by lazy { LoggerFactory.getLogger(PdfWriter::class.java) }
-
     /**
      * Set the output PDF file path
      *
@@ -33,9 +29,6 @@ class PdfWriter(
      */
     override fun setOutput(filePath: String) {
         this.outputPath = filePath
-        if (logger.isDebugEnabled) {
-            logger.debug("Set PDF output file: {}", filePath)
-        }
     }
 
     /**
@@ -45,10 +38,6 @@ class PdfWriter(
      */
     override suspend fun write(data: Flow<BufferedImage>) {
         val path = outputPath
-
-        if (logger.isInfoEnabled) {
-            logger.info("Starting PDF generation: {}", path)
-        }
 
         // Create PDF document
         PDDocument().use { document ->
@@ -65,10 +54,6 @@ class PdfWriter(
                 PDPageContentStream(document, page).use { contentStream ->
                     contentStream.drawImage(pdImage, 0f, 0f)
                 }
-
-                if (logger.isDebugEnabled) {
-                    logger.debug("Added image to PDF: {}x{}, JPEG quality: {}", image.width, image.height, jpegQuality)
-                }
                 
                 // 🔧 MEMORY OPTIMIZATION: Release resources immediately after use
                 // Flush the original image from memory immediately after use
@@ -78,10 +63,6 @@ class PdfWriter(
 
             // Save PDF document
             document.save(path)
-
-            if (logger.isInfoEnabled) {
-                logger.info("PDF generation completed: {}, pages: {}", path, document.numberOfPages)
-            }
         }
     }
 }

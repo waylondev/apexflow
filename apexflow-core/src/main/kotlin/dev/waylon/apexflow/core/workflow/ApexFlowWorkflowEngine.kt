@@ -2,7 +2,7 @@ package dev.waylon.apexflow.core.workflow
 
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flowOn
-import org.slf4j.LoggerFactory
+
 
 /**
  * ApexFlow workflow engine implementation
@@ -25,9 +25,6 @@ class ApexFlowWorkflowEngine<I, O>(
     private val writer: WorkflowWriter<O>
 ) : WorkflowEngine {
 
-    // Logger for debug-level monitoring with lazy initialization
-    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
-
     private var config: WorkflowConfig = WorkflowConfig()
 
     override fun configure(config: WorkflowConfig) {
@@ -38,48 +35,22 @@ class ApexFlowWorkflowEngine<I, O>(
         // High-performance parallel data flow with dedicated coroutines for each stage
         // Modern Kotlin: Use Flow operators for optimal parallelism
 
-        // Lazy log initialization - only check if debug is enabled when needed
-        if (logger.isDebugEnabled) {
-            logger.debug("Starting workflow execution...")
-            logger.debug(
-                "Workflow config: readBufferSize={}, processBufferSize={}, ioBufferSize={}",
-                config.readBufferSize, config.processBufferSize, config.ioBufferSize
-            )
-        }
-
-        // Minimal overhead path without performance monitoring
+        // Minimal overhead path without logging
         runCatching {
-            if (logger.isDebugEnabled) {
-                logger.debug("Starting Step 1: Reading data with dispatcher: {}", config.readDispatcher)
-            }
-
             // Step 1: Read data
             val dataFlow = reader.read()
                 .buffer(config.readBufferSize)  // Read buffer for balancing reader and processor
                 .flowOn(config.readDispatcher)
-
-            if (logger.isDebugEnabled) {
-                logger.debug("Starting Step 2: Processing data with dispatcher: {}", config.processDispatcher)
-            }
 
             // Step 2: Process data
             val processedFlow = processor.process(dataFlow)
                 .buffer(config.processBufferSize)  // Process buffer for balancing processor and writer
                 .flowOn(config.processDispatcher)
 
-            if (logger.isDebugEnabled) {
-                logger.debug("Starting Step 3: Writing data with dispatcher: {}", config.writeDispatcher)
-            }
-
             // Step 3: Write data
             writer.write(processedFlow.flowOn(config.writeDispatcher))
-
-            if (logger.isDebugEnabled) {
-                logger.debug("Workflow execution completed successfully")
-            }
         }.onFailure {
             // Handle and rethrow errors
-            logger.error("Workflow execution failed with error: {}", it.message, it)
             config.errorHandler(it)
             throw it
         }

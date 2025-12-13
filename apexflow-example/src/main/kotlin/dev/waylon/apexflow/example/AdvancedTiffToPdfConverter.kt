@@ -49,9 +49,7 @@ fun main() {
 
     // Use the simplified performance monitoring method
     runBlocking {
-        PerformanceMonitorUtil.withPerformanceMonitoring(
-            logger = logger,
-        ) {
+        PerformanceMonitorUtil.withPerformanceMonitoring {
             // Run the conversion within the performance monitoring block
             engine.startAsync()
         }

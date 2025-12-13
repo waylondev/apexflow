@@ -9,7 +9,6 @@ import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import javax.imageio.stream.FileImageOutputStream
 import kotlinx.coroutines.flow.Flow
-import org.slf4j.LoggerFactory
 
 /**
  * TIFF file writer implementation using TwelveMonkeys ImageIO library
@@ -23,9 +22,6 @@ class TiffWriter(
     private var outputPath: String
 ) : FileWorkflowWriter<BufferedImage> {
 
-    // Lazy logger initialization for better startup performance
-    private val logger by lazy { LoggerFactory.getLogger(TiffWriter::class.java) }
-
     /**
      * Set the output TIFF file path
      *
@@ -33,9 +29,6 @@ class TiffWriter(
      */
     override fun setOutput(filePath: String) {
         this.outputPath = filePath
-        if (logger.isDebugEnabled) {
-            logger.debug("Set TIFF output file: {}", filePath)
-        }
     }
 
     /**
@@ -45,10 +38,6 @@ class TiffWriter(
      */
     override suspend fun write(data: Flow<BufferedImage>) {
         val path = outputPath
-
-        if (logger.isInfoEnabled) {
-            logger.info("Starting TIFF generation: {}", path)
-        }
 
         // Get TIFF image writer
         val writers = ImageIO.getImageWritersByFormatName("tiff")
@@ -78,10 +67,6 @@ class TiffWriter(
                 data.collect { image ->
                     pageCount++
 
-                    if (logger.isDebugEnabled) {
-                        logger.debug("Writing page {} to TIFF: {}x{}", pageCount, image.width, image.height)
-                    }
-
                     // Create IIOImage from BufferedImage
                     val iioImage = IIOImage(image, null, null)
 
@@ -97,14 +82,6 @@ class TiffWriter(
 
                 // Step 3: End the write sequence to finalize the multi-page TIFF file
                 writer.endWriteSequence()
-
-                if (pageCount > 0) {
-                    if (logger.isInfoEnabled) {
-                        logger.info("TIFF generation completed: {}, pages: {}", path, pageCount)
-                    }
-                } else {
-                    logger.warn("No images to write to TIFF file: {}", path)
-                }
             }
         }
     }

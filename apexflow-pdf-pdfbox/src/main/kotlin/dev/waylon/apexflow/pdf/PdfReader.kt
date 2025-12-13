@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.rendering.PDFRenderer
-import org.slf4j.LoggerFactory
+
 
 /**
  * Render quality strategy enum
@@ -44,8 +44,7 @@ class PdfReader(
     private var renderQuality: RenderQuality = RenderQuality.HIGH
 ) : FileWorkflowReader<BufferedImage> {
 
-    // Lazy logger initialization for better startup performance
-    private val logger by lazy { LoggerFactory.getLogger(PdfReader::class.java) }
+
 
     /**
      * Set the input PDF file path
@@ -54,9 +53,6 @@ class PdfReader(
      */
     override fun setInput(filePath: String) {
         this.inputPath = filePath
-        if (logger.isDebugEnabled) {
-            logger.debug("Set PDF input file: {}", filePath)
-        }
     }
 
     /**
@@ -67,9 +63,6 @@ class PdfReader(
     fun setDpi(dpi: Float) {
         // Validate DPI value
         this.dpi = dpi
-        if (logger.isDebugEnabled) {
-            logger.debug("Set PDF renderer DPI: {}", this.dpi)
-        }
     }
 
     /**
@@ -79,9 +72,6 @@ class PdfReader(
      */
     fun setRenderQuality(quality: RenderQuality) {
         this.renderQuality = quality
-        if (logger.isDebugEnabled) {
-            logger.debug("Set render quality: {}", quality)
-        }
     }
 
     /**
@@ -151,12 +141,7 @@ class PdfReader(
         val file = validateInput()
         val path = file.absolutePath
 
-        if (logger.isInfoEnabled) {
-            logger.info(
-                "Reading PDF file: {}, size: {} bytes, render quality: {}",
-                path, file.length(), renderQuality
-            )
-        }
+
 
         // Step 2: Open and load PDF document with automatic resource management
         Loader.loadPDF(file).use { document ->
@@ -166,22 +151,16 @@ class PdfReader(
             // Step 4: Get page count
             val pageCount = document.numberOfPages
 
-            if (logger.isInfoEnabled) {
-                logger.info("PDF file contains {} pages", pageCount)
-            }
+
 
             // Step 5: Render pages sequentially with rendering strategy optimization
             repeat(pageCount) { pageIndex ->
-                if (logger.isDebugEnabled) {
-                    logger.debug("Processing page {}/{} from: {}", pageIndex + 1, pageCount, path)
-                }
+
 
                 // Get effective DPI based on render quality
                 val effectiveDpi = getEffectiveDpi()
 
-                if (logger.isDebugEnabled) {
-                    logger.debug("Rendering page {}/{} with DPI: {}", pageIndex + 1, pageCount, effectiveDpi)
-                }
+
 
                 // Render the current page with effective DPI
                 var renderedImage = renderer.renderImageWithDPI(pageIndex, effectiveDpi)
@@ -194,12 +173,7 @@ class PdfReader(
                     renderedImage = resizeImageForUltraFast(renderedImage)
                 }
 
-                if (logger.isDebugEnabled) {
-                    logger.debug(
-                        "Successfully processed page {}/{}: {}x{}, type: {}",
-                        pageIndex + 1, pageCount, renderedImage.width, renderedImage.height, renderedImage.type
-                    )
-                }
+
 
                 // Emit the final image
                 emit(renderedImage)
@@ -208,13 +182,10 @@ class PdfReader(
                 renderedImage.flush()
             }
 
-            if (logger.isInfoEnabled) {
-                logger.info("Completed rendering all {} pages from: {}", pageCount, path)
-            }
+
         }
     }.catch {
         // Centralized error handling
-        logger.error("Error reading PDF file: {}", inputPath, it)
         throw it
     }
 
@@ -227,9 +198,7 @@ class PdfReader(
         // Step 1: Validate input path is set
         val path = inputPath
 
-        if (logger.isDebugEnabled) {
-            logger.debug("Starting PDF reading: {}", path)
-        }
+
 
         // Step 2: Validate file exists and is a file
         return File(path).also {

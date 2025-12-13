@@ -13,9 +13,6 @@ dependencies {
     // Core dependencies - using version catalog for consistency
     implementation(libs.kotlinx.coroutines.core)
 
-    // Logging - Best practice: Only depend on SLF4J API, let client choose implementation
-    implementation(libs.slf4j.api) // Added to version catalog
-
     // Test dependencies - Kotlin testing framework
     testImplementation(libs.kotlin.test)
 

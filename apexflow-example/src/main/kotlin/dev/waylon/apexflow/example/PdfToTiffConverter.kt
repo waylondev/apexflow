@@ -50,9 +50,7 @@ fun main() {
 
     // Use the simplified performance monitoring method
     runBlocking {
-        PerformanceMonitorUtil.withPerformanceMonitoring(
-            logger = logger
-        ) {
+        PerformanceMonitorUtil.withPerformanceMonitoring() {
             // Execute workflow - PDF to TIFF conversion
             engine.startAsync()
         }

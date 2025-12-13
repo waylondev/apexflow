@@ -38,7 +38,7 @@ fun main() {
     runBlocking {
         // Simplified performance monitoring using withPerformanceMonitoring method
         // pageCount is optional and will be automatically handled
-        PerformanceMonitorUtil.withPerformanceMonitoring(logger) {
+        PerformanceMonitorUtil.withPerformanceMonitoring {
             // Run the conversion
             engine.startAsync()
         }
