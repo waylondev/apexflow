@@ -4,7 +4,6 @@ import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
 import dev.waylon.apexflow.pdf.PdfReader
-import dev.waylon.apexflow.pdf.RenderQuality
 import dev.waylon.apexflow.tiff.TiffWriter
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -35,9 +34,11 @@ fun main() {
     // Create workflow engine using ApexFlow DSL
     val engine = apexFlowWorkflow {
         // Configure PdfReader with optimal settings for smaller file size
-        reader(PdfReader(
-            inputPath = inputPath,
-        ))
+        reader(
+            PdfReader(
+                inputPath = inputPath,
+            )
+        )
         processor(WorkflowProcessor.identity())
         writer(TiffWriter(outputPath))
         configure {

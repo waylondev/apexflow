@@ -1,10 +1,10 @@
 package dev.waylon.apexflow.example
 
+import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
 import dev.waylon.apexflow.pdf.PdfWriter
 import dev.waylon.apexflow.tiff.TiffReader
-import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 

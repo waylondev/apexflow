@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.example
 
+import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
 import dev.waylon.apexflow.pdf.PdfWriter
@@ -8,7 +9,6 @@ import java.awt.Color
 import java.awt.image.BufferedImage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
