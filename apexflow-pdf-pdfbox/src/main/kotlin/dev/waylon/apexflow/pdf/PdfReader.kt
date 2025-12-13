@@ -101,6 +101,8 @@ class PdfReader(
             val g2d = grayImage.createGraphics()
             g2d.drawImage(image, 0, 0, null)
             g2d.dispose()
+            // Flush original image to free memory
+            image.flush()
             return grayImage
         }
 
@@ -120,6 +122,8 @@ class PdfReader(
         val g2d = resizedImage.createGraphics()
         g2d.drawImage(image, 0, 0, newWidth, newHeight, null)
         g2d.dispose()
+        // Flush original image to free memory
+        image.flush()
         return resizedImage
     }
 
