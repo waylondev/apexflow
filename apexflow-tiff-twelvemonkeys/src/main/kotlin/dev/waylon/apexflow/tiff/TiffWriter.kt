@@ -10,16 +10,36 @@ import javax.imageio.ImageWriter
 import javax.imageio.stream.FileImageOutputStream
 import kotlinx.coroutines.flow.Flow
 
+
+
 /**
  * TIFF file writer implementation using TwelveMonkeys ImageIO library
  *
  * Implements FileWorkflowWriter interface for writing BufferedImage to TIFF files
- * Supports writing single and multi-page TIFF files
- * Optimized for high performance
+ * Supports writing single and multi-page TIFF files with advanced performance optimizations:
+ * - Direct support for ImageWriteParam for complete configuration control
+ * - Optimized memory management with image flushing
+ * - High performance I/O with FileImageOutputStream
+ *
+ * Example usage:
+ * ```kotlin
+ * // Basic usage with default parameters
+ * val writer1 = TiffWriter(outputPath)
+ * 
+ * // Usage with custom ImageWriteParam for advanced configuration
+ * val writer2 = TiffWriter(outputPath)
+ * val customWriteParam = ImageIO.getImageWritersByFormatName("tiff").next().defaultWriteParam
+ * customWriteParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
+ * customWriteParam.compressionType = "DEFLATE"
+ * customWriteParam.compressionQuality = 0.95f
+ * writer2.setWriteParam(customWriteParam)
+ * ```
  */
 class TiffWriter(
     // Optional output path to set during construction
-    private var outputPath: String
+    private var outputPath: String,
+    // Custom ImageWriteParam for advanced configuration, null means use default
+    private var writeParam: ImageWriteParam? = null
 ) : FileWorkflowWriter<BufferedImage> {
 
     /**
@@ -29,6 +49,15 @@ class TiffWriter(
      */
     override fun setOutput(filePath: String) {
         this.outputPath = filePath
+    }
+    
+    /**
+     * Set custom ImageWriteParam for advanced configuration
+     *
+     * @param writeParam Custom ImageWriteParam for advanced configuration
+     */
+    fun setWriteParam(writeParam: ImageWriteParam) {
+        this.writeParam = writeParam
     }
 
     /**
@@ -48,15 +77,12 @@ class TiffWriter(
         // Use extension function to automatically dispose ImageWriter resources
         writers.next().use { writer ->
             // Create output stream with use block for proper resource management
-            // FileImageOutputStream is optimized for file I/O and handles buffering internally
             val file = File(path)
             FileImageOutputStream(file).use { outputStream ->
                 writer.output = outputStream
 
-                // Create default write parameters with LZW compression
-                val writeParams = writer.defaultWriteParam
-                writeParams.compressionMode = ImageWriteParam.MODE_EXPLICIT
-                writeParams.compressionType = "LZW" // Set actual compression type (LZW is good for TIFF files)
+                // Use custom write param if provided, otherwise use default
+                val effectiveWriteParam = writeParam ?: writer.defaultWriteParam
 
                 // Correct way to write multi-page TIFF using ImageWriter's sequence API
                 var pageCount = 0
@@ -74,7 +100,7 @@ class TiffWriter(
                     // This ensures each image is added as a new page in the TIFF file
                     writer.writeToSequence(
                         iioImage,
-                        writeParams
+                        effectiveWriteParam
                     )
                     // Always flush the image from memory immediately after writing
                     image.flush()
