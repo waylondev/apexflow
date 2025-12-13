@@ -9,35 +9,25 @@ import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.rendering.PDFRenderer
 
-
 /**
- * PDF reader configuration DSL
+ * PDF image reader configuration DSL
  *
- * Provides a fluent API for configuring PDF reader
+ * Provides a fluent API for configuring PDF image reader
  */
-class PdfReaderConfig {
-    /**
-     * DPI for rendering PDF pages, default 100 for better performance
-     */
+class PdfImageReaderConfig {
     var dpi: Float = 100f
-    
-    /**
-     * Custom image processor to be applied to each rendered image
-     * Set to null to use no processing
-     */
     var imageProcessor: ((BufferedImage) -> BufferedImage)? = null
 }
 
 /**
- * PDF reader implementation using PDFBox library
+ * PDF image reader implementation using PDFBox library
  *
- * Implements FileWorkflowReader interface for reading PDF files
- * Supports reading multi-page PDF files and converting each page to BufferedImage
- * Optimized for high performance with configurable rendering strategies
+ * Renders PDF pages to BufferedImage
+ * Supports rendering with configurable DPI and custom image processing
  *
  * DSL usage example:
  * ```kotlin
- * val reader = PdfReader(inputPath) {
+ * val reader = PdfImageReader(inputPath) {
  *     dpi = 200f
  *     imageProcessor {
  *         // Custom image processing logic
@@ -50,15 +40,15 @@ class PdfReaderConfig {
  * }
  * ```
  */
-class PdfReader(
+class PdfImageReader(
     // Optional input path to set during construction
     private var inputPath: String,
     // Optional configuration block using DSL
-    config: PdfReaderConfig.() -> Unit = {}
+    config: PdfImageReaderConfig.() -> Unit = {}
 ) : FileWorkflowReader<BufferedImage> {
-
+    
     // Configuration instance
-    private val pdfConfig = PdfReaderConfig().apply(config)
+    private val pdfConfig = PdfImageReaderConfig().apply(config)
 
     /**
      * Set the input PDF file path
@@ -68,13 +58,13 @@ class PdfReader(
     override fun setInput(filePath: String) {
         this.inputPath = filePath
     }
-
+    
     /**
-     * Configure PDF reader using DSL
+     * Configure PDF image reader using DSL
      *
      * @param config Configuration block
      */
-    fun configure(config: PdfReaderConfig.() -> Unit) {
+    fun configure(config: PdfImageReaderConfig.() -> Unit) {
         pdfConfig.apply(config)
     }
 
@@ -90,9 +80,9 @@ class PdfReader(
     /**
      * Get current DPI setting
      *
-     * @return Current DPI value, null if not set
+     * @return Current DPI value
      */
-    fun getDpi(): Float? {
+    fun getDpi(): Float {
         return pdfConfig.dpi
     }
 
@@ -105,40 +95,24 @@ class PdfReader(
         pdfConfig.imageProcessor = processor
     }
 
-
     /**
      * Read PDF file and return a Flow of BufferedImage
      *
      * @return Flow<BufferedImage> Flow of images from the PDF file
-     *
-     * This implementation uses efficient single-threaded rendering with:
-     * - True streaming behavior: render one page, emit one page
-     * - Memory management: flush images after emission
-     * - Render quality strategies: support for different rendering qualities
-     * - Grayscale rendering: faster rendering for certain use cases
-     * - Resource efficiency: minimal memory usage
      */
     override fun read(): Flow<BufferedImage> = flow {
         // Step 1: Validate input path and get File object
         val file = validateInput()
         val path = file.absolutePath
 
-
-
         // Step 2: Open and load PDF document with automatic resource management
         Loader.loadPDF(file).use { document ->
             // Step 3: Create PDF renderer
             val renderer = PDFRenderer(document)
-
-            // Step 4: Get page count
             val pageCount = document.numberOfPages
-
-
 
             // Step 5: Render pages sequentially with rendering strategy optimization
             repeat(pageCount) { pageIndex ->
-
-
                 // Render the current page with the configured DPI
                 var renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
 
@@ -156,8 +130,6 @@ class PdfReader(
                 // Flush the image from memory after emission
                 processedImage.flush()
             }
-
-
         }
     }.catch {
         // Centralized error handling
@@ -172,8 +144,6 @@ class PdfReader(
     private fun validateInput(): File {
         // Step 1: Validate input path is set
         val path = inputPath
-
-
 
         // Step 2: Validate file exists and is a file
         return File(path).also {

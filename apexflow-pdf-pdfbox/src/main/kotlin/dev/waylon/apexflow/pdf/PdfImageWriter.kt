@@ -10,32 +10,36 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
 
 /**
- * PDF writer configuration DSL
+ * PDF image writer configuration DSL
  *
- * Provides a fluent API for configuring PDF writer
+ * Provides a fluent API for configuring PDF image writer
  */
-class PdfWriterConfig {
-    /**
-     * JPEG quality (0-100), default 85 for good balance of quality and size
-     */
+class PdfImageWriterConfig {
     var jpegQuality: Float = 85f
 }
 
 /**
- * PDF writer implementation using PDFBox library
+ * PDF image writer implementation using PDFBox library
  *
- * Implements FileWorkflowWriter interface for writing BufferedImage to PDF files
- * Optimized for high performance
+ * Writes BufferedImage to PDF files
+ * Supports writing with configurable JPEG quality
+ *
+ * DSL usage example:
+ * ```kotlin
+ * val writer = PdfImageWriter(outputPath) {
+ *     jpegQuality = 90f
+ * }
+ * ```
  */
-class PdfWriter(
+class PdfImageWriter(
     // Optional output path to set during construction
     private var outputPath: String,
     // Optional configuration block using DSL
-    config: PdfWriterConfig.() -> Unit = {}
+    config: PdfImageWriterConfig.() -> Unit = {}
 ) : FileWorkflowWriter<BufferedImage> {
-
+    
     // Configuration instance
-    private val pdfConfig = PdfWriterConfig().apply(config)
+    private val pdfConfig = PdfImageWriterConfig().apply(config)
 
     /**
      * Set the output PDF file path
@@ -47,11 +51,11 @@ class PdfWriter(
     }
     
     /**
-     * Configure PDF writer using DSL
+     * Configure PDF image writer using DSL
      *
      * @param config Configuration block
      */
-    fun configure(config: PdfWriterConfig.() -> Unit) {
+    fun configure(config: PdfImageWriterConfig.() -> Unit) {
         pdfConfig.apply(config)
     }
     
@@ -67,9 +71,9 @@ class PdfWriter(
     /**
      * Get current JPEG quality setting
      *
-     * @return Current JPEG quality, null if not set
+     * @return Current JPEG quality (0-100)
      */
-    fun getJpegQuality(): Float? {
+    fun getJpegQuality(): Float {
         return pdfConfig.jpegQuality
     }
 
@@ -99,7 +103,6 @@ class PdfWriter(
                 
                 // 🔧 MEMORY OPTIMIZATION: Release resources immediately after use
                 // Flush the original image from memory immediately after use
-                // This is the most effective memory optimization with minimal performance impact
                 image.flush()
             }
 
