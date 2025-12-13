@@ -33,12 +33,13 @@ fun main() {
     val watermarkProcessor = workflowProcessor()
 
     // Create workflow engine using DSL with custom processor and configuration
-    // Use configure block but only set the properties we care about, others use default values
+    // Use configure block for clearer separation of configuration
     val engine = apexFlowWorkflow {
         reader(TiffReader(inputPath = inputPath))
         processor(watermarkProcessor)
         writer(PdfImageWriter(outputPath))
-        // Use configure block, only set the properties we care about
+        
+        // Use configure block for clear configuration separation
         configure {
             readBufferSize = 1000
             processBufferSize = 1000

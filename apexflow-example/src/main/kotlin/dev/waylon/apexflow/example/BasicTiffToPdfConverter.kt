@@ -31,6 +31,7 @@ fun main() {
         reader(TiffReader(inputPath = inputPath))
         processor(WorkflowProcessor.noOp())
         writer(PdfImageWriter(outputPath))
+        // Use empty configure block for consistency
         configure {
         }
     }
