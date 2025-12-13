@@ -34,11 +34,6 @@ application {
     mainClass.set("dev.waylon.apexflow.example.BasicTiffToPdfConverterKt")
 }
 
-// Note: Multiple example files are available. To run a specific example:
-// ./gradlew basicRun
-// ./gradlew configuredRun
-// ./gradlew advancedRun
-
 // Default run task - run the basic example
 application {
     mainClass.set("dev.waylon.apexflow.example.BasicTiffToPdfConverterKt")

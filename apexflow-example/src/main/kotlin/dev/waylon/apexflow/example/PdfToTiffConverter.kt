@@ -37,8 +37,6 @@ fun main() {
         // Configure PdfReader with optimal settings for smaller file size
         reader(PdfReader(
             inputPath = inputPath,
-            dpi = 50f, // Lower DPI for smaller files (default is 100f)
-            renderQuality = RenderQuality.BALANCED // BALANCED or FAST for smaller files
         ))
         processor(WorkflowProcessor.identity())
         writer(TiffWriter(outputPath))

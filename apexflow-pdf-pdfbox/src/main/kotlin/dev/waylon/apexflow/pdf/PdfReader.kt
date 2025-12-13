@@ -41,7 +41,7 @@ class PdfReader(
     // DPI for rendering PDF pages, default 100 for better performance
     private var dpi: Float = 100f,
     // Render quality strategy, default to balanced for good performance and quality
-    private var renderQuality: RenderQuality = RenderQuality.BALANCED
+    private var renderQuality: RenderQuality = RenderQuality.HIGH
 ) : FileWorkflowReader<BufferedImage> {
 
     // Lazy logger initialization for better startup performance
