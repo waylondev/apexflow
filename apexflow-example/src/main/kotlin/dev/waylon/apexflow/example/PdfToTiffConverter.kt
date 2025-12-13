@@ -3,7 +3,7 @@ package dev.waylon.apexflow.example
 import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
-import dev.waylon.apexflow.pdf.PdfReader
+import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.tiff.TiffWriter
 import kotlinx.coroutines.runBlocking
 
@@ -32,7 +32,7 @@ fun main() {
     val engine = apexFlowWorkflow {
         // Configure PdfReader with optimal settings for smaller file size
         reader(
-            PdfReader(
+            PdfImageReader(
                 inputPath = inputPath,
             )
         )

@@ -3,7 +3,7 @@ package dev.waylon.apexflow.example
 import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
-import dev.waylon.apexflow.pdf.PdfWriter
+import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.tiff.TiffReader
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ fun main() {
     val engine = apexFlowWorkflow {
         reader(TiffReader(inputPath = inputPath))
         processor(WorkflowProcessor.identity())
-        writer(PdfWriter(outputPath))
+        writer(PdfImageWriter(outputPath))
         // Use configure block, only set the properties we care about
         configure {
             readBufferSize = 500
