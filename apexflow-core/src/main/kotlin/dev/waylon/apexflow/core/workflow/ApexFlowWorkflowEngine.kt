@@ -31,6 +31,23 @@ class ApexFlowWorkflowEngine<I, O>(
         this.config = config
     }
 
+    /**
+     * Configure workflow engine using DSL
+     *
+     * Example usage:
+     * ```kotlin
+     * val engine = ApexFlowWorkflowEngine(reader, processor, writer)
+     * engine.configure {
+     *     readBufferSize = 200
+     *     processBufferSize = 200
+     *     errorHandler = { e -> println("Error: ${e.message}") }
+     * }
+     * ```
+     */
+    fun configure(block: WorkflowConfig.() -> Unit) {
+        this.config = WorkflowConfig().apply(block)
+    }
+
     override suspend fun startAsync() {
         // High-performance parallel data flow with dedicated coroutines for each stage
         // Modern Kotlin: Use Flow operators for optimal parallelism
