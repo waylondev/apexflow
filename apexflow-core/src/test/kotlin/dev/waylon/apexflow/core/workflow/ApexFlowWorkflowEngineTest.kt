@@ -81,11 +81,8 @@ class ApexFlowWorkflowEngineTest {
             }
         }
         
-        // Create and configure workflow engine with DSL
+        // Create and configure workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        engine.configure {
-            // Configure using the DSL - note: WorkflowConfig properties are val, use copy instead
-        }
         
         // Start workflow
         engine.startAsync()
