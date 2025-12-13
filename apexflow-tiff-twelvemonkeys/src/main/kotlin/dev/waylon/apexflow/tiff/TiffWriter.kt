@@ -13,6 +13,16 @@ import kotlinx.coroutines.flow.Flow
 
 
 /**
+ * TIFF writer configuration DSL
+ *
+ * Provides a fluent API for configuring TIFF writer
+ * No default values - client must explicitly set all required parameters
+ */
+class TiffWriterConfig {
+    var writeParam: ImageWriteParam? = null
+}
+
+/**
  * TIFF file writer implementation using TwelveMonkeys ImageIO library
  *
  * Implements FileWorkflowWriter interface for writing BufferedImage to TIFF files
@@ -26,21 +36,31 @@ import kotlinx.coroutines.flow.Flow
  * // Basic usage with default parameters
  * val writer1 = TiffWriter(outputPath)
  * 
- * // Usage with custom ImageWriteParam for advanced configuration
- * val writer2 = TiffWriter(outputPath)
+ * // Usage with DSL configuration
+ * val writer2 = TiffWriter(outputPath) {
+ *     val customWriteParam = ImageIO.getImageWritersByFormatName("tiff").next().defaultWriteParam
+ *     customWriteParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
+ *     customWriteParam.compressionType = "DEFLATE"
+ *     customWriteParam.compressionQuality = 0.95f
+ *     writeParam = customWriteParam
+ * }
+ * 
+ * // Usage with direct writeParam setting
+ * val writer3 = TiffWriter(outputPath)
  * val customWriteParam = ImageIO.getImageWritersByFormatName("tiff").next().defaultWriteParam
- * customWriteParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
- * customWriteParam.compressionType = "DEFLATE"
- * customWriteParam.compressionQuality = 0.95f
- * writer2.setWriteParam(customWriteParam)
+ * customWriteParam.compressionType = "LZW"
+ * writer3.setWriteParam(customWriteParam)
  * ```
  */
 class TiffWriter(
     // Optional output path to set during construction
     private var outputPath: String,
-    // Custom ImageWriteParam for advanced configuration, null means use default
-    private var writeParam: ImageWriteParam? = null
+    // Optional configuration block using DSL
+    config: TiffWriterConfig.() -> Unit = {}
 ) : FileWorkflowWriter<BufferedImage> {
+
+    // Configuration instance
+    private val tiffConfig = TiffWriterConfig().apply(config)
 
     /**
      * Set the output TIFF file path
@@ -52,12 +72,21 @@ class TiffWriter(
     }
     
     /**
+     * Configure TIFF writer using DSL
+     *
+     * @param config Configuration block
+     */
+    fun configure(config: TiffWriterConfig.() -> Unit) {
+        tiffConfig.apply(config)
+    }
+    
+    /**
      * Set custom ImageWriteParam for advanced configuration
      *
      * @param writeParam Custom ImageWriteParam for advanced configuration
      */
     fun setWriteParam(writeParam: ImageWriteParam) {
-        this.writeParam = writeParam
+        this.tiffConfig.writeParam = writeParam
     }
 
     /**
@@ -81,8 +110,8 @@ class TiffWriter(
             FileImageOutputStream(file).use { outputStream ->
                 writer.output = outputStream
 
-                // Use custom write param if provided, otherwise use default
-                val effectiveWriteParam = writeParam ?: writer.defaultWriteParam
+                // Verify client has set required writeParam
+                val effectiveWriteParam = tiffConfig.writeParam ?: writer.defaultWriteParam
 
                 // Correct way to write multi-page TIFF using ImageWriter's sequence API
                 var pageCount = 0

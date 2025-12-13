@@ -10,6 +10,16 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
 
 /**
+ * PDF writer configuration DSL
+ *
+ * Provides a fluent API for configuring PDF writer
+ * No default values - client must explicitly set all required parameters
+ */
+class PdfWriterConfig {
+    var jpegQuality: Float? = null
+}
+
+/**
  * PDF writer implementation using PDFBox library
  *
  * Implements FileWorkflowWriter interface for writing BufferedImage to PDF files
@@ -18,9 +28,12 @@ import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
 class PdfWriter(
     // Optional output path to set during construction
     private var outputPath: String,
-    // JPEG quality (0-100), default 85 for good balance of quality and size
-    private val jpegQuality: Float = 85f
+    // Optional configuration block using DSL
+    config: PdfWriterConfig.() -> Unit = {}
 ) : FileWorkflowWriter<BufferedImage> {
+
+    // Configuration instance
+    private val pdfConfig = PdfWriterConfig().apply(config)
 
     /**
      * Set the output PDF file path
@@ -29,6 +42,33 @@ class PdfWriter(
      */
     override fun setOutput(filePath: String) {
         this.outputPath = filePath
+    }
+    
+    /**
+     * Configure PDF writer using DSL
+     *
+     * @param config Configuration block
+     */
+    fun configure(config: PdfWriterConfig.() -> Unit) {
+        pdfConfig.apply(config)
+    }
+    
+    /**
+     * Set JPEG quality for image compression
+     *
+     * @param quality JPEG quality (0-100), higher means better quality but larger file size
+     */
+    fun setJpegQuality(quality: Float) {
+        this.pdfConfig.jpegQuality = quality.coerceIn(0f, 100f)
+    }
+    
+    /**
+     * Get current JPEG quality setting
+     *
+     * @return Current JPEG quality (0-100)
+     */
+    fun getJpegQuality(): Float {
+        return pdfConfig.jpegQuality
     }
 
     /**
@@ -47,8 +87,11 @@ class PdfWriter(
                 val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
                 document.addPage(page)
 
+                // Verify client has set required jpegQuality parameter
+                val clientJpegQuality = pdfConfig.jpegQuality ?: throw IllegalStateException("jpegQuality must be explicitly set by client")
+                
                 // Create PDImageXObject from BufferedImage with JPEG compression for smaller file size
-                val pdImage = JPEGFactory.createFromImage(document, image, jpegQuality / 100f)
+                val pdImage = JPEGFactory.createFromImage(document, image, clientJpegQuality / 100f)
 
                 // Write image to PDF page
                 PDPageContentStream(document, page).use { contentStream ->
