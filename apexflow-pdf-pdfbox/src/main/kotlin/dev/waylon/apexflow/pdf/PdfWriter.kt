@@ -69,6 +69,11 @@ class PdfWriter(
                 if (logger.isDebugEnabled) {
                     logger.debug("Added image to PDF: {}x{}, JPEG quality: {}", image.width, image.height, jpegQuality)
                 }
+                
+                // 🔧 MEMORY OPTIMIZATION: Release resources immediately after use
+                // Flush the original image from memory immediately after use
+                // This is the most effective memory optimization with minimal performance impact
+                image.flush()
             }
 
             // Save PDF document
