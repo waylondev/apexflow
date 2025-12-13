@@ -2,8 +2,8 @@ package dev.waylon.apexflow.dsl
 
 import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
+import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageWriter
-import dev.waylon.apexflow.pdf.PdfReader
 import dev.waylon.apexflow.tiff.TiffReader
 import dev.waylon.apexflow.tiff.TiffWriter
 import java.awt.image.BufferedImage
@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage
 fun tiffToPdf(
     inputPath: String,
     outputPath: String
-) = apexFlowWorkflow {
+) = apexFlowWorkflow<BufferedImage, BufferedImage> {
     reader(TiffReader(inputPath = inputPath))
     processor(WorkflowProcessor.identity())
     writer(PdfImageWriter(outputPath))
@@ -52,8 +52,8 @@ fun tiffToPdf(
 fun pdfToTiff(
     inputPath: String,
     outputPath: String
-) = apexFlowWorkflow {
-    reader(PdfReader(inputPath = inputPath))
+) = apexFlowWorkflow<BufferedImage, BufferedImage> {
+    reader(PdfImageReader(inputPath = inputPath))
     processor(WorkflowProcessor.identity())
     writer(TiffWriter(outputPath))
 }

@@ -1,16 +1,13 @@
 package dev.waylon.apexflow.example
 
 import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
-import dev.waylon.apexflow.core.workflow.WorkflowProcessor
-import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
-import dev.waylon.apexflow.pdf.PdfImageReader
-import dev.waylon.apexflow.tiff.TiffWriter
+import dev.waylon.apexflow.dsl.pdfToTiff
 import kotlinx.coroutines.runBlocking
 
 /**
  * PDF to TIFF Converter Example with Comprehensive Performance Monitoring
  *
- * Demonstrates how to use ApexFlow DSL to convert PDF files to TIFF files
+ * Demonstrates how to use ApexFlow simplified DSL to convert PDF files to TIFF files
  * with comprehensive performance monitoring including:
  * - Memory usage (heap and non-heap)
  * - CPU usage
@@ -28,22 +25,8 @@ fun main() {
     println("📄 Output: $outputPath")
     println("📊 Performance monitoring enabled")
 
-    // Create workflow engine using ApexFlow DSL
-    val engine = apexFlowWorkflow {
-        // Configure PdfReader with optimal settings for smaller file size
-        reader(
-            PdfImageReader(
-                inputPath = inputPath,
-            )
-        )
-        processor(WorkflowProcessor.identity())
-        writer(TiffWriter(outputPath))
-        configure {
-            readBufferSize = 500
-            processBufferSize = 500
-            ioBufferSize = 4 * 8192
-        }
-    }
+    // Create workflow engine using simplified ApexFlow DSL
+    val engine = pdfToTiff(inputPath, outputPath)
 
     // Use the simplified performance monitoring method
     runBlocking {

@@ -1,11 +1,7 @@
 package dev.waylon.apexflow.example
 
 import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
-import dev.waylon.apexflow.core.workflow.WorkflowProcessor
-import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
-import dev.waylon.apexflow.core.workflow.noOp
-import dev.waylon.apexflow.pdf.PdfImageWriter
-import dev.waylon.apexflow.tiff.TiffReader
+import dev.waylon.apexflow.dsl.tiffToPdf
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
@@ -26,15 +22,8 @@ fun main() {
     logger.info("📄 Input: $inputPath")
     logger.info("📄 Output: $outputPath")
 
-    // Create workflow engine using DSL - processor is optional (defaults to identity)
-    val engine = apexFlowWorkflow {
-        reader(TiffReader(inputPath = inputPath))
-        processor(WorkflowProcessor.noOp())
-        writer(PdfImageWriter(outputPath))
-        // Use empty configure block for consistency
-        configure {
-        }
-    }
+    // Create workflow engine using simplified DSL
+    val engine = tiffToPdf(inputPath, outputPath)
 
     runBlocking {
         // Simplified performance monitoring using withPerformanceMonitoring method

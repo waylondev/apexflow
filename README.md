@@ -43,15 +43,25 @@ val engine = apexFlowWorkflow {
 runBlocking { engine.startAsync() }
 ```
 
-### Module Structure
+## Module Structure
 
 ```
 ├── apexflow-core/                    # Core workflow engine (format-agnostic)
 ├── apexflow-pdf-pdfbox/             # PDF format support
 ├── apexflow-tiff-twelvemonkeys/     # TIFF format support
 ├── apexflow-dsl-extensions/         # Concise DSL extensions for common cases
-└── apexflow-example/                # Example usage
+└── apexflow-example/                # Example usage (depends only on apexflow-dsl-extensions)
 ```
+
+## Dependency Structure
+
+- **apexflow-example** → depends on **apexflow-dsl-extensions**
+- **apexflow-dsl-extensions** → depends on all other modules
+- **apexflow-core** → no dependencies on format modules
+- **apexflow-pdf-pdfbox** → PDF format support
+- **apexflow-tiff-twelvemonkeys** → TIFF format support
+
+This structure allows users to depend only on the **apexflow-dsl-extensions** module for a simplified API, while advanced users can still use the core modules directly.
 
 ## Key Features
 
