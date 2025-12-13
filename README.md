@@ -4,26 +4,53 @@ ApexFlow is a modern, high-performance file conversion engine built on Kotlin co
 
 ## Quick Start
 
-### Basic TIFF to PDF Conversion
+### Simplified TIFF to PDF Conversion
+
 ```kotlin
+// Add this import for the concise API
+import dev.waylon.apexflow.dsl.tiffToPdf
+
+// Simplest usage: just input and output paths
+val engine = tiffToPdf("input.tif", "output.pdf")
+runBlocking { engine.startAsync() }
+```
+
+### Simplified PDF to TIFF Conversion
+
+```kotlin
+// Add this import for the concise API
+import dev.waylon.apexflow.dsl.pdfToTiff
+
+// Simplest usage: just input and output paths
+val engine = pdfToTiff("input.pdf", "output.tif")
+runBlocking { engine.startAsync() }
+```
+
+### Traditional DSL Usage
+
+```kotlin
+// No extra imports needed for core DSL
 val engine = apexFlowWorkflow {
     reader(TiffReader(inputPath = "input.tif"))
     processor(WorkflowProcessor.identity())
-    writer(PdfWriter("output.pdf"))
+    writer(PdfImageWriter("output.pdf"))
+    configure {
+        readBufferSize = 200
+        processBufferSize = 200
+    }
 }
 
 runBlocking { engine.startAsync() }
 ```
 
-### PDF to TIFF Conversion
-```kotlin
-val engine = apexFlowWorkflow {
-    reader(PdfReader(inputPath = "input.pdf", dpi = 50f))
-    processor(WorkflowProcessor.identity())
-    writer(TiffWriter("output.tif"))
-}
+### Module Structure
 
-runBlocking { engine.startAsync() }
+```
+├── apexflow-core/                    # Core workflow engine (format-agnostic)
+├── apexflow-pdf-pdfbox/             # PDF format support
+├── apexflow-tiff-twelvemonkeys/     # TIFF format support
+├── apexflow-dsl-extensions/         # Concise DSL extensions for common cases
+└── apexflow-example/                # Example usage
 ```
 
 ## Key Features
