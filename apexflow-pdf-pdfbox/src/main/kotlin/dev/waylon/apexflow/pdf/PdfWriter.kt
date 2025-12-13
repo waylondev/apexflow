@@ -13,10 +13,12 @@ import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
  * PDF writer configuration DSL
  *
  * Provides a fluent API for configuring PDF writer
- * No default values - client must explicitly set all required parameters
  */
 class PdfWriterConfig {
-    var jpegQuality: Float? = null
+    /**
+     * JPEG quality (0-100), default 85 for good balance of quality and size
+     */
+    var jpegQuality: Float = 85f
 }
 
 /**
@@ -65,9 +67,9 @@ class PdfWriter(
     /**
      * Get current JPEG quality setting
      *
-     * @return Current JPEG quality (0-100)
+     * @return Current JPEG quality, null if not set
      */
-    fun getJpegQuality(): Float {
+    fun getJpegQuality(): Float? {
         return pdfConfig.jpegQuality
     }
 
@@ -87,11 +89,8 @@ class PdfWriter(
                 val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
                 document.addPage(page)
 
-                // Verify client has set required jpegQuality parameter
-                val clientJpegQuality = pdfConfig.jpegQuality ?: throw IllegalStateException("jpegQuality must be explicitly set by client")
-                
                 // Create PDImageXObject from BufferedImage with JPEG compression for smaller file size
-                val pdImage = JPEGFactory.createFromImage(document, image, clientJpegQuality / 100f)
+                val pdImage = JPEGFactory.createFromImage(document, image, pdfConfig.jpegQuality / 100f)
 
                 // Write image to PDF page
                 PDPageContentStream(document, page).use { contentStream ->

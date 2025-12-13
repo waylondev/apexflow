@@ -14,10 +14,17 @@ import org.apache.pdfbox.rendering.PDFRenderer
  * PDF reader configuration DSL
  *
  * Provides a fluent API for configuring PDF reader
- * No default values - client must explicitly set all required parameters
  */
 class PdfReaderConfig {
-    var dpi: Float? = null
+    /**
+     * DPI for rendering PDF pages, default 100 for better performance
+     */
+    var dpi: Float = 100f
+    
+    /**
+     * Custom image processor to be applied to each rendered image
+     * Set to null to use no processing
+     */
     var imageProcessor: ((BufferedImage) -> BufferedImage)? = null
 }
 
@@ -132,11 +139,8 @@ class PdfReader(
             repeat(pageCount) { pageIndex ->
 
 
-                // Verify client has set required DPI parameter
-                val clientDpi = pdfConfig.dpi ?: throw IllegalStateException("DPI must be explicitly set by client")
-                
-                // Render the current page with the exact DPI provided by client
-                var renderedImage = renderer.renderImageWithDPI(pageIndex, clientDpi)
+                // Render the current page with the configured DPI
+                var renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
 
                 // Apply custom processor if provided
                 val processedImage = pdfConfig.imageProcessor?.invoke(renderedImage) ?: renderedImage

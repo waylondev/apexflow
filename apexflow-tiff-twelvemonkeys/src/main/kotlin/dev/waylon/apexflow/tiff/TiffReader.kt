@@ -20,8 +20,6 @@ import kotlinx.coroutines.flow.flow
  * Optimized for high performance
  */
 class TiffReader(
-    // Default IO buffer size: 4 * 8192 = 32768 bytes
-    private var ioBufferSize: Int = 4 * 8192,
     // Optional input path to set during construction
     private var inputPath: String
 ) : FileWorkflowReader<BufferedImage> {
@@ -36,19 +34,9 @@ class TiffReader(
     }
 
     /**
-     * Set IO buffer size for reading files
-     *
-     * @param bufferSize Buffer size in bytes
-     */
-    fun setIoBufferSize(bufferSize: Int) {
-        this.ioBufferSize = bufferSize
-    }
-
-    /**
      * Read TIFF file and return a Flow of BufferedImage
      *
      * For multi-page image files, returns each page as a separate BufferedImage
-     * Optimized for high performance: minimal object creation, efficient IO, optimized image reading
      *
      * @return Flow<BufferedImage> Flow of images from the image file
      */
@@ -56,8 +44,8 @@ class TiffReader(
         // Step 1: Validate input path and get File object
         val file = validateInput()
 
-        // Step 2: Create optimized ImageInputStream with buffered IO
-        createOptimizedImageInputStream(file).use { input ->
+        // Step 2: Create standard ImageInputStream
+        ImageIO.createImageInputStream(file).use { input ->
             // Step 3: Get appropriate ImageReader using the same input stream
             val reader = getImageReader(input, file)
 
@@ -67,12 +55,11 @@ class TiffReader(
 
                 val numPages = imageReader.getNumImages(true)
 
-                // Create optimized read param once
+                // Use default read param, client can't customize this via our API
                 val readParam = imageReader.defaultReadParam
 
-                // Read each page with optimized parameters
+                // Read each page
                 repeat(numPages) { pageIndex ->
-                    // Optimized image reading
                     val image = imageReader.read(pageIndex, readParam)
                     emit(image)
                 }
@@ -97,18 +84,6 @@ class TiffReader(
             require(it.exists()) { "Image file does not exist: $path" }
             require(it.isFile) { "Path is not a file: $path" }
         }
-    }
-
-    /**
-     * Create optimized ImageInputStream with buffered IO
-     *
-     * @param file File to create input stream for
-     * @return ImageInputStream Optimized image input stream
-     */
-    private fun createOptimizedImageInputStream(file: File): ImageInputStream {
-        // Use BufferedInputStream with configurable buffer size for better IO performance
-        val bufferedInputStream = BufferedInputStream(FileInputStream(file), ioBufferSize)
-        return ImageIO.createImageInputStream(bufferedInputStream)
     }
 
     /**
