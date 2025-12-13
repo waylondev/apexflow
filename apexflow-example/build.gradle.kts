@@ -14,9 +14,6 @@ repositories {
 
 dependencies {
     // ApexFlow modules from local Maven repository
-    implementation("dev.waylon.apexflow:apexflow-core:0.0.1")
-    implementation("dev.waylon.apexflow:apexflow-tiff-twelvemonkeys:0.0.1")
-    implementation("dev.waylon.apexflow:apexflow-pdf-pdfbox:0.0.1")
     implementation("dev.waylon.apexflow:apexflow-dsl-extensions:0.0.1")
 
     // Add coroutines dependency
