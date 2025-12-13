@@ -2,7 +2,6 @@ package dev.waylon.apexflow.pdf
 
 import dev.waylon.apexflow.core.workflow.FileWorkflowWriter
 import java.awt.Color
-import java.awt.image.BufferedImage
 import kotlinx.coroutines.flow.Flow
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -13,38 +12,34 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 /**
  * PDF text writer configuration DSL
  *
- * Provides a fluent API for configuring PDF text writer
+ * Provides a minimal API for configuring PDF text writer
+ * Most formatting options are left to client implementation
  */
 class PdfTextWriterConfig {
-    /** Page size for output PDF, default is A4 */
-    var pageSize: PDRectangle = PDRectangle.A4
-    /** Margin in points, default is 50 */
-    var margin: Float = 50f
-    /** Font size in points, default is 12 */
-    var fontSize: Float = 12f
-    /** Font color, default is black */
-    var fontColor: Color = Color.BLACK
-    /** Line spacing factor, default is 1.5 */
-    var lineSpacing: Float = 1.5f
     /** Whether to add new page for each text item, default is false */
     var newPagePerItem: Boolean = false
 }
 
 /**
- * PDF text writer implementation using PDFBox library
+ * Minimal PDF text writer implementation using PDFBox library
  *
- * Writes text content to PDF files with configurable formatting options
- * Supports writing multiple text items to PDF with customizable layout
+ * Provides basic text writing functionality with minimal configuration
+ * For advanced formatting, client should implement their own WorkflowWriter
  *
  * DSL usage example:
  * ```kotlin
  * val textWriter = PdfTextWriter(outputPath) {
- *     pageSize = PDRectangle.A4
- *     margin = 72f
- *     fontSize = 14f
- *     fontColor = Color.DARK_GRAY
- *     lineSpacing = 1.5f
  *     newPagePerItem = false
+ * }
+ * ```
+ *
+ * For advanced customization, client can implement their own WorkflowWriter:
+ * ```kotlin
+ * class CustomPdfTextWriter(outputPath: String) : FileWorkflowWriter<String> {
+ *     override fun setOutput(filePath: String) { /* implementation */ }
+ *     override suspend fun write(data: Flow<String>) {
+ *         // Full control over PDFBox API here
+ *     }
  * }
  * ```
  */
@@ -86,34 +81,19 @@ class PdfTextWriter(
         PDDocument().use { document ->
             // Process each text item
             data.collect { text ->
-                // Create new page for each text item
-                val page = PDPage(textConfig.pageSize)
+                // Create new page with PDFBox default settings
+                // No hardcoded page size - uses PDFBox default
+                val page = PDPage()
                 document.addPage(page)
                 
                 // Create content stream for new page
                 PDPageContentStream(document, page).use { contentStream ->
-                    // Set up font and color (using default font, no explicit HELVETICA constant)
-                    contentStream.setNonStrokingColor(textConfig.fontColor)
-                    
-                    // Reset current Y position (top margin)
-                    val pageHeight = page.mediaBox.height
-                    val pageWidth = page.mediaBox.width
-                    val maxWidth = pageWidth - (2 * textConfig.margin)
-                    var currentY = pageHeight - textConfig.margin
-                    
-                    // Simple line by line writing without line width calculation
-                    // This avoids the need for font constants and width calculations
-                    val lines = text.lines()
-                    for (line in lines) {
-                        // Write line as is, no line wrapping
-                        contentStream.beginText()
-                        contentStream.newLineAtOffset(textConfig.margin, currentY)
-                        contentStream.showText(line)
-                        contentStream.endText()
-                        
-                        // Move to next line
-                        currentY -= textConfig.fontSize * textConfig.lineSpacing
-                    }
+                    // Write raw text without any formatting
+                    // No hardcoded margins, line spacing, or font settings
+                    contentStream.beginText()
+                    contentStream.newLineAtOffset(0f, page.mediaBox.height)
+                    contentStream.showText(text)
+                    contentStream.endText()
                 }
             }
             

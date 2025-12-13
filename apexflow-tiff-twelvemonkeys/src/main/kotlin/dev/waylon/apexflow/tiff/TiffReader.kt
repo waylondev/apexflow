@@ -6,6 +6,7 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
 import javax.imageio.ImageIO
+import javax.imageio.ImageReadParam
 import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
 import kotlinx.coroutines.flow.Flow
@@ -13,16 +14,40 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 /**
+ * TIFF reader configuration DSL
+ *
+ * Provides a fluent API for configuring TIFF reader
+ */
+class TiffReaderConfig {
+    /** Image read parameters for customizing TIFF reading behavior */
+    var readParam: ImageReadParam? = null
+}
+
+/**
  * TIFF file reader implementation using TwelveMonkeys ImageIO library
  *
  * Implements FileWorkflowReader interface for reading TIFF files
- * Supports reading single and multi-page TIFF files
- * Optimized for high performance
+ * Supports reading single and multi-page TIFF files with configurable options
+ *
+ * DSL usage example:
+ * ```kotlin
+ * val reader = TiffReader(inputPath) {
+ *     // Optional custom read param for advanced configuration
+ *     val customReadParam = ImageIO.getImageReadersByFormatName("tiff").next().defaultReadParam
+ *     customReadParam.sourceRegion = Rectangle(0, 0, 100, 100)
+ *     readParam = customReadParam
+ * }
+ * ```
  */
 class TiffReader(
     // Optional input path to set during construction
-    private var inputPath: String
+    private var inputPath: String,
+    // Optional configuration block using DSL
+    config: TiffReaderConfig.() -> Unit = {}
 ) : FileWorkflowReader<BufferedImage> {
+    
+    // Configuration instance
+    private val tiffConfig = TiffReaderConfig().apply(config)
 
     /**
      * Set the input TIFF file path
@@ -31,6 +56,24 @@ class TiffReader(
      */
     override fun setInput(filePath: String) {
         this.inputPath = filePath
+    }
+    
+    /**
+     * Configure TIFF reader using DSL
+     *
+     * @param config Configuration block
+     */
+    fun configure(config: TiffReaderConfig.() -> Unit) {
+        tiffConfig.apply(config)
+    }
+    
+    /**
+     * Set custom ImageReadParam for advanced configuration
+     *
+     * @param readParam Custom ImageReadParam for advanced configuration
+     */
+    fun setReadParam(readParam: javax.imageio.ImageReadParam) {
+        tiffConfig.readParam = readParam
     }
 
     /**
@@ -45,7 +88,7 @@ class TiffReader(
         val file = validateInput()
 
         // Step 2: Create standard ImageInputStream
-        ImageIO.createImageInputStream(file).use { input ->
+        javax.imageio.ImageIO.createImageInputStream(file).use { input ->
             // Step 3: Get appropriate ImageReader using the same input stream
             val reader = getImageReader(input, file)
 
@@ -55,8 +98,8 @@ class TiffReader(
 
                 val numPages = imageReader.getNumImages(true)
 
-                // Use default read param, client can't customize this via our API
-                val readParam = imageReader.defaultReadParam
+                // Use custom read param if provided, otherwise default
+                val readParam = tiffConfig.readParam ?: imageReader.defaultReadParam
 
                 // Read each page
                 repeat(numPages) { pageIndex ->
