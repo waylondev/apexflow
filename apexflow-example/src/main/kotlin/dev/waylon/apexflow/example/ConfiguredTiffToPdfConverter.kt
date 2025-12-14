@@ -5,10 +5,10 @@ import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
 import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.tiff.TiffReader
-import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 
 /**
  * Configured TIFF to PDF converter example

@@ -3,7 +3,6 @@ package dev.waylon.apexflow.pdf
 import dev.waylon.apexflow.core.workflow.WorkflowWriter
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -30,7 +29,7 @@ class PdfTextWriter(
     private val outputStream: OutputStream,
     private val config: PdfTextWriterConfig.() -> Unit = {}
 ) : WorkflowWriter<String> {
-    
+
     private val pdfConfig = PdfTextWriterConfig().apply(config)
 
     fun configure(config: PdfTextWriterConfig.() -> Unit) {
@@ -48,14 +47,14 @@ class PdfTextWriter(
                 PDPageContentStream(document, page).use { contentStream ->
                     // Create PDType1Font from font name enum
                     val pdFont = PDType1Font(pdfConfig.font)
-                    
+
                     // Set font and font size
                     contentStream.setFont(pdFont, pdfConfig.fontSize)
-                    
+
                     // Calculate text position (margin from edges)
                     val startX = pdfConfig.margin
                     val startY = page.mediaBox.height - pdfConfig.margin
-                    
+
                     // Write text to PDF
                     contentStream.beginText()
                     contentStream.newLineAtOffset(startX, startY)

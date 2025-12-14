@@ -1,3 +1,5 @@
+import jdk.tools.jlink.resources.plugins
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id("java-library")
@@ -41,7 +43,7 @@ publishing {
             }
         }
     }
-    
+
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])

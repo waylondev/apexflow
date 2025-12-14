@@ -2,10 +2,10 @@ package dev.waylon.apexflow.example
 
 import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.dsl.tiffToPdf
-import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 
 /**
  * Basic TIFF to PDF converter example

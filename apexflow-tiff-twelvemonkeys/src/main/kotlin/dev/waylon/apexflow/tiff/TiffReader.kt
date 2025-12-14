@@ -70,7 +70,7 @@ class TiffReader(
      *
      * @return Flow<BufferedImage> Flow of images from the TIFF data
      */
-    override fun read(): Flow<BufferedImage> = flow<BufferedImage> { // Explicit type declaration
+    override fun read(): Flow<BufferedImage> = flow { // Explicit type declaration
         // Create ImageInputStream from the provided InputStream
         ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
             // Get appropriate ImageReader
@@ -92,9 +92,6 @@ class TiffReader(
                 }
             }
         }
-    }.catch {
-        // Centralized error handling
-        throw it
     }
     
     /**

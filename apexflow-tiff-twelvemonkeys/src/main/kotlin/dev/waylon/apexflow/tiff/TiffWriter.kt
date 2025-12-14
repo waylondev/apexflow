@@ -5,11 +5,7 @@ import java.awt.image.BufferedImage
 import java.io.OutputStream
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
-import javax.imageio.ImageWriter
-import javax.imageio.stream.ImageOutputStream
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 
 /**
  * TIFF writer configuration DSL
@@ -38,7 +34,7 @@ class TiffWriter(
     private val outputStream: OutputStream,
     private val config: TiffWriterConfig.() -> Unit = {}
 ) : WorkflowWriter<BufferedImage> {
-    
+
     // Configuration instance
     private val tiffConfig = TiffWriterConfig().apply(config)
 
