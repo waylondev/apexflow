@@ -1,7 +1,8 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.core.workflow.FileWorkflowWriter
+import dev.waylon.apexflow.core.workflow.WorkflowWriter
 import java.awt.image.BufferedImage
+import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -21,70 +22,57 @@ class PdfImageWriterConfig {
 /**
  * PDF image writer implementation using PDFBox library
  *
+ * Supports writing to OutputStream with configurable options
  * Writes BufferedImage to PDF files
- * Supports writing with configurable JPEG quality
  *
  * DSL usage example:
  * ```kotlin
- * val writer = PdfImageWriter(outputPath) {
+ * val writer = PdfImageWriter(outputStream) {
  *     jpegQuality = 90f
  * }
  * ```
  */
 class PdfImageWriter(
-    // Optional output path to set during construction
-    private var outputPath: String,
-    // Optional configuration block using DSL
-    config: PdfImageWriterConfig.() -> Unit = {}
-) : FileWorkflowWriter<BufferedImage> {
+    private val outputStream: OutputStream,
+    private val config: PdfImageWriterConfig.() -> Unit = {}
+) : WorkflowWriter<BufferedImage> {
     
     // Configuration instance
     private val pdfConfig = PdfImageWriterConfig().apply(config)
 
     /**
-     * Set the output PDF file path
-     *
-     * @param filePath Path to the output PDF file
-     */
-    override fun setOutput(filePath: String) {
-        this.outputPath = filePath
-    }
-    
-    /**
-     * Configure PDF image writer using DSL
+     * Configure PDF writer using DSL
      *
      * @param config Configuration block
      */
     fun configure(config: PdfImageWriterConfig.() -> Unit) {
         pdfConfig.apply(config)
     }
-    
+
     /**
-     * Set JPEG quality for image compression
+     * Get the current JPEG quality setting
      *
-     * @param quality JPEG quality (0-100), higher means better quality but larger file size
-     */
-    fun setJpegQuality(quality: Float) {
-        this.pdfConfig.jpegQuality = quality.coerceIn(0f, 100f)
-    }
-    
-    /**
-     * Get current JPEG quality setting
-     *
-     * @return Current JPEG quality (0-100)
+     * @return Float JPEG quality as percentage (0-100)
      */
     fun getJpegQuality(): Float {
         return pdfConfig.jpegQuality
     }
 
     /**
-     * Write BufferedImage flow to PDF file
+     * Set custom JPEG quality for PDF writing
+     *
+     * @param quality JPEG quality as percentage (0-100)
+     */
+    fun setJpegQuality(quality: Float) {
+        pdfConfig.jpegQuality = quality
+    }
+
+    /**
+     * Write BufferedImage flow to PDF OutputStream
      *
      * @param data Flow of BufferedImage to write
      */
     override suspend fun write(data: Flow<BufferedImage>) {
-        val path = outputPath
-
         // Create PDF document
         PDDocument().use { document ->
             // Collect all images from the flow and add to PDF
@@ -102,12 +90,13 @@ class PdfImageWriter(
                 }
                 
                 // 🔧 MEMORY OPTIMIZATION: Release resources immediately after use
-                // Flush the original image from memory immediately after use
                 image.flush()
             }
 
-            // Save PDF document
-            document.save(path)
+            // Save PDF document to OutputStream
+            document.save(outputStream)
+            // Flush to ensure all data is written
+            outputStream.flush()
         }
     }
 }

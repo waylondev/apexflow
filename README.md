@@ -43,41 +43,96 @@ val engine = apexFlowWorkflow {
 runBlocking { engine.startAsync() }
 ```
 
-## Generic Data Processing
+## Generic Data Processing - Beyond File Conversion
 
-ApexFlow is not limited to file conversion - it can handle any type of data flow. Here's an example of processing 100 million numbers:
+ApexFlow is a **true generic workflow engine** that transcends file conversion limitations. It can handle **any type of data flow**, making it suitable for a wide range of use cases:
+
+- **Batch Processing**: Process millions/billions of records efficiently
+- **Stream Processing**: Handle real-time data streams
+- **ETL Pipelines**: Extract, transform, and load data across systems
+- **API Integration**: Connect different data sources and destinations
+- **Calculation Engines**: Perform complex computations on large datasets
+- **Data Transformation**: Map, filter, and aggregate any data type
+
+### Key Advantages of Generic Design
+
+✅ **Universal Compatibility**: Works with any data type, not just files
+✅ **Memory Efficient**: Constant memory usage regardless of data size
+✅ **High Performance**: Parallel processing across multiple coroutines
+✅ **Scalable**: Handles from small datasets to 100+ million records
+✅ **Easy to Extend**: Simple interface for custom components
+✅ **Performance Monitoring**: Built-in metrics for any workflow
+
+### Example: 100 Million Number Processing
 
 ```kotlin
 // Create components for number processing workflow
-val reader = NumberReader(100_000_000)  // Generates 100 million numbers
+val reader = NumberReader(100_000_000L)  // Generates 100 million numbers
 val processor = MultiplyByTwoProcessor() // Multiplies each number by 2
-val writer = NumberWriter()              // Prints results
+val writer = NumberWriter()              // Logs results with metrics
 
 // Create and run workflow engine
-val engine = ApexFlowWorkflowEngine(reader, processor, writer)
+val engine = apexFlowWorkflow {
+    reader(reader)
+    processor(processor)
+    writer(writer)
+    configure {
+        readBufferSize = 10_000
+        processBufferSize = 10_000
+    }
+}
+
 runBlocking { engine.startAsync() }
 ```
 
-### Core Interfaces
+### Core Interfaces - The Foundation of Flexibility
 
-ApexFlow's generic design is based on three core interfaces:
+ApexFlow's power comes from its **generic core interfaces** that support any data type:
 
 ```kotlin
-// Reads data from any source (files, databases, generated streams, etc.)
+// Reads data from ANY source (files, databases, generated streams, APIs, etc.)
 interface WorkflowReader<T> {
     fun read(): Flow<T>
 }
 
-// Processes data (transforms, filters, maps, etc.)
+// Processes data with ANY transformation (mapping, filtering, aggregation, etc.)
 interface WorkflowProcessor<I, O> {
     fun process(input: Flow<I>): Flow<O>
 }
 
-// Writes data to any destination (files, databases, console, etc.)
+// Writes data to ANY destination (files, databases, console, APIs, etc.)
 interface WorkflowWriter<T> {
     suspend fun write(data: Flow<T>)
 }
 ```
+
+## Enhanced File I/O Support
+
+While ApexFlow is generic, it provides specialized support for file operations with **multiple input/output options**: 
+
+### 1. File Path Support (Current)
+```kotlin
+// Simplest usage with file paths
+val reader = TiffReader("input.tif")
+val writer = PdfImageWriter("output.pdf")
+```
+
+### 2. InputStream/OutputStream Support (Planned Enhancement)
+```kotlin
+// Flexible usage with streams
+val reader = TiffReader(inputStream)
+val writer = PdfImageWriter(outputStream)
+```
+
+### 3. DSL Configuration
+```kotlin
+// Configurable file processing with DSL
+val writer = PdfImageWriter("output.pdf") {
+    jpegQuality = 90f
+}
+```
+
+This multi-layered approach ensures that ApexFlow can adapt to any file processing scenario, whether you're working with file paths, streams, or need fine-grained configuration.
 
 ## Module Structure
 

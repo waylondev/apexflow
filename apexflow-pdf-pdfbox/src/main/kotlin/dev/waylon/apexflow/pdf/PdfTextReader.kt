@@ -1,10 +1,10 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.core.workflow.FileWorkflowReader
-import java.io.File
+import dev.waylon.apexflow.core.workflow.WorkflowReader
+import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.apache.pdfbox.Loader
+import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 
 /**
@@ -13,83 +13,57 @@ import org.apache.pdfbox.text.PDFTextStripper
  * Provides a fluent API for configuring PDF text reader
  */
 class PdfTextReaderConfig {
-    /** Start page for text extraction, default is 1 */
     var startPage: Int = 1
-    /** End page for text extraction, null means all pages */
-    var endPage: Int? = null
-    /** Whether to sort text by position, default is true */
-    var sortByPosition: Boolean = true
+    var endPage: Int = Int.MAX_VALUE
 }
 
 /**
  * PDF text reader implementation using PDFBox library
  *
- * Extracts text content from PDF files
- * Supports extracting text from specific pages with configurable options
+ * Supports reading from InputStream with configurable options
+ * Reads text from PDF files
  *
  * DSL usage example:
  * ```kotlin
- * val textReader = PdfTextReader(inputPath) {
+ * val reader = PdfTextReader(inputStream) {
  *     startPage = 1
  *     endPage = 5
- *     sortByPosition = true
  * }
  * ```
  */
 class PdfTextReader(
-    // Optional input path to set during construction
-    private var inputPath: String,
-    // Optional configuration block using DSL
-    config: PdfTextReaderConfig.() -> Unit = {}
-) : FileWorkflowReader<String> {
+    private val inputStream: InputStream,
+    private val config: PdfTextReaderConfig.() -> Unit = {}
+) : WorkflowReader<String> {
     
     // Configuration instance
-    private val textConfig = PdfTextReaderConfig().apply(config)
+    private val pdfConfig = PdfTextReaderConfig().apply(config)
 
-    /**
-     * Set the input PDF file path
-     *
-     * @param filePath Path to the PDF file
-     */
-    override fun setInput(filePath: String) {
-        this.inputPath = filePath
-    }
-    
     /**
      * Configure PDF text reader using DSL
      *
      * @param config Configuration block
      */
     fun configure(config: PdfTextReaderConfig.() -> Unit) {
-        textConfig.apply(config)
+        pdfConfig.apply(config)
     }
 
     /**
-     * Extract text from PDF file and return a Flow of String
+     * Read text from PDF InputStream and return a Flow of strings
      *
-     * @return Flow<String> Flow of text content from the PDF file
+     * @return Flow<String> Flow of text strings from PDF pages
      */
-    override fun read(): Flow<String> = flow {
-        // Validate input file
-        val file = File(inputPath)
-        require(file.exists()) { "PDF file does not exist: $inputPath" }
-        require(file.isFile) { "Path is not a file: $inputPath" }
-
-        // Load PDF document
-        Loader.loadPDF(file).use { document ->
-            // Create PDFTextStripper for text extraction
+    override fun read(): Flow<String> = flow { // Explicit type declaration
+        // Create PDDocument from the provided InputStream
+        PDDocument.load(inputStream).use { document ->
+            // Create PDFTextStripper
             val textStripper = PDFTextStripper()
-            
-            // Configure text stripper with client provided parameters
-            textStripper.startPage = textConfig.startPage
-            textStripper.endPage = textConfig.endPage ?: document.numberOfPages
-            textStripper.sortByPosition = textConfig.sortByPosition
-            
-            // Extract text content
-            val extractedText = textStripper.getText(document)
-            
-            // Emit the extracted text
-            emit(extractedText)
+            textStripper.startPage = pdfConfig.startPage
+            textStripper.endPage = minOf(pdfConfig.endPage, document.numberOfPages)
+
+            // Extract text from PDF
+            val text = textStripper.getText(document)
+            emit(text)
         }
     }
 }
