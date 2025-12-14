@@ -41,26 +41,26 @@ runBlocking { engine.startAsync() }
 ## Core Architecture
 
 ### Key Design Principles
-- **高性能 (High Performance)**: 基于Kotlin协程和Flow API，实现真正的并行处理
-- **可扩展 (Extensible)**: 模块化设计，支持自定义组件
-- **SOLID**: 严格遵循SOLID原则，代码清晰、可维护
-- **通用 (Generic)**: 支持任何数据类型，不局限于文件转换
+- **High Performance**: Based on Kotlin coroutines and Flow API, enabling true parallel processing
+- **Extensible**: Modular design with support for custom components
+- **SOLID**: Strict adherence to SOLID principles for clear, maintainable code
+- **Generic**: Supports any data type, not limited to file conversion
 
 ### Core Interfaces
-ApexFlow的核心优势在于其**通用接口设计**，支持任何数据类型：
+The core advantage of ApexFlow lies in its **generic interface design**, supporting any data type:
 
 ```kotlin
-// 从任何数据源读取数据（文件、数据库、API等）
+// Read data from any source (file, database, API, etc.)
 interface WorkflowReader<T> {
     fun read(): Flow<T>
 }
 
-// 处理任何数据转换（映射、过滤、聚合等）
+// Process any data transformation (mapping, filtering, aggregation, etc.)
 interface WorkflowProcessor<I, O> {
     fun process(input: Flow<I>): Flow<O>
 }
 
-// 写入任何目标（文件、数据库、控制台等）
+// Write to any destination (file, database, console, etc.)
 interface WorkflowWriter<T> {
     suspend fun write(data: Flow<T>)
 }
@@ -68,49 +68,49 @@ interface WorkflowWriter<T> {
 
 ### Architecture Advantages
 
-| **特性** | **ApexFlow (Flow-based)** | **传统方法** | **性能提升** |
-|----------|---------------------------|--------------|--------------|
-| **处理模型** | 响应式流，持续分块处理 | 顺序/内存中处理 | **3-5x 更快** |
-| **并发** | 轻量级协程，支持千级并发 | 线程池限制，上下文切换成本高 | **1000x 更高并发** |
-| **内存管理** | 动态背压，自动调整 | 固定缓冲区，易OOM | **90% 内存占用降低** |
-| **扩展性** | 模块化，插件式组件 | 硬编码，需修改核心代码 | **更快的创新速度** |
-| **资源利用率** | CPU和IO始终忙碌 | 存在空闲时间 | **5x 更高吞吐量** |
+| **Feature** | **ApexFlow (Flow-based)** | **Traditional Methods** | **Performance Gain** |
+|-------------|---------------------------|-------------------------|----------------------|
+| **Processing Model** | Reactive stream, continuous chunk processing | Sequential/in-memory processing | **3-5x faster** |
+| **Concurrency** | Lightweight coroutines, supporting thousands of concurrent tasks | Thread pool limited with high context switching cost | **1000x higher concurrency** |
+| **Memory Management** | Dynamic backpressure, automatic adjustment | Fixed buffer, prone to OOM | **90% reduced memory usage** |
+| **Extensibility** | Modular, plugin-based components | Hard-coded, requires core code modification | **Faster innovation speed** |
+| **Resource Utilization** | CPU and IO always busy | Idle time exists | **5x higher throughput** |
 
 ## Key Features
 
-### 高性能
-- **异步处理**: 基于协程和Flow API的非阻塞执行
-- **并行流水线**: 三阶段并行处理，优化调度器分配
-- **内置背压**: 自动处理背压，优化内存使用
-- **低开销设计**: 聚焦关键路径，最小化开销
+### High Performance
+- **Asynchronous Processing**: Non-blocking execution based on coroutines and Flow API
+- **Parallel Pipeline**: Three-stage parallel processing with optimized dispatcher allocation
+- **Built-in Backpressure**: Automatic backpressure handling for optimized memory usage
+- **Low Overhead Design**: Focus on critical paths with minimal overhead
 
-### 开发者友好
-- **流畅DSL**: 类型安全的工作流构建，直观语法
-- **统一接口**: 所有转换类型使用一致API
-- **全面错误处理**: 内置异常管理
-- **不可变配置**: 线程安全的工作流配置
+### Developer Friendly
+- **Fluent DSL**: Type-safe workflow construction with intuitive syntax
+- **Unified Interface**: Consistent API for all conversion types
+- **Comprehensive Error Handling**: Built-in exception management
+- **Immutable Configuration**: Thread-safe workflow configuration
 
-### 可扩展架构
-- **SOLID原则**: 清洁、可维护的代码设计
-- **即插即用组件**: 易于扩展自定义reader、processor和writer
-- **格式支持**: 内置PDF和TIFF支持，可扩展到其他格式
+### Extensible Architecture
+- **SOLID Principles**: Clean, maintainable code design
+- **Plug-and-Play Components**: Easy to extend with custom readers, processors, and writers
+- **Format Support**: Built-in PDF and TIFF support, extensible to other formats
 
 ## Module Structure
 ```
-├── apexflow-core/                    # 核心工作流引擎（格式无关）
-├── apexflow-pdf-pdfbox/             # PDF格式支持
-├── apexflow-tiff-twelvemonkeys/     # TIFF格式支持
-├── apexflow-dsl-extensions/         # 简化DSL扩展
-└── apexflow-example/                # 示例代码
+├── apexflow-core/                    # Core workflow engine (format-agnostic)
+├── apexflow-pdf-pdfbox/             # PDF format support
+├── apexflow-tiff-twelvemonkeys/     # TIFF format support
+├── apexflow-dsl-extensions/         # Simplified DSL extensions
+└── apexflow-example/                # Example code
 ```
 
 ## Technology Stack
-- **Kotlin**: 现代编程语言
-- **Kotlin Coroutines**: 异步编程
-- **Kotlin Flow**: 响应式流处理
-- **PDFBox**: PDF格式支持
-- **TwelveMonkeys**: TIFF格式支持
-- **SLF4J**: 日志抽象
+- **Kotlin**: Modern programming language
+- **Kotlin Coroutines**: Asynchronous programming
+- **Kotlin Flow**: Reactive stream processing
+- **PDFBox**: PDF format support
+- **TwelveMonkeys**: TIFF format support
+- **SLF4J**: Logging abstraction
 
 ## Build and Run
 
@@ -133,19 +133,19 @@ gradlew.bat :apexflow-core:build
 ```
 
 ## Performance Benefits
-- **处理大文件**: 支持100GB+文件，无内存限制
-- **高吞吐量**: 并发处理数百个文件
-- **稳定性能**: 任何文件大小都有可预测的处理时间
-- **资源高效**: 最大化CPU和IO利用率
+- **Handle Large Files**: Support for 100GB+ files with no memory limits
+- **High Throughput**: Concurrent processing of hundreds of files
+- **Stable Performance**: Predictable processing time for any file size
+- **Resource Efficient**: Maximize CPU and IO utilization
 
 ## Conclusion
 
-ApexFlow是一个**高性能工作流引擎**，专为现代Kotlin应用设计，提供：
+ApexFlow is a **high-performance workflow engine** designed for modern Kotlin applications, offering:
 
-- **简单API**: 直观DSL，易于构建工作流
-- **高性能**: 异步并行处理，内置背压
-- **健壮设计**: 可靠的错误处理和边界情况管理
-- **可扩展架构**: 易于添加新格式和自定义处理
-- **现代技术**: 基于Kotlin协程和Flow API
+- **Simple API**: Intuitive DSL for easy workflow construction
+- **High Performance**: Asynchronous parallel processing with built-in backpressure
+- **Robust Design**: Reliable error handling and edge case management
+- **Extensible Architecture**: Easy to add new formats and custom processing
+- **Modern Technology**: Based on Kotlin coroutines and Flow API
 
-ApexFlow简化了数据处理工作流，同时提供卓越的性能，非常适合高容量文档处理和自定义转换管道。
+ApexFlow simplifies data processing workflows while delivering exceptional performance, making it ideal for high-volume document processing and custom conversion pipelines.
