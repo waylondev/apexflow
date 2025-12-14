@@ -34,6 +34,7 @@ class PdfImageWriter(
     }
 
     override suspend fun write(data: Flow<BufferedImage>) {
+        val quality = pdfConfig.jpegQuality / 100f
         PDDocument().use { document ->
             data.collect { image ->
                 // Create page with the same size as the image
@@ -43,7 +44,7 @@ class PdfImageWriter(
                 // Create content stream for writing image
                 PDPageContentStream(document, page).use { contentStream ->
                     // Create PDImageXObject from BufferedImage with JPEG compression
-                    val pdImage = JPEGFactory.createFromImage(document, image, pdfConfig.jpegQuality / 100f)
+                    val pdImage = JPEGFactory.createFromImage(document, image, quality)
                     // Draw image to fit the entire page
                     contentStream.drawImage(pdImage, 0f, 0f)
                 }
