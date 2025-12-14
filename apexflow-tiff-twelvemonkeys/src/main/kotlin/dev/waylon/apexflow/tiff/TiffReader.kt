@@ -89,6 +89,7 @@ class TiffReader(
                 repeat(numPages) { pageIndex ->
                     val image = imageReader.read(pageIndex, readParam)
                     emit(image)
+                    image.flush()
                 }
             }
         }

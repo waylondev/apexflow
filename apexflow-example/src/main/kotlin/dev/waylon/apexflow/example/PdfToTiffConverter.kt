@@ -19,8 +19,8 @@ import kotlinx.coroutines.runBlocking
  */
 fun main() {
     // Configure input and output paths
-    val inputPath = "build/spring-boot-reference.pdf"
-    val outputPath = "build/spring-boot-reference.tif"
+    val inputPath = "apexflow-example/build/spring-boot-reference.pdf"
+    val outputPath = "apexflow-example/build/spring-boot-reference.tif"
 
     println("🚀 Starting PDF to TIFF Converter with Comprehensive Performance Monitoring")
     println("📄 Input: $inputPath")

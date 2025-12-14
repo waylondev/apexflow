@@ -17,8 +17,8 @@ fun main() {
     val logger = LoggerFactory.getLogger("BasicTiffToPdfConverter")
 
     // Get input and output paths
-    val inputPath = "build/spring-boot-reference.tif"
-    val outputPath = "build/spring-boot-reference-output-basic.pdf"
+    val inputPath = "apexflow-example/build/spring-boot-reference.tif"
+    val outputPath = "apexflow-example/build/spring-boot-reference-output-basic.pdf"
 
     logger.info("🚀 Starting Basic TIFF to PDF Converter")
     logger.info("📄 Input: $inputPath")

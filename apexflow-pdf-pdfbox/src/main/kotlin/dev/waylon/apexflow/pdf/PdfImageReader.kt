@@ -13,7 +13,7 @@ import org.apache.pdfbox.rendering.PDFRenderer
  * PDF image reader configuration DSL
  */
 class PdfImageReaderConfig {
-    var dpi: Float = 300f
+    var dpi: Float = 100f
 }
 
 /**
@@ -40,6 +40,7 @@ class PdfImageReader(
             for (pageIndex in 0 until numPages) {
                 val image = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
                 emit(image)
+                image.flush()
             }
         }
     }
