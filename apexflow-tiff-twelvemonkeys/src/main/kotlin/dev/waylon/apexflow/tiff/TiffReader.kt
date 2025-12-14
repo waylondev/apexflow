@@ -8,7 +8,6 @@ import javax.imageio.ImageReadParam
 import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -41,7 +40,7 @@ class TiffReader(
     private val inputStream: InputStream,
     private val config: TiffReaderConfig.() -> Unit = {}
 ) : WorkflowReader<BufferedImage> {
-    
+
     // Configuration instance
     private val tiffConfig = TiffReaderConfig().apply(config)
 
@@ -94,7 +93,7 @@ class TiffReader(
             }
         }
     }
-    
+
     /**
      * Get appropriate ImageReader for the given ImageInputStream
      */

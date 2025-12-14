@@ -6,6 +6,10 @@ import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.tiff.TiffReader
 import dev.waylon.apexflow.tiff.TiffWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * Simplified TIFF to PDF conversion
@@ -26,8 +30,8 @@ import dev.waylon.apexflow.tiff.TiffWriter
  * ```
  */
 fun tiffToPdf(
-    inputStream: java.io.InputStream,
-    outputStream: java.io.OutputStream
+    inputStream: InputStream,
+    outputStream: OutputStream
 ) = apexFlowWorkflow {
     reader(TiffReader(inputStream))
     processor(WorkflowProcessor.identity())
@@ -54,9 +58,9 @@ fun tiffToPdf(
     inputPath: String,
     outputPath: String
 ) = apexFlowWorkflow {
-    reader(TiffReader(java.io.FileInputStream(inputPath)))
+    reader(TiffReader(FileInputStream(inputPath)))
     processor(WorkflowProcessor.identity())
-    writer(PdfImageWriter(java.io.FileOutputStream(outputPath)))
+    writer(PdfImageWriter(FileOutputStream(outputPath)))
 }
 
 /**
@@ -78,8 +82,8 @@ fun tiffToPdf(
  * ```
  */
 fun pdfToTiff(
-    inputStream: java.io.InputStream,
-    outputStream: java.io.OutputStream
+    inputStream: InputStream,
+    outputStream: OutputStream
 ) = apexFlowWorkflow {
     reader(PdfImageReader(inputStream))
     processor(WorkflowProcessor.identity())
@@ -106,7 +110,7 @@ fun pdfToTiff(
     inputPath: String,
     outputPath: String
 ) = apexFlowWorkflow {
-    reader(PdfImageReader(java.io.FileInputStream(inputPath)))
+    reader(PdfImageReader(FileInputStream(inputPath)))
     processor(WorkflowProcessor.identity())
-    writer(TiffWriter(java.io.FileOutputStream(outputPath)))
+    writer(TiffWriter(FileOutputStream(outputPath)))
 }

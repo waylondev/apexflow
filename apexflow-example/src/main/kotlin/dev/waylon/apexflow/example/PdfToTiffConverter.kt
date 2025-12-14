@@ -5,6 +5,7 @@ import dev.waylon.apexflow.dsl.pdfToTiff
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 
 /**
  * PDF to TIFF Converter Example with Comprehensive Performance Monitoring
@@ -18,14 +19,16 @@ import kotlinx.coroutines.runBlocking
  * - Conversion speed
  */
 fun main() {
+    val logger = LoggerFactory.getLogger("PdfToTiffConverter")
+    
     // Configure input and output paths
     val inputPath = "apexflow-example/build/spring-boot-reference.pdf"
     val outputPath = "apexflow-example/build/spring-boot-reference.tif"
 
-    println("🚀 Starting PDF to TIFF Converter with Comprehensive Performance Monitoring")
-    println("📄 Input: $inputPath")
-    println("📄 Output: $outputPath")
-    println("📊 Performance monitoring enabled")
+    logger.info("🚀 Starting PDF to TIFF Converter with Comprehensive Performance Monitoring")
+    logger.info("📄 Input: {}", inputPath)
+    logger.info("📄 Output: {}", outputPath)
+    logger.info("📊 Performance monitoring enabled")
 
     // Use try-with-resources to ensure proper resource cleanup
     FileInputStream(inputPath).use { inputStream ->
@@ -43,9 +46,9 @@ fun main() {
         }
     }
 
-    println("📁 Output file created: $outputPath")
-    println("🚀 Performance test completed!")
+    logger.info("📁 Output file created: {}", outputPath)
+    logger.info("🚀 Performance test completed!")
 
     // Note: Workflow metrics are logged internally by ApexFlow
-    println("📈 Workflow metrics available in console output")
+    logger.info("📈 Workflow metrics available in console output")
 }
