@@ -19,7 +19,6 @@ kotlin {
     jvmToolchain(21)
 }
 
-
 repositories {
     mavenCentral()
     mavenLocal() // Add local Maven repository to resolve core module

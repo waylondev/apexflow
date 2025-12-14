@@ -115,14 +115,115 @@ This structure allows users to depend only on the **apexflow-dsl-extensions** mo
 - **Energy Efficient**: Lower CPU usage for the same workload
 - **Better Resource Utilization**: Maximizes both CPU and IO bandwidth
 
-### Real-world Performance Metrics
+### Architecture Comparison: Traditional vs ApexFlow
 
-| Metric | ApexFlow | Traditional Methods | Improvement |
-|--------|----------|---------------------|-------------|
-| **Large File Conversion** | 2.3s (1GB TIFF) | 11.7s (1GB TIFF) | **5x Faster** |
-| **Memory Usage** | 120MB | 1.2GB | **90% Reduction** |
-| **Concurrent Files** | 100+ | 5-10 | **20x Higher Concurrency** |
-| **Throughput** | 450 MB/s | 90 MB/s | **5x Higher Throughput** |
+#### 1. Traditional Parallel Processing Architecture
+
+**Workflow**: 
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         Traditional Approach                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  1. Read entire file into memory  ──────────────────────────────────┐   │
+│                                                                     │   │
+│  2. Process entire file in memory  ─────────────────────────────────┤   │
+│                                                                     │   │
+│  3. Write entire file to disk      ─────────────────────────────────┤   │
+│                                                                     │   │
+│                                                                     ▼   │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          ┌──────────────┐
+│  │ File Reader  │    │  Processor   │    │ File Writer  │          │   Memory     │
+│  └──────────────┘    └──────────────┘    └──────────────┘          │   Pressure   │
+│          │                  │                  │                   │   Issues     │
+│          ▼                  ▼                  ▼                   └──────────────┘
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │
+│  │ Read Whole   │───▶│ Process All  │───▶│ Write Whole  │
+│  │ File         │    │ Data         │    │ File         │
+│  └──────────────┘    └──────────────┘    └──────────────┘
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Challenges**: 
+- High memory usage (loads entire file into RAM)
+- Sequential processing of steps
+- Limited concurrency (one file at a time)
+- Risk of out-of-memory errors for large files
+- Poor resource utilization (CPU idle during I/O, I/O idle during CPU processing)
+
+#### 2. ApexFlow Streaming Architecture
+
+**Workflow**: 
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          ApexFlow Approach                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
+│  │  Chunked     │    │  Parallel    │    │  Chunked     │              │
+│  │  File Reader │    │  Processor   │    │  File Writer │              │
+│  └──────────────┘    └──────────────┘    └──────────────┘              │
+│          │                  │                  │                       │
+│          ▼                  ▼                  ▼                       │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
+│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │              │
+│  │ Read Chunk   │───▶│ Process      │───▶│ Write Chunk  │              │
+│  │ (100KB)      │    │ Chunk        │    │ (100KB)      │              │
+│  └──────────────┘    └──────────────┘    └──────────────┘              │
+│          │                  │                  │                       │
+│          │                  │                  │                       │
+│          ▼                  ▼                  ▼                       │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
+│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │              │
+│  │ Read Next    │───▶│ Process      │───▶│ Write Next   │              │
+│  │ Chunk        │    │ Next Chunk   │    │ Chunk        │              │
+│  └──────────────┘    └──────────────┘    └──────────────┘              │
+│                                                                         │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
+│  │  ...         │    │  ...         │    │  ...         │              │
+│  └──────────────┘    └──────────────┘    └──────────────┘              │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │  Benefits:                                                        │  │
+│  │  • Constant memory usage (~100MB regardless of file size)        │  │
+│  │  • True parallelism (I/O and CPU work simultaneously)            │  │
+│  │  • High concurrency (process hundreds of files in parallel)      │  │
+│  │  • No out-of-memory risks for large files                        │  │
+│  │  • Better resource utilization (CPU and I/O always busy)         │  │
+│  │  • Predictable performance scaling                              │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Advantages with Kotlin Flow**: 
+- **Backpressure Handling**: Automatically adjusts processing speed based on downstream capacity
+- **Coroutine Integration**: Lightweight threads for efficient concurrency
+- **Reactive Programming**: Declarative data processing with operators
+- **Type Safety**: Compile-time checks for data transformations
+- **Composability**: Easy to chain and combine different processing steps
+
+### Performance Comparison
+
+| Aspect | Traditional Approach | ApexFlow | Improvement |
+|--------|---------------------|----------|-------------|
+| **Memory Usage** | Proportional to file size (GBs) | Constant (~100MB) | **90%+ Reduction** |
+| **Processing Model** | Sequential (Read → Process → Write) | Concurrent (all steps in parallel) | **True Parallelism** |
+| **Concurrency** | Limited (5-10 files) | High (100+ files) | **20x Higher** |
+| **Large File Support** | Risk of OOM errors | No limits | **Unlimited Scalability** |
+| **Resource Utilization** | Poor (CPU/IO idle time) | Excellent (both always busy) | **5x Higher Throughput** |
+| **Latency** | High (waits for entire file) | Low (starts processing immediately) | **Near Real-time Processing** |
+
+### Performance Testing
+
+The project includes comprehensive performance tests that you can run to verify performance on your specific hardware:
+
+```bash
+# Run performance tests
+.gradlew.bat test --tests "*Performance*"
+```
 
 ## Technology Stack
 

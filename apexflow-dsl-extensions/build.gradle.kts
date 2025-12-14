@@ -24,6 +24,7 @@ repositories {
     mavenLocal() // Add local Maven repository to resolve apexflow modules
 }
 
+
 dependencies {
     // ApexFlow modules from local Maven repository
     implementation("dev.waylon.apexflow:apexflow-core:0.0.1")
@@ -36,6 +37,7 @@ dependencies {
     // Test dependencies
     testImplementation(libs.kotlin.test)
 }
+
 
 // Use the Kotlin test runner
 tasks.test {
