@@ -33,7 +33,7 @@ class PdfImageReader(
     }
 
     override fun read(): Flow<BufferedImage> = flow {
-        Loader.loadPDF(RandomAccessReadBuffer(inputStream)).use { document ->
+        Loader.loadPDF(inputStream.readAllBytes()).use { document ->
 
             val renderer = PDFRenderer(document)
             val pageCount = document.numberOfPages

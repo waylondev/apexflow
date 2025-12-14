@@ -13,15 +13,15 @@ import kotlinx.coroutines.Dispatchers
 data class WorkflowConfig(
     /**
      * Read buffer size
-     * Used to balance reader and processor speeds, default is 10
+     * Used to balance reader and processor speeds, default is 100
      */
-    val readBufferSize: Int = 10,
+    val readBufferSize: Int = 100,
 
     /**
      * Process buffer size
-     * Used to balance processor and writer speeds, default is 10
+     * Used to balance processor and writer speeds, default is 100
      */
-    val processBufferSize: Int = 10,
+    val processBufferSize: Int = 100,
 
     /**
      * Error handling function
