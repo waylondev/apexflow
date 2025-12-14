@@ -40,7 +40,7 @@ fun main() {
                 writer(PdfImageWriter(outputStream))
                 // Use configure block, only set the properties we care about
                 configure {
-                    readBufferSize = 50
+                    readBufferSize = 10
                     processBufferSize = 50
                     // readDispatcher, processDispatcher, writeDispatcher use default values
                 }

@@ -1,13 +1,11 @@
 # ApexFlow - High Performance Workflow Engine
 
-ApexFlow is a modern, high-performance workflow engine built on Kotlin coroutines and Flow API. It provides a flexible, extensible architecture for building efficient data processing workflows, not limited to file conversion but supporting any type of data flow.
+ApexFlow is a modern, high-performance workflow engine built on Kotlin coroutines and Flow API. It provides a **flexible, extensible architecture** for building efficient data processing workflows, supporting **any type of data flow** beyond file conversion.
 
 ## Quick Start
 
 ### Simplified TIFF to PDF Conversion
-
 ```kotlin
-// Add this import for the concise API
 import dev.waylon.apexflow.dsl.tiffToPdf
 
 // Simplest usage: just input and output paths
@@ -16,9 +14,7 @@ runBlocking { engine.startAsync() }
 ```
 
 ### Simplified PDF to TIFF Conversion
-
 ```kotlin
-// Add this import for the concise API
 import dev.waylon.apexflow.dsl.pdfToTiff
 
 // Simplest usage: just input and output paths
@@ -27,7 +23,6 @@ runBlocking { engine.startAsync() }
 ```
 
 ### Traditional DSL Usage
-
 ```kotlin
 // No extra imports needed for core DSL
 val engine = apexFlowWorkflow {
@@ -43,311 +38,92 @@ val engine = apexFlowWorkflow {
 runBlocking { engine.startAsync() }
 ```
 
-## Generic Data Processing - Beyond File Conversion
+## Core Architecture
 
-ApexFlow is a **true generic workflow engine** that transcends file conversion limitations. It can handle **any type of data flow**, making it suitable for a wide range of use cases:
+### Key Design Principles
+- **高性能 (High Performance)**: 基于Kotlin协程和Flow API，实现真正的并行处理
+- **可扩展 (Extensible)**: 模块化设计，支持自定义组件
+- **SOLID**: 严格遵循SOLID原则，代码清晰、可维护
+- **通用 (Generic)**: 支持任何数据类型，不局限于文件转换
 
-- **Batch Processing**: Process millions/billions of records efficiently
-- **Stream Processing**: Handle real-time data streams
-- **ETL Pipelines**: Extract, transform, and load data across systems
-- **API Integration**: Connect different data sources and destinations
-- **Calculation Engines**: Perform complex computations on large datasets
-- **Data Transformation**: Map, filter, and aggregate any data type
-
-### Key Advantages of Generic Design
-
-✅ **Universal Compatibility**: Works with any data type, not just files
-✅ **Memory Efficient**: Constant memory usage regardless of data size
-✅ **High Performance**: Parallel processing across multiple coroutines
-✅ **Scalable**: Handles from small datasets to 100+ million records
-✅ **Easy to Extend**: Simple interface for custom components
-✅ **Performance Monitoring**: Built-in metrics for any workflow
-
-### Example: 100 Million Number Processing
+### Core Interfaces
+ApexFlow的核心优势在于其**通用接口设计**，支持任何数据类型：
 
 ```kotlin
-// Create components for number processing workflow
-val reader = NumberReader(100_000_000L)  // Generates 100 million numbers
-val processor = MultiplyByTwoProcessor() // Multiplies each number by 2
-val writer = NumberWriter()              // Logs results with metrics
-
-// Create and run workflow engine
-val engine = apexFlowWorkflow {
-    reader(reader)
-    processor(processor)
-    writer(writer)
-    configure {
-        readBufferSize = 10_000
-        processBufferSize = 10_000
-    }
-}
-
-runBlocking { engine.startAsync() }
-```
-
-### Core Interfaces - The Foundation of Flexibility
-
-ApexFlow's power comes from its **generic core interfaces** that support any data type:
-
-```kotlin
-// Reads data from ANY source (files, databases, generated streams, APIs, etc.)
+// 从任何数据源读取数据（文件、数据库、API等）
 interface WorkflowReader<T> {
     fun read(): Flow<T>
 }
 
-// Processes data with ANY transformation (mapping, filtering, aggregation, etc.)
+// 处理任何数据转换（映射、过滤、聚合等）
 interface WorkflowProcessor<I, O> {
     fun process(input: Flow<I>): Flow<O>
 }
 
-// Writes data to ANY destination (files, databases, console, APIs, etc.)
+// 写入任何目标（文件、数据库、控制台等）
 interface WorkflowWriter<T> {
     suspend fun write(data: Flow<T>)
 }
 ```
 
-## Enhanced File I/O Support
+### Architecture Advantages
 
-While ApexFlow is generic, it provides specialized support for file operations with **multiple input/output options**: 
-
-### 1. File Path Support (Current)
-```kotlin
-// Simplest usage with file paths
-val reader = TiffReader("input.tif")
-val writer = PdfImageWriter("output.pdf")
-```
-
-### 2. InputStream/OutputStream Support (Planned Enhancement)
-```kotlin
-// Flexible usage with streams
-val reader = TiffReader(inputStream)
-val writer = PdfImageWriter(outputStream)
-```
-
-### 3. DSL Configuration
-```kotlin
-// Configurable file processing with DSL
-val writer = PdfImageWriter("output.pdf") {
-    jpegQuality = 90f
-}
-```
-
-This multi-layered approach ensures that ApexFlow can adapt to any file processing scenario, whether you're working with file paths, streams, or need fine-grained configuration.
-
-## Module Structure
-
-```
-├── apexflow-core/                    # Core workflow engine (format-agnostic)
-├── apexflow-pdf-pdfbox/             # PDF format support
-├── apexflow-tiff-twelvemonkeys/     # TIFF format support
-├── apexflow-dsl-extensions/         # Concise DSL extensions for common cases
-└── apexflow-example/                # Example usage including number processing
-```
-
-## Dependency Structure
-
-- **apexflow-example** → depends on **apexflow-dsl-extensions**
-- **apexflow-dsl-extensions** → depends on all other modules
-- **apexflow-core** → no dependencies on format modules
-- **apexflow-pdf-pdfbox** → PDF-specific functionality
-- **apexflow-tiff-twelvemonkeys** → TIFF-specific functionality
-- **apexflow-pdf-pdfbox** → PDF format support
-- **apexflow-tiff-twelvemonkeys** → TIFF format support
-
-This structure allows users to depend only on the **apexflow-dsl-extensions** module for a simplified API, while advanced users can still use the core modules directly.
+| **特性** | **ApexFlow (Flow-based)** | **传统方法** | **性能提升** |
+|----------|---------------------------|--------------|--------------|
+| **处理模型** | 响应式流，持续分块处理 | 顺序/内存中处理 | **3-5x 更快** |
+| **并发** | 轻量级协程，支持千级并发 | 线程池限制，上下文切换成本高 | **1000x 更高并发** |
+| **内存管理** | 动态背压，自动调整 | 固定缓冲区，易OOM | **90% 内存占用降低** |
+| **扩展性** | 模块化，插件式组件 | 硬编码，需修改核心代码 | **更快的创新速度** |
+| **资源利用率** | CPU和IO始终忙碌 | 存在空闲时间 | **5x 更高吞吐量** |
 
 ## Key Features
 
-### High Performance
-- **Asynchronous Processing**: Leverages coroutines and Flow API for non-blocking execution
-- **Parallel Pipeline**: Three-stage parallel processing with optimized dispatchers
-- **Built-in Backpressure**: Flow API automatically handles backpressure, optimizing memory usage
-- **Optimized Buffer Management**: Configurable buffer sizes for balanced throughput
-- **Low Overhead Design**: Focus on critical path with minimal overhead
+### 高性能
+- **异步处理**: 基于协程和Flow API的非阻塞执行
+- **并行流水线**: 三阶段并行处理，优化调度器分配
+- **内置背压**: 自动处理背压，优化内存使用
+- **低开销设计**: 聚焦关键路径，最小化开销
 
-### Developer Friendly
-- **Fluent DSL**: Type-safe workflow construction with intuitive syntax
-- **Unified Interface**: Consistent API across all conversion types
-- **Comprehensive Error Handling**: Built-in exception management
-- **Immutable Configuration**: Thread-safe workflow configuration
+### 开发者友好
+- **流畅DSL**: 类型安全的工作流构建，直观语法
+- **统一接口**: 所有转换类型使用一致API
+- **全面错误处理**: 内置异常管理
+- **不可变配置**: 线程安全的工作流配置
 
-### Extensible Architecture
-- **SOLID Principles**: Clean, maintainable code following best practices
-- **Plug-and-Play Components**: Easy to extend with custom readers, processors, and writers
-- **Format Support**: Built-in PDF and TIFF support, extensible to other formats
+### 可扩展架构
+- **SOLID原则**: 清洁、可维护的代码设计
+- **即插即用组件**: 易于扩展自定义reader、processor和writer
+- **格式支持**: 内置PDF和TIFF支持，可扩展到其他格式
 
-## Architecture Design Advantages
-
-### Flow-based Data Stream vs Traditional Conversion Methods
-
-| **Aspect** | **ApexFlow (Flow-based)** | **Traditional Methods** | **Performance Advantage** |
-|------------|---------------------------|-------------------------|---------------------------|
-| **Data Processing Model** | **Reactive Stream**: Continuous chunk processing with backpressure | **Sequential/In-Memory**: Load entire file into memory, process sequentially | **3-5x Faster**: Parallel processing across multiple stages |
-| **Concurrency** | **Lightweight Coroutines**: Thousands of concurrent operations with minimal overhead | **Thread-based**: Limited by thread pool size, high context switching cost | **1000x Higher Concurrency**: Coroutines use ~1KB stack vs threads ~1MB |
-| **Memory Management** | **Dynamic Backpressure**: Automatically adjusts to available memory | **Fixed Buffers**: Prone to out-of-memory errors for large files | **90% Lower Memory Footprint**: For processing large TIFF files |
-| **Error Handling** | **Declarative**: Built-in Flow error operators, isolated stage failures | **Imperative**: Manual try-catch blocks, cascading failures | **Better Fault Tolerance**: Isolated errors don't crash entire workflow |
-| **Scalability** | **Horizontal**: Easy to scale across machines, elastic to load | **Vertical**: Limited by single machine resources | **Linear Scalability**: Performance scales with number of cores |
-| **Throughput Optimization** | **Balanced Pipeline**: Optimized dispatchers for CPU/IO bound tasks | **Single-threaded**: Sequential execution regardless of task type | **Higher Throughput**: Maximizes CPU and IO utilization |
-| **Latency** | **Consistent**: Predictable processing times across input sizes | **Variable**: Exponential latency for larger files | **Stable Latency**: Predictable performance for any file size |
-| **Extensibility** | **Modular**: Plug-and-play components, easy to add formats | **Hardcoded**: Requires modifying core code for new formats | **Faster Innovation**: Add new features without breaking changes |
-
-### Theoretical Foundations
-
-1. **Reactive Streams Specification**: Implements the Reactive Streams standard for efficient data flow
-2. **Flow API Design**: Leverages Kotlin's Flow for declarative stream processing
-3. **Coroutine Theory**: Lightweight threads with cooperative scheduling
-4. **Amdahl's Law**: Optimized parallelism across pipeline stages
-5. **Memory Locality**: Process data in cache-friendly chunks
-6. **Backpressure Mechanism**: Elastic flow control based on downstream capacity
-
-### Practical Performance Benefits
-
-- **Process 100GB+ Files**: No memory constraints due to chunked processing
-- **High Throughput**: Process hundreds of files concurrently
-- **Consistent Performance**: Predictable results regardless of input size
-- **Energy Efficient**: Lower CPU usage for the same workload
-- **Better Resource Utilization**: Maximizes both CPU and IO bandwidth
-
-### Architecture Comparison: Traditional vs ApexFlow
-
-#### 1. Traditional Parallel Processing Architecture
-
-**Workflow**: 
+## Module Structure
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         Traditional Approach                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  1. Read entire file into memory  ──────────────────────────────────┐   │
-│                                                                     │   │
-│  2. Process entire file in memory  ─────────────────────────────────┤   │
-│                                                                     │   │
-│  3. Write entire file to disk      ─────────────────────────────────┤   │
-│                                                                     │   │
-│                                                                     ▼   │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          ┌──────────────┐
-│  │ File Reader  │    │  Processor   │    │ File Writer  │          │   Memory     │
-│  └──────────────┘    └──────────────┘    └──────────────┘          │   Pressure   │
-│          │                  │                  │                   │   Issues     │
-│          ▼                  ▼                  ▼                   └──────────────┘
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │
-│  │ Read Whole   │───▶│ Process All  │───▶│ Write Whole  │
-│  │ File         │    │ Data         │    │ File         │
-│  └──────────────┘    └──────────────┘    └──────────────┘
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-**Challenges**: 
-- High memory usage (loads entire file into RAM)
-- Sequential processing of steps
-- Limited concurrency (one file at a time)
-- Risk of out-of-memory errors for large files
-- Poor resource utilization (CPU idle during I/O, I/O idle during CPU processing)
-
-#### 2. ApexFlow Streaming Architecture
-
-**Workflow**: 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          ApexFlow Approach                            │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │  Chunked     │    │  Parallel    │    │  Chunked     │              │
-│  │  File Reader │    │  Processor   │    │  File Writer │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│          │                  │                  │                       │
-│          ▼                  ▼                  ▼                       │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │              │
-│  │ Read Chunk   │───▶│ Process      │───▶│ Write Chunk  │              │
-│  │ (100KB)      │    │ Chunk        │    │ (100KB)      │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│          │                  │                  │                       │
-│          │                  │                  │                       │
-│          ▼                  ▼                  ▼                       │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │  Step 1:     │    │  Step 2:     │    │  Step 3:     │              │
-│  │ Read Next    │───▶│ Process      │───▶│ Write Next   │              │
-│  │ Chunk        │    │ Next Chunk   │    │ Chunk        │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│                                                                         │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐              │
-│  │  ...         │    │  ...         │    │  ...         │              │
-│  └──────────────┘    └──────────────┘    └──────────────┘              │
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │  Benefits:                                                        │  │
-│  │  • Constant memory usage (~100MB regardless of file size)        │  │
-│  │  • True parallelism (I/O and CPU work simultaneously)            │  │
-│  │  • High concurrency (process hundreds of files in parallel)      │  │
-│  │  • No out-of-memory risks for large files                        │  │
-│  │  • Better resource utilization (CPU and I/O always busy)         │  │
-│  │  • Predictable performance scaling                              │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-**Key Advantages with Kotlin Flow**: 
-- **Backpressure Handling**: Automatically adjusts processing speed based on downstream capacity
-- **Coroutine Integration**: Lightweight threads for efficient concurrency
-- **Reactive Programming**: Declarative data processing with operators
-- **Type Safety**: Compile-time checks for data transformations
-- **Composability**: Easy to chain and combine different processing steps
-
-### Performance Comparison
-
-| Aspect | Traditional Approach | ApexFlow | Improvement |
-|--------|---------------------|----------|-------------|
-| **Memory Usage** | Proportional to file size (GBs) | Constant (~100MB) | **90%+ Reduction** |
-| **Processing Model** | Sequential (Read → Process → Write) | Concurrent (all steps in parallel) | **True Parallelism** |
-| **Concurrency** | Limited (5-10 files) | High (100+ files) | **20x Higher** |
-| **Large File Support** | Risk of OOM errors | No limits | **Unlimited Scalability** |
-| **Resource Utilization** | Poor (CPU/IO idle time) | Excellent (both always busy) | **5x Higher Throughput** |
-| **Latency** | High (waits for entire file) | Low (starts processing immediately) | **Near Real-time Processing** |
-
-### Performance Testing
-
-The project includes comprehensive performance tests that you can run to verify performance on your specific hardware:
-
-```bash
-# Run performance tests
-.gradlew.bat test --tests "*Performance*"
+├── apexflow-core/                    # 核心工作流引擎（格式无关）
+├── apexflow-pdf-pdfbox/             # PDF格式支持
+├── apexflow-tiff-twelvemonkeys/     # TIFF格式支持
+├── apexflow-dsl-extensions/         # 简化DSL扩展
+└── apexflow-example/                # 示例代码
 ```
 
 ## Technology Stack
-
-- **Kotlin**: Modern programming language
-- **Kotlin Coroutines**: Asynchronous programming
-- **Kotlin Flow**: Reactive stream processing
-- **PDFBox**: PDF format support
-- **TwelveMonkeys**: TIFF format support
-- **SLF4J**: Logging abstraction
-
-## Project Structure
-
-```
-├── apexflow-core/          # Core workflow engine and interfaces
-├── apexflow-pdf-pdfbox/   # PDF format support using PDFBox
-├── apexflow-tiff-twelvemonkeys/ # TIFF format support using TwelveMonkeys
-└── apexflow-example/       # Example usage and demonstrations
-```
-
-## Performance Test Results
-
-| Test Scenario | Result |
-|---------------|--------|
-| 10,000 item processing | ✅ Successfully completed |
-| Backpressure handling | ✅ Automatically managed |
-| Buffer size testing | ✅ Works correctly with all sizes |
-| Edge case handling | ✅ Passes all edge cases |
-| Exception handling | ✅ Correctly handles all exceptions |
+- **Kotlin**: 现代编程语言
+- **Kotlin Coroutines**: 异步编程
+- **Kotlin Flow**: 响应式流处理
+- **PDFBox**: PDF格式支持
+- **TwelveMonkeys**: TIFF格式支持
+- **SLF4J**: 日志抽象
 
 ## Build and Run
 
+### Windows
+```bash
+# Build all modules
+gradlew.bat build
+
+# Build specific module
+gradlew.bat :apexflow-core:build
+```
+
+### Linux/Mac
 ```bash
 # Build all modules
 ./gradlew build
@@ -356,14 +132,20 @@ The project includes comprehensive performance tests that you can run to verify 
 ./gradlew :apexflow-core:build
 ```
 
+## Performance Benefits
+- **处理大文件**: 支持100GB+文件，无内存限制
+- **高吞吐量**: 并发处理数百个文件
+- **稳定性能**: 任何文件大小都有可预测的处理时间
+- **资源高效**: 最大化CPU和IO利用率
+
 ## Conclusion
 
-ApexFlow is a **high-performance file conversion engine** built for modern Kotlin applications, offering:
+ApexFlow是一个**高性能工作流引擎**，专为现代Kotlin应用设计，提供：
 
-- **Simple API**: Intuitive DSL for easy workflow construction
-- **High Performance**: Asynchronous, parallel processing with built-in backpressure
-- **Robust Design**: Reliable error handling and edge case management
-- **Extensible Architecture**: Easy to add new formats and custom processing
-- **Modern Technology**: Built with Kotlin coroutines and Flow API
+- **简单API**: 直观DSL，易于构建工作流
+- **高性能**: 异步并行处理，内置背压
+- **健壮设计**: 可靠的错误处理和边界情况管理
+- **可扩展架构**: 易于添加新格式和自定义处理
+- **现代技术**: 基于Kotlin协程和Flow API
 
-ApexFlow simplifies file conversion workflows while delivering excellent performance, making it ideal for high-volume document processing and custom conversion pipelines.
+ApexFlow简化了数据处理工作流，同时提供卓越的性能，非常适合高容量文档处理和自定义转换管道。
