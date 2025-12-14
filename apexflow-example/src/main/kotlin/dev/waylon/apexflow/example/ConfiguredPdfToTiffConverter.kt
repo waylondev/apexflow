@@ -64,10 +64,4 @@ fun main() {
     }
 
     logger.info("📁 Output file created: $outputPath")
-    logger.info("🔧 Configuration:")
-    logger.info("   - Read Buffer Size: 500")
-    logger.info("   - Process Buffer Size: 500")
-    logger.info("   - Performance Monitoring: true")
-    logger.info("   - IO Buffer Size: ${4 * 8192}")
-    logger.info("   - Granular Performance Monitoring: true")
 }

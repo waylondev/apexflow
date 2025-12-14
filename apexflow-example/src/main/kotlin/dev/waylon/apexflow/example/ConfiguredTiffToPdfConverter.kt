@@ -38,8 +38,8 @@ fun main() {
                 writer(PdfImageWriter(outputStream))
                 // Use configure block, only set the properties we care about
                 configure {
-                    readBufferSize = 500
-                    processBufferSize = 500
+                    readBufferSize = 5
+                    processBufferSize = 5
                     // readDispatcher, processDispatcher, writeDispatcher use default values
                 }
             }
@@ -55,10 +55,4 @@ fun main() {
     }
 
     logger.info("📁 Output file created: $outputPath")
-    logger.info("🔧 Configuration:")
-    logger.info("   - Read Buffer Size: 500")
-    logger.info("   - Process Buffer Size: 500")
-    logger.info("   - Performance Monitoring: true")
-    logger.info("   - IO Buffer Size: ${4 * 8192}")
-    logger.info("   - Granular Performance Monitoring: true")
 }
