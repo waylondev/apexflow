@@ -28,7 +28,7 @@ fun main() {
     // Create workflow engine using DSL with custom configuration
     // Use configure block but only set the properties we care about, others use default values
     val engine = apexFlowWorkflow {
-        reader(TiffReader(inputPath = inputPath))
+        reader(TiffReader(inputPath))
         processor(WorkflowProcessor.identity())
         writer(PdfImageWriter(outputPath))
         // Use configure block, only set the properties we care about

@@ -35,7 +35,7 @@ fun main() {
     // Create workflow engine using DSL with custom processor and configuration
     // Use configure block for clearer separation of configuration
     val engine = apexFlowWorkflow {
-        reader(TiffReader(inputPath = inputPath))
+        reader(TiffReader(inputPath))
         processor(watermarkProcessor)
         writer(PdfImageWriter(outputPath))
 

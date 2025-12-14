@@ -1,10 +1,12 @@
 package dev.waylon.apexflow.tiff
 
+import java.io.FileInputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import org.opentest4j.FileInfo
 
 /**
  * Test for TiffReader
@@ -27,7 +29,7 @@ class TiffReaderTest {
     @Test
     fun testReadSimpleTiff() = runBlocking {
         // Given
-        val reader = TiffReader(inputPath = testResourcePath)
+        val reader = TiffReader(FileInputStream(testResourcePath))
 
         // When
         val images = reader.read().toList()
@@ -48,11 +50,9 @@ class TiffReaderTest {
      */
     @Test
     fun testReadMultipleTimes() = runBlocking {
-        // Given
-        val reader = TiffReader(inputPath = testResourcePath)
-
         // When & Then - Read the same file multiple times
         repeat(3) {
+            val reader = TiffReader(FileInputStream(testResourcePath))
             val images = reader.read().toList()
             assertNotNull(images)
             assertEquals(1, images.size, "Expected 1 page in TIFF file")
@@ -67,7 +67,7 @@ class TiffReaderTest {
     fun testReadDifferentConfigurations() = runBlocking {
         // When & Then - Create multiple readers with the same file
         repeat(3) {
-            val reader = TiffReader(inputPath = testResourcePath)
+            val reader = TiffReader(FileInputStream(testResourcePath))
             val images = reader.read().toList()
             assertNotNull(images)
             assertEquals(1, images.size, "Expected 1 page in TIFF file")

@@ -14,23 +14,25 @@ import java.awt.image.BufferedImage
  * This function provides a concise way to create a TIFF to PDF conversion workflow
  * with minimal configuration.
  *
- * @param inputPath Path to the input TIFF file
- * @param outputPath Path to the output PDF file
+ * @param inputStream Input stream for TIFF file
+ * @param outputStream Output stream for PDF file
  * @return Configured workflow engine ready to execute
  *
  * Usage example:
  * ```kotlin
- * val engine = tiffToPdf("input.tif", "output.pdf")
+ * val inputStream = FileInputStream("input.tif")
+ * val outputStream = FileOutputStream("output.pdf")
+ * val engine = tiffToPdf(inputStream, outputStream)
  * runBlocking { engine.startAsync() }
  * ```
  */
 fun tiffToPdf(
-    inputPath: String,
-    outputPath: String
+    inputStream: java.io.InputStream,
+    outputStream: java.io.OutputStream
 ) = apexFlowWorkflow {
-    reader(TiffReader(inputPath = inputPath))
+    reader(TiffReader(inputStream))
     processor(WorkflowProcessor.identity())
-    writer(PdfImageWriter(outputPath))
+    writer(PdfImageWriter(outputStream))
 }
 
 /**
@@ -39,21 +41,23 @@ fun tiffToPdf(
  * This function provides a concise way to create a PDF to TIFF conversion workflow
  * with minimal configuration.
  *
- * @param inputPath Path to the input PDF file
- * @param outputPath Path to the output TIFF file
+ * @param inputStream Input stream for PDF file
+ * @param outputStream Output stream for TIFF file
  * @return Configured workflow engine ready to execute
  *
  * Usage example:
  * ```kotlin
- * val engine = pdfToTiff("input.pdf", "output.tif")
+ * val inputStream = FileInputStream("input.pdf")
+ * val outputStream = FileOutputStream("output.tif")
+ * val engine = pdfToTiff(inputStream, outputStream)
  * runBlocking { engine.startAsync() }
  * ```
  */
 fun pdfToTiff(
-    inputPath: String,
-    outputPath: String
+    inputStream: java.io.InputStream,
+    outputStream: java.io.OutputStream
 ) = apexFlowWorkflow {
-    reader(PdfImageReader(inputPath = inputPath))
+    reader(PdfImageReader(inputStream))
     processor(WorkflowProcessor.identity())
-    writer(TiffWriter(outputPath))
+    writer(TiffWriter(outputStream))
 }
