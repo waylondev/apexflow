@@ -1,12 +1,24 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
+    id("java-library")
 }
 
 group = "dev.waylon.apexflow"
 version = "0.0.1"
 
 description = "ApexFlow PDF-PDFBox Library - PDF writing functionality using PDFBox"
+
+// Configure Java 21
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Configure Kotlin to use JDK 21
+kotlin {
+    jvmToolchain(21)
+}
 
 
 repositories {
@@ -36,6 +48,17 @@ tasks.test {
 
 // Configure Maven publishing
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/waylondev/apexflow")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])

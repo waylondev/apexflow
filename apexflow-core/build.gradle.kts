@@ -8,6 +8,12 @@ group = "dev.waylon.apexflow"
 version = "0.0.1"
 description = "ApexFlow Core Library - High Performance TIFF to PDF Conversion Engine"
 
+// Configure Java 21
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 
 dependencies {
     // Core dependencies - using version catalog for consistency
@@ -25,6 +31,17 @@ tasks.test {
 
 // Configure Maven publishing
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/waylondev/apexflow")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
