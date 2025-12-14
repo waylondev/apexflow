@@ -32,20 +32,18 @@ class ApexFlowWorkflowEngine<I, O>(
     }
 
     override suspend fun startAsync() {
-        // High-performance parallel data flow with dedicated coroutines for each stage
-        // Modern Kotlin: Use Flow operators for optimal parallelism
-
-        // Minimal overhead path without logging
+        // Optimized parallel data flow with minimal context switching
+        // Reorder Flow operators for optimal performance
         runCatching {
-            // Step 1: Read data
+            // Step 1: Read data - Optimized order: flowOn first, then buffer
             val dataFlow = reader.read()
-                .buffer(config.readBufferSize)  // Read buffer for balancing reader and processor
-                .flowOn(config.readDispatcher)
+                .flowOn(config.readDispatcher)  // Move flowOn before buffer for better performance
+                .buffer(config.readBufferSize)  // Buffer on the new dispatcher thread
 
-            // Step 2: Process data
+            // Step 2: Process data - Optimized order: flowOn first, then buffer
             val processedFlow = processor.process(dataFlow)
-                .buffer(config.processBufferSize)  // Process buffer for balancing processor and writer
-                .flowOn(config.processDispatcher)
+                .flowOn(config.processDispatcher)  // Move flowOn before buffer
+                .buffer(config.processBufferSize)  // Buffer on the new dispatcher thread
 
             // Step 3: Write data
             writer.write(processedFlow.flowOn(config.writeDispatcher))

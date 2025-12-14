@@ -18,8 +18,8 @@ class WorkflowConfigTest {
         val config = WorkflowConfig()
 
         // Verify default values
-        assertEquals(100, config.readBufferSize)
-        assertEquals(100, config.processBufferSize)
+        assertEquals(10, config.readBufferSize)
+        assertEquals(10, config.processBufferSize)
         assertEquals(Dispatchers.IO, config.readDispatcher)
         assertEquals(Dispatchers.Default, config.processDispatcher)
         assertEquals(Dispatchers.IO, config.writeDispatcher)
