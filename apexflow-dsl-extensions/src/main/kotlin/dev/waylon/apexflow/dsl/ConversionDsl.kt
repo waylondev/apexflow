@@ -6,10 +6,10 @@ import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.tiff.TiffReader
 import dev.waylon.apexflow.tiff.TiffWriter
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Simplified TIFF to PDF conversion
@@ -23,8 +23,8 @@ import java.io.OutputStream
  *
  * Usage example:
  * ```kotlin
- * val inputStream = FileInputStream("input.tif")
- * val outputStream = FileOutputStream("output.pdf")
+ * val inputStream = Files.newInputStream(Paths.get("input.tif"))
+ * val outputStream = Files.newOutputStream(Paths.get("output.pdf"))
  * val engine = tiffToPdf(inputStream, outputStream)
  * runBlocking { engine.startAsync() }
  * ```
@@ -58,9 +58,9 @@ fun tiffToPdf(
     inputPath: String,
     outputPath: String
 ) = apexFlowWorkflow {
-    reader(TiffReader(FileInputStream(inputPath)))
+    reader(TiffReader(Files.newInputStream(Paths.get(inputPath))))
     processor(WorkflowProcessor.identity())
-    writer(PdfImageWriter(FileOutputStream(outputPath)))
+    writer(PdfImageWriter(Files.newOutputStream(Paths.get(outputPath))))
 }
 
 /**
@@ -75,8 +75,8 @@ fun tiffToPdf(
  *
  * Usage example:
  * ```kotlin
- * val inputStream = FileInputStream("input.pdf")
- * val outputStream = FileOutputStream("output.tif")
+ * val inputStream = Files.newInputStream(Paths.get("input.pdf"))
+ * val outputStream = Files.newOutputStream(Paths.get("output.tif"))
  * val engine = pdfToTiff(inputStream, outputStream)
  * runBlocking { engine.startAsync() }
  * ```
@@ -110,7 +110,7 @@ fun pdfToTiff(
     inputPath: String,
     outputPath: String
 ) = apexFlowWorkflow {
-    reader(PdfImageReader(FileInputStream(inputPath)))
+    reader(PdfImageReader(Files.newInputStream(Paths.get(inputPath))))
     processor(WorkflowProcessor.identity())
-    writer(TiffWriter(FileOutputStream(outputPath)))
+    writer(TiffWriter(Files.newOutputStream(Paths.get(outputPath))))
 }

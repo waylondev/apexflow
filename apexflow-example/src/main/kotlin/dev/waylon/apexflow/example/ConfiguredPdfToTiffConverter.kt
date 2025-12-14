@@ -5,8 +5,10 @@ import dev.waylon.apexflow.core.workflow.WorkflowProcessor
 import dev.waylon.apexflow.core.workflow.apexFlowWorkflow
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.tiff.TiffWriter
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import kotlinx.coroutines.runBlocking
@@ -30,8 +32,8 @@ fun main() {
     logger.info("📊 Performance monitoring enabled")
 
     // Use try-with-resources to ensure proper resource cleanup
-    FileInputStream(inputPath).use { inputStream ->
-        FileOutputStream(outputPath).use { outputStream ->
+    Files.newInputStream(Paths.get(inputPath)).use { inputStream ->
+        Files.newOutputStream(Paths.get(outputPath)).use { outputStream ->
             // Create workflow engine using DSL with custom configuration
             // Use configure block but only set the properties we care about, others use default values
             val engine = apexFlowWorkflow {
