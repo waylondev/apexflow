@@ -4,6 +4,11 @@ import dev.waylon.apexflow.core.workflow.WorkflowReader
 import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlin.math.min
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.text.PDFTextStripper
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 
 /**
  * PDF text reader configuration DSL
@@ -30,8 +35,12 @@ class PdfTextReader(
     }
 
     override fun read(): Flow<String> = flow { 
-        // PDF text reading implementation will be added later
-        // For now, just emit dummy text
-        emit("PDF text content")
+        Loader.loadPDF(RandomAccessReadBuffer(inputStream)).use { document ->
+            val textStripper = PDFTextStripper()
+            textStripper.startPage = pdfConfig.startPage
+            textStripper.endPage = min(pdfConfig.endPage, document.numberOfPages)
+            val text = textStripper.getText(document)
+            emit(text)
+        }
     }
 }
