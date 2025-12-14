@@ -34,13 +34,19 @@ class PdfImageReader(
 
     override fun read(): Flow<BufferedImage> = flow {
         Loader.loadPDF(RandomAccessReadBuffer(inputStream)).use { document ->
-            val renderer = PDFRenderer(document)
-            val numPages = document.numberOfPages
 
-            for (pageIndex in 0 until numPages) {
-                val image = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
-                emit(image)
-                image.flush()
+            val renderer = PDFRenderer(document)
+            val pageCount = document.numberOfPages
+
+            repeat(pageCount) { pageIndex ->
+                // Render the current page with the configured DPI
+                val renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
+
+                // Emit the final image
+                emit(renderedImage)
+
+                // Flush the image from memory after emission
+                renderedImage.flush()
             }
         }
     }

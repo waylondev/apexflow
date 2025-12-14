@@ -88,7 +88,7 @@ private fun workflowProcessor(): WorkflowProcessor<BufferedImage, BufferedImage>
                 // Add a simple watermark (for demonstration purposes)
                 graphics.color = Color(255, 255, 255, 128) // Semi-transparent white
                 graphics.font = graphics.font.deriveFont(16f)
-                graphics.drawString("ApexFlow Converted", 10, image.height - 20)
+                graphics.drawString("ApexFlow", 10, image.height - 20)
 
                 graphics.dispose()
 
