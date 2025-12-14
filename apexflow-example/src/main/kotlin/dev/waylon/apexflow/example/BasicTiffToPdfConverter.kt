@@ -4,6 +4,8 @@ import dev.waylon.apexflow.core.util.PerformanceMonitorUtil
 import dev.waylon.apexflow.dsl.tiffToPdf
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 /**
  * Basic TIFF to PDF converter example
@@ -15,26 +17,29 @@ fun main() {
     val logger = LoggerFactory.getLogger("BasicTiffToPdfConverter")
 
     // Get input and output paths
-    val inputPath = "apexflow-example/build/spring-boot-reference.tif"
-    val outputPath = "apexflow-example/build/spring-boot-reference-output-basic.pdf"
+    val inputPath = "build/spring-boot-reference.tif"
+    val outputPath = "build/spring-boot-reference-output-basic.pdf"
 
     logger.info("🚀 Starting Basic TIFF to PDF Converter")
     logger.info("📄 Input: $inputPath")
     logger.info("📄 Output: $outputPath")
 
-    // Create workflow engine using simplified DSL
-    val engine = tiffToPdf(inputPath, outputPath)
+    // Use try-with-resources to ensure proper resource cleanup
+    FileInputStream(inputPath).use { inputStream ->
+        FileOutputStream(outputPath).use { outputStream ->
+            // Create workflow engine using simplified DSL
+            val engine = tiffToPdf(inputStream, outputStream)
 
-    runBlocking {
-        // Simplified performance monitoring using withPerformanceMonitoring method
-        // pageCount is optional and will be automatically handled
-        PerformanceMonitorUtil.withPerformanceMonitoring {
-            // Run the conversion
-            engine.startAsync()
+            runBlocking {
+                // Simplified performance monitoring using withPerformanceMonitoring method
+                // pageCount is optional and will be automatically handled
+                PerformanceMonitorUtil.withPerformanceMonitoring {
+                    // Run the conversion
+                    engine.startAsync()
+                }
+            }
         }
     }
 
     logger.info("📁 Output file created: $outputPath")
-
-
 }

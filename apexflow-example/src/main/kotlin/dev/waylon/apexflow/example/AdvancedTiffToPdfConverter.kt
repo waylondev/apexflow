@@ -7,6 +7,8 @@ import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.tiff.TiffReader
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -22,8 +24,8 @@ import org.slf4j.LoggerFactory
 fun main() {
     val logger = LoggerFactory.getLogger("AdvancedTiffToPdfConverter")
     // Get input and output paths
-    val inputPath = "apexflow-example/build/spring-boot-reference.tif"
-    val outputPath = "apexflow-example/build/spring-boot-reference-output-advanced.pdf"
+    val inputPath = "build/spring-boot-reference.tif"
+    val outputPath = "build/spring-boot-reference-output-advanced.pdf"
 
     logger.info("🚀 Starting Advanced TIFF to PDF Converter")
     logger.info("📄 Input: $inputPath")
@@ -32,27 +34,32 @@ fun main() {
     // Create custom processor with watermark functionality
     val watermarkProcessor = workflowProcessor()
 
-    // Create workflow engine using DSL with custom processor and configuration
-    // Use configure block for clearer separation of configuration
-    val engine = apexFlowWorkflow {
-        reader(TiffReader(inputPath))
-        processor(watermarkProcessor)
-        writer(PdfImageWriter(outputPath))
+    // Use try-with-resources to ensure proper resource cleanup
+    FileInputStream(inputPath).use { inputStream ->
+        FileOutputStream(outputPath).use { outputStream ->
+            // Create workflow engine using DSL with custom processor and configuration
+            // Use configure block for clearer separation of configuration
+            val engine = apexFlowWorkflow {
+                reader(TiffReader(inputStream))
+                processor(watermarkProcessor)
+                writer(PdfImageWriter(outputStream))
 
-        // Use configure block for clear configuration separation
-        configure {
-            readBufferSize = 1000
-            processBufferSize = 1000
-            ioBufferSize = 8 * 8192
-            // readDispatcher, processDispatcher, writeDispatcher use default values
-        }
-    }
+                // Use configure block for clear configuration separation
+                configure {
+                    readBufferSize = 1000
+                    processBufferSize = 1000
+                    ioBufferSize = 8 * 8192
+                    // readDispatcher, processDispatcher, writeDispatcher use default values
+                }
+            }
 
-    // Use the simplified performance monitoring method
-    runBlocking {
-        PerformanceMonitorUtil.withPerformanceMonitoring {
-            // Run the conversion within the performance monitoring block
-            engine.startAsync()
+            // Use the simplified performance monitoring method
+            runBlocking {
+                PerformanceMonitorUtil.withPerformanceMonitoring {
+                    // Run the conversion within the performance monitoring block
+                    engine.startAsync()
+                }
+            }
         }
     }
 
@@ -61,8 +68,6 @@ fun main() {
     logger.info("✨ Features:")
     logger.info("   - Custom image processing with watermark")
     logger.info("   - Performance-optimized settings")
-
-
 }
 
 private fun workflowProcessor(): WorkflowProcessor<BufferedImage, BufferedImage> {
