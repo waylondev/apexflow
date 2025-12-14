@@ -3,6 +3,7 @@ package dev.waylon.apexflow.tiff
 import dev.waylon.apexflow.core.workflow.WorkflowWriter
 import java.awt.image.BufferedImage
 import java.io.OutputStream
+import javax.imageio.IIOImage
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
  */
 class TiffWriterConfig {
     /** JPEG compression quality for TIFF writing */
-    var jpegQuality: Float = 85f
+    var writeParam: ImageWriteParam? = null
 }
 
 /**
@@ -60,16 +61,13 @@ class TiffWriter(
             writer.output = imageOutputStream
 
             // Create write param with JPEG compression
-            val writeParam = writer.defaultWriteParam
-            writeParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
-            writeParam.compressionType = "JPEG"
-            writeParam.compressionQuality = tiffConfig.jpegQuality / 100f
+            val writeParam = tiffConfig.writeParam ?: writer.defaultWriteParam
 
             // Write images to TIFF
             data.collect {
-                writer.write(null, writer.defaultWriteParam.let { param ->
-                    javax.imageio.IIOImage(it, null, null)
-                }, writeParam)
+                writer.write(
+                    null, IIOImage(it, null, null), writeParam
+                )
             }
         }
     }
