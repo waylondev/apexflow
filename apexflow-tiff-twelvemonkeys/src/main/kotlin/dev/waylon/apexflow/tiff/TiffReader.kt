@@ -2,9 +2,7 @@ package dev.waylon.apexflow.tiff
 
 import dev.waylon.apexflow.core.workflow.FileWorkflowReader
 import java.awt.image.BufferedImage
-import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileInputStream
 import javax.imageio.ImageIO
 import javax.imageio.ImageReadParam
 import javax.imageio.ImageReader
@@ -45,7 +43,7 @@ class TiffReader(
     // Optional configuration block using DSL
     config: TiffReaderConfig.() -> Unit = {}
 ) : FileWorkflowReader<BufferedImage> {
-    
+
     // Configuration instance
     private val tiffConfig = TiffReaderConfig().apply(config)
 
@@ -57,7 +55,7 @@ class TiffReader(
     override fun setInput(filePath: String) {
         this.inputPath = filePath
     }
-    
+
     /**
      * Configure TIFF reader using DSL
      *
@@ -66,13 +64,13 @@ class TiffReader(
     fun configure(config: TiffReaderConfig.() -> Unit) {
         tiffConfig.apply(config)
     }
-    
+
     /**
      * Set custom ImageReadParam for advanced configuration
      *
      * @param readParam Custom ImageReadParam for advanced configuration
      */
-    fun setReadParam(readParam: javax.imageio.ImageReadParam) {
+    fun setReadParam(readParam: ImageReadParam) {
         tiffConfig.readParam = readParam
     }
 
@@ -88,7 +86,7 @@ class TiffReader(
         val file = validateInput()
 
         // Step 2: Create standard ImageInputStream
-        javax.imageio.ImageIO.createImageInputStream(file).use { input ->
+        ImageIO.createImageInputStream(file).use { input ->
             // Step 3: Get appropriate ImageReader using the same input stream
             val reader = getImageReader(input, file)
 

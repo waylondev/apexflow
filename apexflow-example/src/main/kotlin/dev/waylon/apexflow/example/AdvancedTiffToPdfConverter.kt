@@ -38,7 +38,7 @@ fun main() {
         reader(TiffReader(inputPath = inputPath))
         processor(watermarkProcessor)
         writer(PdfImageWriter(outputPath))
-        
+
         // Use configure block for clear configuration separation
         configure {
             readBufferSize = 1000

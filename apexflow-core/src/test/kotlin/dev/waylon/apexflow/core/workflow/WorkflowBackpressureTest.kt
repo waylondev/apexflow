@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
  * Backpressure tests for workflow engine
  */
 class WorkflowBackpressureTest {
-    
+
     /**
      * Test backpressure handling with slow writer
      *
@@ -23,7 +23,7 @@ class WorkflowBackpressureTest {
     fun testBackpressureWithSlowWriter() = runBlocking {
         // Number of items to process
         val itemCount = 1000
-        
+
         // Mock reader that emits items quickly
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -32,14 +32,14 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Mock processor that processes items quickly
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that is slow (simulates IO bottleneck)
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -51,31 +51,33 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Create workflow engine with small buffers (to trigger backpressure)
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        engine.configure(WorkflowConfig(
-            readBufferSize = 10,
-            processBufferSize = 10
-        ))
-        
+        engine.configure(
+            WorkflowConfig(
+                readBufferSize = 10,
+                processBufferSize = 10
+            )
+        )
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Backpressure test: Processed $itemCount items in $executionTime ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
     }
-    
+
     /**
      * Test backpressure with fast writer
      *
@@ -85,7 +87,7 @@ class WorkflowBackpressureTest {
     fun testBackpressureWithFastWriter() = runBlocking {
         // Number of items to process
         val itemCount = 10000
-        
+
         // Mock reader that emits items
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -94,14 +96,14 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Mock processor that processes items
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that is fast
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -111,31 +113,33 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Create workflow engine with large buffers
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        engine.configure(WorkflowConfig(
-            readBufferSize = 1000,
-            processBufferSize = 1000
-        ))
-        
+        engine.configure(
+            WorkflowConfig(
+                readBufferSize = 1000,
+                processBufferSize = 1000
+            )
+        )
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Fast writer test: Processed $itemCount items in $executionTime ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
     }
-    
+
     /**
      * Test backpressure with varying processing times
      *
@@ -145,7 +149,7 @@ class WorkflowBackpressureTest {
     fun testBackpressureWithVaryingProcessingTimes() = runBlocking {
         // Number of items to process
         val itemCount = 1000
-        
+
         // Mock reader that emits items
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -154,7 +158,7 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Mock processor with varying processing times
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
@@ -166,7 +170,7 @@ class WorkflowBackpressureTest {
                 }.map { it + 1 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -176,13 +180,13 @@ class WorkflowBackpressureTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
     }

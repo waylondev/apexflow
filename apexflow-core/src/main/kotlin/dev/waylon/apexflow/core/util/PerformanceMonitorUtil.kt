@@ -50,7 +50,13 @@ object PerformanceMonitorUtil {
                 counter++
                 if (counter % 5 == 0) { // Print every 5 seconds
                     val memoryUsage = getMemoryUsage()
-                    println("📊 Memory usage: Used ${decimalFormat.format(memoryUsage.used.toDouble() / (1024 * 1024))} MB, Max ${decimalFormat.format(memoryUsage.max.toDouble() / (1024 * 1024))} MB")
+                    println(
+                        "📊 Memory usage: Used ${decimalFormat.format(memoryUsage.used.toDouble() / (1024 * 1024))} MB, Max ${
+                            decimalFormat.format(
+                                memoryUsage.max.toDouble() / (1024 * 1024)
+                            )
+                        } MB"
+                    )
                 }
             }
         }
@@ -149,7 +155,7 @@ object PerformanceMonitorUtil {
         pageCount: Int
     ) {
         println("\n📊 Performance Summary:")
-        println("=" .repeat(60))
+        println("=".repeat(60))
 
         // Execution time
         val seconds = executionTime.toDouble() / 1000
@@ -170,7 +176,7 @@ object PerformanceMonitorUtil {
         println("🗑️  Garbage Collection: $gcCount collections, ${decimalFormat.format(gcTime.toDouble() / 1000)} seconds")
 
         // Final summary
-        println("=" .repeat(60))
+        println("=".repeat(60))
         println("✅ Performance monitoring completed")
     }
 

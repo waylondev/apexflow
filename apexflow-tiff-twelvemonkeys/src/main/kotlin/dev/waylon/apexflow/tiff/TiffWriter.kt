@@ -11,7 +11,6 @@ import javax.imageio.stream.FileImageOutputStream
 import kotlinx.coroutines.flow.Flow
 
 
-
 /**
  * TIFF writer configuration DSL
  *
@@ -35,7 +34,7 @@ class TiffWriterConfig {
  * ```kotlin
  * // Basic usage with default parameters
  * val writer1 = TiffWriter(outputPath)
- * 
+ *
  * // Usage with DSL configuration
  * val writer2 = TiffWriter(outputPath) {
  *     val customWriteParam = ImageIO.getImageWritersByFormatName("tiff").next().defaultWriteParam
@@ -44,7 +43,7 @@ class TiffWriterConfig {
  *     customWriteParam.compressionQuality = 0.95f
  *     writeParam = customWriteParam
  * }
- * 
+ *
  * // Usage with direct writeParam setting
  * val writer3 = TiffWriter(outputPath)
  * val customWriteParam = ImageIO.getImageWritersByFormatName("tiff").next().defaultWriteParam
@@ -70,7 +69,7 @@ class TiffWriter(
     override fun setOutput(filePath: String) {
         this.outputPath = filePath
     }
-    
+
     /**
      * Configure TIFF writer using DSL
      *
@@ -79,7 +78,7 @@ class TiffWriter(
     fun configure(config: TiffWriterConfig.() -> Unit) {
         tiffConfig.apply(config)
     }
-    
+
     /**
      * Set custom ImageWriteParam for advanced configuration
      *

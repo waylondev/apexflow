@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage
 fun tiffToPdf(
     inputPath: String,
     outputPath: String
-) = apexFlowWorkflow<BufferedImage, BufferedImage> {
+) = apexFlowWorkflow {
     reader(TiffReader(inputPath = inputPath))
     processor(WorkflowProcessor.identity())
     writer(PdfImageWriter(outputPath))
@@ -52,7 +52,7 @@ fun tiffToPdf(
 fun pdfToTiff(
     inputPath: String,
     outputPath: String
-) = apexFlowWorkflow<BufferedImage, BufferedImage> {
+) = apexFlowWorkflow {
     reader(PdfImageReader(inputPath = inputPath))
     processor(WorkflowProcessor.identity())
     writer(TiffWriter(outputPath))

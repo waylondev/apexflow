@@ -13,7 +13,7 @@ import org.junit.jupiter.api.assertThrows
  * Edge case tests for workflow engine
  */
 class WorkflowEdgeCaseTest {
-    
+
     /**
      * Test workflow with empty input
      *
@@ -25,14 +25,14 @@ class WorkflowEdgeCaseTest {
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = emptyFlow()
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -42,17 +42,17 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results - no items should be collected
         assertEquals(0, collectedItems.size)
     }
-    
+
     /**
      * Test workflow with single item
      *
@@ -66,14 +66,14 @@ class WorkflowEdgeCaseTest {
                 emit(42)
             }
         }
-        
+
         // Mock processor that processes the item
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it * 2 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -83,17 +83,17 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results
         assertEquals(listOf(84), collectedItems)
     }
-    
+
     /**
      * Test workflow with reader that throws exception
      *
@@ -108,14 +108,14 @@ class WorkflowEdgeCaseTest {
                 throw RuntimeException("Reader exception")
             }
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -125,10 +125,10 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
@@ -136,7 +136,7 @@ class WorkflowEdgeCaseTest {
             }
         }
     }
-    
+
     /**
      * Test workflow with processor that throws exception
      *
@@ -151,17 +151,17 @@ class WorkflowEdgeCaseTest {
                 emit(2)
             }
         }
-        
+
         // Mock processor that throws exception
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
-                return input.map { 
+                return input.map {
                     if (it == 2) throw RuntimeException("Processor exception")
-                    it + 1 
+                    it + 1
                 }
             }
         }
-        
+
         // Mock writer
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -171,10 +171,10 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
@@ -182,7 +182,7 @@ class WorkflowEdgeCaseTest {
             }
         }
     }
-    
+
     /**
      * Test workflow with writer that throws exception
      *
@@ -197,14 +197,14 @@ class WorkflowEdgeCaseTest {
                 emit(2)
             }
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that throws exception
         val mockWriter = object : WorkflowWriter<Int> {
             override suspend fun write(data: Flow<Int>) {
@@ -213,21 +213,21 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
                 engine.startAsync()
             }
         }
-        
+
         // Verify that exception is thrown - no need to check collected items
         // due to parallel processing nature, collected items may vary
     }
-    
+
     /**
      * Test workflow with large items
      *
@@ -237,27 +237,27 @@ class WorkflowEdgeCaseTest {
     fun testWorkflowWithLargeItems() = runBlocking {
         // Size of each large item
         val largeItemSize = 1024 * 1024 // 1MB
-        
+
         // Mock reader that emits large strings
         val mockReader = object : WorkflowReader<String> {
             override fun read(): Flow<String> = flow {
                 // Create a large string
                 val largeString = "a".repeat(largeItemSize)
-                
+
                 // Emit the large string multiple times
                 repeat(3) {
                     emit(largeString)
                 }
             }
         }
-        
+
         // Mock processor that processes large strings
         val mockProcessor = object : WorkflowProcessor<String, String> {
             override fun process(input: Flow<String>): Flow<String> {
                 return input.map { it.substring(0, 10) } // Take first 10 characters
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<String>()
         val mockWriter = object : WorkflowWriter<String> {
@@ -267,13 +267,13 @@ class WorkflowEdgeCaseTest {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results
         assertEquals(3, collectedItems.size)
         collectedItems.forEach { assertEquals("aaaaaaaaaa", it) }

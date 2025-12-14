@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
  * Unit tests for WorkflowConfig
  */
 class WorkflowConfigTest {
-    
+
     /**
      * Test default configuration values
      */
@@ -16,7 +16,7 @@ class WorkflowConfigTest {
     fun testDefaultConfiguration() {
         // Create workflow config with default values
         val config = WorkflowConfig()
-        
+
         // Verify default values
         assertEquals(100, config.readBufferSize)
         assertEquals(100, config.processBufferSize)
@@ -25,7 +25,7 @@ class WorkflowConfigTest {
         assertEquals(Dispatchers.IO, config.writeDispatcher)
         assertEquals(4 * 8192, config.ioBufferSize)
     }
-    
+
     /**
      * Test custom configuration values
      */
@@ -42,7 +42,7 @@ class WorkflowConfigTest {
             writeDispatcher = Dispatchers.Default,
             ioBufferSize = 8 * 8192
         )
-        
+
         // Verify custom values
         assertEquals(200, config.readBufferSize)
         assertEquals(200, config.processBufferSize)
@@ -51,7 +51,7 @@ class WorkflowConfigTest {
         assertEquals(Dispatchers.Default, config.writeDispatcher)
         assertEquals(8 * 8192, config.ioBufferSize)
     }
-    
+
     /**
      * Test copy functionality
      */
@@ -59,14 +59,14 @@ class WorkflowConfigTest {
     fun testCopyConfiguration() {
         // Create original config
         val originalConfig = WorkflowConfig(readBufferSize = 300, processBufferSize = 300)
-        
+
         // Copy config
         val copiedConfig = originalConfig.copy(readBufferSize = 400)
-        
+
         // Verify original config unchanged
         assertEquals(300, originalConfig.readBufferSize)
         assertEquals(300, originalConfig.processBufferSize)
-        
+
         // Verify copied config has new values
         assertEquals(400, copiedConfig.readBufferSize)
         assertEquals(300, copiedConfig.processBufferSize)

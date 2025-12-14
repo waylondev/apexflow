@@ -17,7 +17,7 @@ import org.junit.jupiter.api.assertThrows
  * under various conditions, including large datasets, backpressure, and edge cases.
  */
 class WorkflowPerformanceTests {
-    
+
     /**
      * Test performance with large dataset (10,000 items)
      *
@@ -27,7 +27,7 @@ class WorkflowPerformanceTests {
     @Test
     fun testPerformanceWithLargeDataset() = runBlocking {
         val itemCount = 10000
-        
+
         // Mock reader that emits many items
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -36,14 +36,14 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Mock processor that processes items
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -53,34 +53,36 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine with optimized buffers
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        engine.configure(WorkflowConfig(
-            readBufferSize = 1000,
-            processBufferSize = 1000
-        ))
-        
+        engine.configure(
+            WorkflowConfig(
+                readBufferSize = 1000,
+                processBufferSize = 1000
+            )
+        )
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Processed $itemCount items in $executionTime ms")
         println("Throughput: ${itemCount / maxOf(executionTime, 1)} items/ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
         assertEquals(1, collectedItems.first())
         assertEquals(itemCount, collectedItems.last())
     }
-    
+
     /**
      * Test backpressure with slow writer
      *
@@ -90,7 +92,7 @@ class WorkflowPerformanceTests {
     @Test
     fun testBackpressureWithSlowWriter() = runBlocking {
         val itemCount = 1000
-        
+
         // Mock reader that emits items quickly
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -99,14 +101,14 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Mock processor that processes items quickly
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that is slow (simulates IO bottleneck)
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -117,31 +119,33 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine with small buffers to trigger backpressure
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        engine.configure(WorkflowConfig(
-            readBufferSize = 10,
-            processBufferSize = 10
-        ))
-        
+        engine.configure(
+            WorkflowConfig(
+                readBufferSize = 10,
+                processBufferSize = 10
+            )
+        )
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Slow writer - Processed $itemCount items in $executionTime ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
     }
-    
+
     /**
      * Test backpressure with slow processor
      *
@@ -151,7 +155,7 @@ class WorkflowPerformanceTests {
     @Test
     fun testBackpressureWithSlowProcessor() = runBlocking {
         val itemCount = 1000
-        
+
         // Mock reader that emits items quickly
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {
@@ -160,7 +164,7 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Mock processor that is slow
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
@@ -168,7 +172,7 @@ class WorkflowPerformanceTests {
                     .map { it + 1 }
             }
         }
-        
+
         // Mock writer that is fast
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -178,27 +182,27 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Slow processor - Processed $itemCount items in $executionTime ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
     }
-    
+
     /**
      * Test edge case with empty input
      *
@@ -210,14 +214,14 @@ class WorkflowPerformanceTests {
         val mockReader = object : WorkflowReader<Int> {
             override fun read(): Flow<Int> = flow {}
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -227,17 +231,17 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results - no items should be collected
         assertEquals(0, collectedItems.size)
     }
-    
+
     /**
      * Test edge case with single item
      *
@@ -251,14 +255,14 @@ class WorkflowPerformanceTests {
                 emit(42)
             }
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it * 2 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -268,17 +272,17 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Verify results
         assertEquals(listOf(84), collectedItems)
     }
-    
+
     /**
      * Test with very large items (1MB each)
      *
@@ -288,7 +292,7 @@ class WorkflowPerformanceTests {
     fun testLargeItems() = runBlocking {
         val itemCount = 10
         val itemSize = 1024 * 1024 // 1MB per item
-        
+
         // Mock reader that emits large strings
         val mockReader = object : WorkflowReader<String> {
             override fun read(): Flow<String> = flow {
@@ -297,14 +301,14 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Mock processor that takes first 10 characters
         val mockProcessor = object : WorkflowProcessor<String, String> {
             override fun process(input: Flow<String>): Flow<String> {
                 return input.map { it.substring(0, 10) }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<String>()
         val mockWriter = object : WorkflowWriter<String> {
@@ -314,28 +318,28 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Measure execution time
         val startTime = System.currentTimeMillis()
-        
+
         // Start workflow
         engine.startAsync()
-        
+
         // Calculate execution time
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        
+
         // Print performance metrics
         println("Processed $itemCount items of 1MB each in $executionTime ms")
-        
+
         // Verify results
         assertEquals(itemCount, collectedItems.size)
         collectedItems.forEach { assertEquals("aaaaaaaaaa", it) }
     }
-    
+
     /**
      * Test exception handling from reader
      *
@@ -351,14 +355,14 @@ class WorkflowPerformanceTests {
                 throw RuntimeException("Reader exception")
             }
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -368,21 +372,21 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
                 engine.startAsync()
             }
         }
-        
+
         // Note: Due to parallel processing nature, collectedItems may be empty or contain some items
         // We don't assert on collectedItems size, only that exception is properly thrown
     }
-    
+
     /**
      * Test exception handling from processor
      *
@@ -398,17 +402,17 @@ class WorkflowPerformanceTests {
                 emit(3)
             }
         }
-        
+
         // Mock processor that throws exception
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
-                return input.map { 
+                return input.map {
                     if (it == 2) throw RuntimeException("Processor exception")
-                    it + 1 
+                    it + 1
                 }
             }
         }
-        
+
         // Mock writer that collects items
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -418,21 +422,21 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
                 engine.startAsync()
             }
         }
-        
+
         // Note: Due to parallel processing nature, collectedItems may be empty or contain some items
         // We don't assert on collectedItems size, only that exception is properly thrown
     }
-    
+
     /**
      * Test exception handling from writer
      *
@@ -448,14 +452,14 @@ class WorkflowPerformanceTests {
                 emit(3)
             }
         }
-        
+
         // Mock processor
         val mockProcessor = object : WorkflowProcessor<Int, Int> {
             override fun process(input: Flow<Int>): Flow<Int> {
                 return input.map { it + 1 }
             }
         }
-        
+
         // Mock writer that throws exception
         val collectedItems = mutableListOf<Int>()
         val mockWriter = object : WorkflowWriter<Int> {
@@ -466,21 +470,21 @@ class WorkflowPerformanceTests {
                 }
             }
         }
-        
+
         // Create workflow engine
         val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-        
+
         // Expect exception
         assertThrows<RuntimeException> {
             runBlocking {
                 engine.startAsync()
             }
         }
-        
+
         // Note: Due to parallel processing nature, collectedItems may be empty or contain some items
         // We don't assert on collectedItems size, only that exception is properly thrown
     }
-    
+
     /**
      * Test performance with varying buffer sizes
      *
@@ -489,10 +493,10 @@ class WorkflowPerformanceTests {
     @Test
     fun testPerformanceWithDifferentBufferSizes() = runBlocking {
         val itemCount = 5000
-        
+
         // Test different buffer sizes
         val bufferSizes = listOf(10, 100, 500, 1000, 2000)
-        
+
         bufferSizes.forEach { bufferSize ->
             // Mock components
             val mockReader = object : WorkflowReader<Int> {
@@ -502,36 +506,38 @@ class WorkflowPerformanceTests {
                     }
                 }
             }
-            
+
             val mockProcessor = object : WorkflowProcessor<Int, Int> {
                 override fun process(input: Flow<Int>): Flow<Int> {
                     return input.map { it + 1 }
                 }
             }
-            
+
             val mockWriter = object : WorkflowWriter<Int> {
                 override suspend fun write(data: Flow<Int>) {
                     data.collect { /* No-op */ }
                 }
             }
-            
+
             // Create workflow engine with current buffer size
             val engine = ApexFlowWorkflowEngine(mockReader, mockProcessor, mockWriter)
-            engine.configure(WorkflowConfig(
-                readBufferSize = bufferSize,
-                processBufferSize = bufferSize
-            ))
-            
+            engine.configure(
+                WorkflowConfig(
+                    readBufferSize = bufferSize,
+                    processBufferSize = bufferSize
+                )
+            )
+
             // Measure execution time
             val startTime = System.currentTimeMillis()
-            
+
             // Start workflow
             engine.startAsync()
-            
+
             // Calculate execution time
             val endTime = System.currentTimeMillis()
             val executionTime = endTime - startTime
-            
+
             // Print performance metrics
             println("Buffer size $bufferSize - Processed $itemCount items in $executionTime ms")
         }
