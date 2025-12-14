@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
  */
 fun main() {
     val logger = LoggerFactory.getLogger("PdfToTiffConverter")
-    
+
     // Configure input and output paths
     val inputPath = "apexflow-example/build/spring-boot-reference.pdf"
     val outputPath = "apexflow-example/build/spring-boot-reference.tiff"

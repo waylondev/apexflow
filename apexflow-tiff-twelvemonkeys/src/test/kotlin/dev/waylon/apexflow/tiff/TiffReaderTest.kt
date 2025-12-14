@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.opentest4j.FileInfo
 
 /**
  * Test for TiffReader
