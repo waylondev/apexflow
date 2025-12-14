@@ -63,12 +63,26 @@ class TiffWriter(
             // Create write param with JPEG compression
             val writeParam = tiffConfig.writeParam ?: writer.defaultWriteParam
 
-            // Write images to TIFF
-            data.collect {
-                writer.write(
-                    null, IIOImage(it, null, null), writeParam
+            // Step 1: Prepare write sequence for multi-page TIFF
+            writer.prepareWriteSequence(null)
+
+            data.collect { image ->
+
+                // Create IIOImage from BufferedImage
+                val iioImage = IIOImage(image, null, null)
+
+                // Step 2: Write each image to the sequence immediately as it arrives
+                // This ensures each image is added as a new page in the TIFF file
+                writer.writeToSequence(
+                    iioImage,
+                    writeParam
                 )
+                // Always flush the image from memory immediately after writing
+                image.flush()
             }
+
+            // Step 3: End the write sequence to finalize the multi-page TIFF file
+            writer.endWriteSequence()
         }
     }
 }
