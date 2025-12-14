@@ -40,15 +40,6 @@ class TiffWriter(
     private val tiffConfig = TiffWriterConfig().apply(config)
 
     /**
-     * Configure TIFF writer using DSL
-     *
-     * @param config Configuration block
-     */
-    fun configure(config: TiffWriterConfig.() -> Unit) {
-        tiffConfig.apply(config)
-    }
-
-    /**
      * Write BufferedImage flow to TIFF OutputStream
      *
      * @param data Flow of BufferedImage to write

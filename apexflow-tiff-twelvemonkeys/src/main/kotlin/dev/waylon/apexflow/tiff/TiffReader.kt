@@ -45,24 +45,6 @@ class TiffReader(
     private val tiffConfig = TiffReaderConfig().apply(config)
 
     /**
-     * Configure TIFF reader using DSL
-     *
-     * @param config Configuration block
-     */
-    fun configure(config: TiffReaderConfig.() -> Unit) {
-        tiffConfig.apply(config)
-    }
-
-    /**
-     * Set custom ImageReadParam for advanced configuration
-     *
-     * @param readParam Custom ImageReadParam for advanced configuration
-     */
-    fun setReadParam(readParam: ImageReadParam) {
-        tiffConfig.readParam = readParam
-    }
-
-    /**
      * Read TIFF data from InputStream and return a Flow of BufferedImage
      *
      * For multi-page image files, returns each page as a separate BufferedImage

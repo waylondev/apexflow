@@ -40,7 +40,6 @@ fun main() {
                 configure {
                     readBufferSize = 500
                     processBufferSize = 500
-                    ioBufferSize = 4 * 8192
                     // readDispatcher, processDispatcher, writeDispatcher use default values
                 }
             }

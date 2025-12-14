@@ -23,7 +23,6 @@ class WorkflowConfigTest {
         assertEquals(Dispatchers.IO, config.readDispatcher)
         assertEquals(Dispatchers.Default, config.processDispatcher)
         assertEquals(Dispatchers.IO, config.writeDispatcher)
-        assertEquals(4 * 8192, config.ioBufferSize)
     }
 
     /**
@@ -39,8 +38,7 @@ class WorkflowConfigTest {
             errorHandler = customErrorHandler,
             readDispatcher = Dispatchers.Default,
             processDispatcher = Dispatchers.IO,
-            writeDispatcher = Dispatchers.Default,
-            ioBufferSize = 8 * 8192
+            writeDispatcher = Dispatchers.Default
         )
 
         // Verify custom values
@@ -49,7 +47,6 @@ class WorkflowConfigTest {
         assertEquals(Dispatchers.Default, config.readDispatcher)
         assertEquals(Dispatchers.IO, config.processDispatcher)
         assertEquals(Dispatchers.Default, config.writeDispatcher)
-        assertEquals(8 * 8192, config.ioBufferSize)
     }
 
     /**

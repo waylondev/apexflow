@@ -47,9 +47,5 @@ data class WorkflowConfig(
      */
     val writeDispatcher: CoroutineDispatcher = Dispatchers.IO,
 
-    /**
-     * IO buffer size (bytes) for reading files
-     * Default: 4 * 8192 = 32768 bytes
-     */
-    val ioBufferSize: Int = 4 * 8192
+
 )

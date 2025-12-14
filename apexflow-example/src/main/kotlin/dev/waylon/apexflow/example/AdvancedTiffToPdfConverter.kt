@@ -46,9 +46,8 @@ fun main() {
 
                 // Use configure block for clear configuration separation
                 configure {
-                    readBufferSize = 1000
-                    processBufferSize = 1000
-                    ioBufferSize = 8 * 8192
+                    readBufferSize = 200
+                    processBufferSize = 200
                     // readDispatcher, processDispatcher, writeDispatcher use default values
                 }
             }

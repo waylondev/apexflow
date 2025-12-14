@@ -21,7 +21,6 @@ class ApexFlowWorkflowBuilder<I, O> {
     var readDispatcher: CoroutineDispatcher = Dispatchers.IO
     var processDispatcher: CoroutineDispatcher = Dispatchers.Default
     var writeDispatcher: CoroutineDispatcher = Dispatchers.IO
-    var ioBufferSize: Int = 4 * 8192
 
     /**
      * Set the workflow reader
@@ -66,8 +65,7 @@ class ApexFlowWorkflowBuilder<I, O> {
             errorHandler = errorHandler,
             readDispatcher = readDispatcher,
             processDispatcher = processDispatcher,
-            writeDispatcher = writeDispatcher,
-            ioBufferSize = ioBufferSize
+            writeDispatcher = writeDispatcher
         )
 
         return ApexFlowWorkflowEngine(_reader, _processor, _writer).also {
