@@ -23,7 +23,7 @@ fun main() {
     
     // Configure input and output paths
     val inputPath = "apexflow-example/build/spring-boot-reference.pdf"
-    val outputPath = "apexflow-example/build/spring-boot-reference.tif"
+    val outputPath = "apexflow-example/build/spring-boot-reference.tiff"
 
     logger.info("🚀 Starting PDF to TIFF Converter with Comprehensive Performance Monitoring")
     logger.info("📄 Input: {}", inputPath)

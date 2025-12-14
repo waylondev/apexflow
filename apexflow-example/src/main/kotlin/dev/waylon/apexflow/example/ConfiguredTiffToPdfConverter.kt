@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 fun main() {
     val logger = LoggerFactory.getLogger("ConfiguredTiffToPdfConverter")
     // Get input and output paths
-    val inputPath = "apexflow-example/build/spring-boot-reference.tif"
+    val inputPath = "apexflow-example/build/spring-boot-reference.tiff"
     val outputPath = "apexflow-example/build/spring-boot-reference-output-configured.pdf"
 
     logger.info("🚀 Starting Configured TIFF to PDF Converter with Performance Monitoring")
