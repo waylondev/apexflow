@@ -1,6 +1,6 @@
-# ApexFlow - High Performance File Conversion Engine
+# ApexFlow - High Performance Workflow Engine
 
-ApexFlow is a modern, high-performance file conversion engine built on Kotlin coroutines and Flow API. It provides a flexible, extensible architecture for building efficient file conversion workflows.
+ApexFlow is a modern, high-performance workflow engine built on Kotlin coroutines and Flow API. It provides a flexible, extensible architecture for building efficient data processing workflows, not limited to file conversion but supporting any type of data flow.
 
 ## Quick Start
 
@@ -43,6 +43,42 @@ val engine = apexFlowWorkflow {
 runBlocking { engine.startAsync() }
 ```
 
+## Generic Data Processing
+
+ApexFlow is not limited to file conversion - it can handle any type of data flow. Here's an example of processing 100 million numbers:
+
+```kotlin
+// Create components for number processing workflow
+val reader = NumberReader(100_000_000)  // Generates 100 million numbers
+val processor = MultiplyByTwoProcessor() // Multiplies each number by 2
+val writer = NumberWriter()              // Prints results
+
+// Create and run workflow engine
+val engine = ApexFlowWorkflowEngine(reader, processor, writer)
+runBlocking { engine.startAsync() }
+```
+
+### Core Interfaces
+
+ApexFlow's generic design is based on three core interfaces:
+
+```kotlin
+// Reads data from any source (files, databases, generated streams, etc.)
+interface WorkflowReader<T> {
+    fun read(): Flow<T>
+}
+
+// Processes data (transforms, filters, maps, etc.)
+interface WorkflowProcessor<I, O> {
+    fun process(input: Flow<I>): Flow<O>
+}
+
+// Writes data to any destination (files, databases, console, etc.)
+interface WorkflowWriter<T> {
+    suspend fun write(data: Flow<T>)
+}
+```
+
 ## Module Structure
 
 ```
@@ -50,7 +86,7 @@ runBlocking { engine.startAsync() }
 ├── apexflow-pdf-pdfbox/             # PDF format support
 ├── apexflow-tiff-twelvemonkeys/     # TIFF format support
 ├── apexflow-dsl-extensions/         # Concise DSL extensions for common cases
-└── apexflow-example/                # Example usage (depends only on apexflow-dsl-extensions)
+└── apexflow-example/                # Example usage including number processing
 ```
 
 ## Dependency Structure
@@ -58,6 +94,8 @@ runBlocking { engine.startAsync() }
 - **apexflow-example** → depends on **apexflow-dsl-extensions**
 - **apexflow-dsl-extensions** → depends on all other modules
 - **apexflow-core** → no dependencies on format modules
+- **apexflow-pdf-pdfbox** → PDF-specific functionality
+- **apexflow-tiff-twelvemonkeys** → TIFF-specific functionality
 - **apexflow-pdf-pdfbox** → PDF format support
 - **apexflow-tiff-twelvemonkeys** → TIFF format support
 
