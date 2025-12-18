@@ -38,6 +38,10 @@ dependencies {
     implementation(libs.pdfbox)
     implementation(libs.twelvemonkeys.imageio.tiff)
 
+    // Logging dependencies
+    implementation(libs.slf4j.api)
+    implementation(libs.logback.classic)
+
     // Test dependencies
     testImplementation(libs.kotlin.test)
 }

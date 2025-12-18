@@ -7,6 +7,27 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
+ * Convenience extension function to execute ApexFlow
+ *
+ * Provides a more readable API for executing ApexFlow workflows.
+ * This is a simple wrapper around the transform() method.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val input = flowOf(1, 2, 3)
+ * val result = flow.execute(input).toList()
+ * ```
+ *
+ * @param input Input Flow to process
+ * @return Output Flow with processed data
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.execute(input: Flow<I>): Flow<O> {
+    return this.transform(input)
+}
+
+/**
  * Convenience extension function to execute ApexFlow with a single value
  *
  * Provides a more readable API for executing ApexFlow workflows with immediate values.
