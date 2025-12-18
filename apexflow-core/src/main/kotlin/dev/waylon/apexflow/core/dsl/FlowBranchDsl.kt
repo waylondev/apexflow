@@ -58,7 +58,7 @@ fun <I, O> Flow<I>.whenFlow(
 ): Flow<O> {
     val builder = WhenFlowBuilder<I, O>()
     builder.configure()
-
+    
     // Use flatMapLatest for better performance with rapidly changing inputs
     // This cancels transformations for old values when new values arrive
     return this.flatMapLatest { input ->
@@ -128,13 +128,17 @@ class WhenFlowBuilder<I, O> {
     fun case(value: I): CaseHandler<I, O> {
         return CaseHandler(this, { input: I -> input == value })
     }
-
+    
+    // Null handling is done through explicit predicate cases
+    // Example: case({ it == null }) then map { "Null value" }
+    // Example: case({ it != null }) then map { "Non-null: $it" }
+    
     /**
      * Define the else branch - executed if no other case matches
-     *
+     * 
      * This provides a fallback transformation for all inputs that don't match any case.
      * If no elseCase is defined and no cases match, an IllegalStateException will be thrown.
-     *
+     * 
      * @param transformation Flow transformation to apply as the default case
      */
     fun elseCase(transformation: (Flow<I>) -> Flow<O>) {
@@ -201,9 +205,9 @@ class CaseHandler<I, O>(
 ) {
     /**
      * Infix function to define the transformation for a case
-     *
+     * 
      * Usage: case({ it > 10 }) then map { "Large: $it" }
-     *
+     * 
      * @param transformation Flow transformation to apply if the condition is met
      */
     infix fun then(transformation: (Flow<I>) -> Flow<O>) {
@@ -225,9 +229,9 @@ class ElseHandler<I, O>(
 ) {
     /**
      * Infix function to define the transformation for the else case
-     *
+     * 
      * Usage: elseCase then map { "Small: $it" }
-     *
+     * 
      * @param transformation Flow transformation to apply as the default case
      */
     infix fun then(transformation: (Flow<I>) -> Flow<O>) {
