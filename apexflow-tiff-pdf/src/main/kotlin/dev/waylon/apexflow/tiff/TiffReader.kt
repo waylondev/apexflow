@@ -27,7 +27,7 @@ class TiffReaderConfig {
  */
 class TiffReader(
     private val inputStream: InputStream,
-    private val config: TiffReaderConfig.() -> Unit = {}
+    config: TiffReaderConfig.() -> Unit = {}
 ) {
 
     // Logger instance

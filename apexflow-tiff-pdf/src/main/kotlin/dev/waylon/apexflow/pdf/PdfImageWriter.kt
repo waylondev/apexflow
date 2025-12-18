@@ -55,7 +55,7 @@ class PdfImageWriterConfig {
  */
 class PdfImageWriter(
     private val outputStream: OutputStream,
-    private val config: PdfImageWriterConfig.() -> Unit = {}
+    config: PdfImageWriterConfig.() -> Unit = {}
 ) {
 
     private val logger = LoggerFactory.getLogger(PdfImageWriter::class.java)
@@ -72,7 +72,6 @@ class PdfImageWriter(
      * Each BufferedImage is written as a separate page in the PDF document
      *
      * @param data Flow of BufferedImage to write
-     * @throws ConversionWriteException if there's an error writing the PDF data
      */
     suspend fun write(data: Flow<BufferedImage>) {
         logger.info("Starting PDF writing process with JPEG quality: {}", pdfConfig.jpegQuality)

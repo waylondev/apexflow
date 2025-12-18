@@ -56,7 +56,7 @@ class PdfImageReaderConfig {
  */
 class PdfImageReader(
     private val inputFile: File,
-    private val config: PdfImageReaderConfig.() -> Unit = {}
+    config: PdfImageReaderConfig.() -> Unit = {}
 ) {
 
     private val logger = LoggerFactory.getLogger(PdfImageReader::class.java)

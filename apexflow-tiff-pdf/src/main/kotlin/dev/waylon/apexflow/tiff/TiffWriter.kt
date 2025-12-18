@@ -63,7 +63,7 @@ class TiffWriterConfig {
  */
 class TiffWriter(
     private val outputFile: File,
-    private val config: TiffWriterConfig.() -> Unit = {}
+    config: TiffWriterConfig.() -> Unit = {}
 ) {
 
     private val logger = LoggerFactory.getLogger(TiffWriter::class.java)
