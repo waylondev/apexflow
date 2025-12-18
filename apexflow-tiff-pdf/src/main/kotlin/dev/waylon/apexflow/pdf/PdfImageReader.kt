@@ -1,14 +1,12 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.conversion.ConversionException
-import dev.waylon.apexflow.conversion.ConversionReadException
-import org.slf4j.LoggerFactory
 import java.awt.image.BufferedImage
 import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.rendering.PDFRenderer
+import org.slf4j.LoggerFactory
 
 /**
  * PDF image reader configuration
@@ -19,31 +17,33 @@ class PdfImageReaderConfig {
      * Higher values result in better quality but larger file sizes
      */
     var dpi: Float = 150f
-    
+
     /**
      * Page numbers to render (0-based index)
      * If empty, all pages will be rendered
      */
     var pageNumbers: List<Int> = emptyList()
-    
+
     /**
      * Whether to skip blank pages during rendering
      */
     var skipBlankPages: Boolean = false
-    
+
     /**
      * Image type to use for rendering
      */
     var imageType: ImageType = ImageType.RGB
-    
+
     /**
      * Image type enumeration for PDF rendering
      */
     enum class ImageType {
         /** RGB color space with 8 bits per component */
         RGB,
+
         /** Grayscale color space with 8 bits per component */
         GRAY,
+
         /** Binary (black and white) color space */
         BINARY
     }
@@ -73,48 +73,40 @@ class PdfImageReader(
      * Each page is rendered as a separate BufferedImage with the configured DPI
      *
      * @return Flow<BufferedImage> Flow of rendered pages
-     * @throws ConversionReadException if there's an error reading the PDF data
      */
     fun read(): Flow<BufferedImage> = flow {
-        try {
-            logger.info("Starting PDF reading process with DPI: {}", pdfConfig.dpi)
-            
-            // Read InputStream to ByteArray first (PDFBox doesn't accept InputStream directly)
-            val pdfBytes = inputStream.readAllBytes()
-            Loader.loadPDF(pdfBytes).use { document ->
-                logger.debug("Loaded PDF document successfully")
+        logger.info("Starting PDF reading process with DPI: {}", pdfConfig.dpi)
 
-                val renderer = PDFRenderer(document)
-                val pageCount = document.pages.count
-                logger.info("Found {} pages in PDF document", pageCount)
+        // Read InputStream to ByteArray first (PDFBox doesn't accept InputStream directly)
+        val pdfBytes = inputStream.readAllBytes()
+        Loader.loadPDF(pdfBytes).use { document ->
+            logger.debug("Loaded PDF document successfully")
 
-                val pagesToRender = if (pdfConfig.pageNumbers.isEmpty()) {
-                    0 until pageCount
-                } else {
-                    pdfConfig.pageNumbers.filter { it in 0 until pageCount }
-                }
+            val renderer = PDFRenderer(document)
+            val pageCount = document.pages.count
+            logger.info("Found {} pages in PDF document", pageCount)
 
-                pagesToRender.forEach { pageIndex ->
-                    logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
-                    // Render the current page with the configured DPI
-                    val renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
-
-                    // Emit the final image
-                    emit(renderedImage)
-
-                    // Flush the image from memory after emission
-                    renderedImage.flush()
-                    logger.debug("Successfully rendered PDF page {}/{}", pageIndex + 1, pageCount)
-                }
+            val pagesToRender = if (pdfConfig.pageNumbers.isEmpty()) {
+                0 until pageCount
+            } else {
+                pdfConfig.pageNumbers.filter { it in 0 until pageCount }
             }
-            
-            logger.info("Completed PDF reading process successfully")
-        } catch (e: Exception) {
-            logger.error("Failed to read PDF data: {}", e.message, e)
-            when (e) {
-                is ConversionException -> throw e
-                else -> throw ConversionReadException("Failed to read PDF data", e)
+
+            pagesToRender.forEach { pageIndex ->
+                logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
+                // Render the current page with the configured DPI
+                val renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
+
+                // Emit the final image
+                emit(renderedImage)
+
+                // Flush the image from memory after emission
+                renderedImage.flush()
+                logger.debug("Successfully rendered PDF page {}/{}", pageIndex + 1, pageCount)
             }
         }
+
+        logger.info("Completed PDF reading process successfully")
+
     }
 }

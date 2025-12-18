@@ -20,6 +20,22 @@ kotlin {
     jvmToolchain(21)
 }
 
+// Configure Kotlin compiler options for context parameters
+val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.addAll(listOf("-Xcontext-parameters", "-Xskip-prerelease-check"))
+    apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+    languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+}
+
+// Also configure test Kotlin compiler options
+val compileTestKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileTestKotlin.compilerOptions {
+    freeCompilerArgs.addAll(listOf("-Xskip-prerelease-check"))
+    apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+    languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+}
+
 
 repositories {
     mavenCentral()

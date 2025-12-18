@@ -1,7 +1,5 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.conversion.ConversionException
-import dev.waylon.apexflow.conversion.ConversionWriteException
 import java.awt.image.BufferedImage
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
@@ -77,48 +75,41 @@ class PdfImageWriter(
      * @throws ConversionWriteException if there's an error writing the PDF data
      */
     suspend fun write(data: Flow<BufferedImage>) {
-        try {
-            logger.info("Starting PDF writing process with JPEG quality: {}", pdfConfig.jpegQuality)
+        logger.info("Starting PDF writing process with JPEG quality: {}", pdfConfig.jpegQuality)
 
-            val quality = pdfConfig.jpegQuality / 100f
-            PDDocument().use { document ->
-                logger.debug("Created new PDF document")
+        val quality = pdfConfig.jpegQuality / 100f
+        PDDocument().use { document ->
+            logger.debug("Created new PDF document")
 
-                var pageIndex = 0
-                data.collect { image ->
-                    pageIndex++
-                    logger.debug("Adding page {} to PDF document (size: {}x{})", pageIndex, image.width, image.height)
+            var pageIndex = 0
+            data.collect { image ->
+                pageIndex++
+                logger.debug("Adding page {} to PDF document (size: {}x{})", pageIndex, image.width, image.height)
 
-                    // Create page with the same size as the image
-                    val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
-                    document.addPage(page)
+                // Create page with the same size as the image
+                val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
+                document.addPage(page)
 
-                    // Create content stream for writing image
-                    PDPageContentStream(document, page).use { contentStream ->
-                        // Create PDImageXObject from BufferedImage with JPEG compression
-                        val pdImage = JPEGFactory.createFromImage(document, image, quality)
-                        // Draw image to fit the entire page
-                        contentStream.drawImage(pdImage, 0f, 0f)
-                    }
-
-                    logger.debug("Successfully added page {} to PDF document", pageIndex)
+                // Create content stream for writing image
+                PDPageContentStream(document, page).use { contentStream ->
+                    // Create PDImageXObject from BufferedImage with JPEG compression
+                    val pdImage = JPEGFactory.createFromImage(document, image, quality)
+                    // Draw image to fit the entire page
+                    contentStream.drawImage(pdImage, 0f, 0f)
                 }
 
-                logger.info("Adding {} pages to PDF document", pageIndex)
-                // Save the document to the output stream
-                logger.debug("Saving PDF document to output stream")
-                document.save(outputStream)
-                outputStream.flush()
-                logger.debug("PDF document saved successfully")
+                logger.debug("Successfully added page {} to PDF document", pageIndex)
             }
 
-            logger.info("Completed PDF writing process successfully")
-        } catch (e: Exception) {
-            logger.error("Failed to write PDF data: {}", e.message, e)
-            when (e) {
-                is ConversionException -> throw e
-                else -> throw ConversionWriteException("Failed to write PDF data", e)
-            }
+            logger.info("Adding {} pages to PDF document", pageIndex)
+            // Save the document to the output stream
+            logger.debug("Saving PDF document to output stream")
+            document.save(outputStream)
+            outputStream.flush()
+            logger.debug("PDF document saved successfully")
         }
+
+        logger.info("Completed PDF writing process successfully")
+
     }
 }
