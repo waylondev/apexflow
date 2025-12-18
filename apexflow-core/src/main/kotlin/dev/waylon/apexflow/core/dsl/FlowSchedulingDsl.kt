@@ -96,7 +96,7 @@ inline fun <I, O> Flow<I>.transformOn(
  */
 @ApexFlowDsl
 inline fun <I, O> Flow<I>.transformOnIO(crossinline block: suspend (I) -> O): Flow<O> {
-    return transformOn(Dispatchers.IO, block)
+    return transformOn(Dispatchers.IO) { block(it) }
 }
 
 /**

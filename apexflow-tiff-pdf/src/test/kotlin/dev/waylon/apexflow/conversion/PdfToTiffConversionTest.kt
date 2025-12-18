@@ -2,14 +2,12 @@ package dev.waylon.apexflow.conversion
 
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
-import dev.waylon.apexflow.core.dsl.transformOnDefault
 import dev.waylon.apexflow.core.dsl.transformOnIO
 import dev.waylon.apexflow.core.dsl.withLogging
 import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.tiff.TiffWriter
 import java.io.File
-import java.nio.file.Files
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -56,28 +54,30 @@ class PdfToTiffConversionTest {
             // Modern approach: Use proper resource management and cleaner flow structure
             transformOnIO { (pdfFile, tiffFile) ->
                 // Open and manage streams in this scope, using use blocks for automatic cleanup
-                Files.newInputStream(pdfFile.toPath()).use { inputStream ->
-                    Files.newOutputStream(tiffFile.toPath()).use { outputStream ->
-                        logger.debug("Processing PDF: {} to TIFF: {}", pdfFile.name, tiffFile.name)
+                logger.debug("Processing PDF: {}", pdfFile.name)
 
-                        // Step 1: Read PDF on IO dispatcher (reader handles its own coroutines)
-                        logger.debug("Step 1: Reading PDF on IO dispatcher")
-                        val imagesFlow = PdfImageReader(inputStream) {
-                            dpi = 100f
-                        }.read()
+                // Step 1: Read PDF on IO dispatcher (reader handles its own coroutines)
+                logger.debug("Step 1: Reading PDF on IO dispatcher")
+                val imagesFlow = PdfImageReader(pdfFile) {
+                    dpi = 100f
+                }.read()
 
-                        // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
-                        logger.debug("Step 2: Writing TIFF on IO dispatcher")
-                        TiffWriter(outputStream) {
-                            compressionType = "JPEG"
-                            compressionQuality = 90f
-                        }.write(imagesFlow)
-                    }
-                }
+                // Return the pair of tiffFile and imagesFlow
+                Pair(tiffFile, imagesFlow)
+
             }
+                .transformOnIO { (tiffFile, imagesFlow) ->
+                    logger.debug("Processing TIFF: {}", tiffFile.name)
+                    // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
+                    logger.debug("Step 2: Writing TIFF on IO dispatcher")
+                    TiffWriter(tiffFile) {
+                        compressionType = "JPEG"
+                        compressionQuality = 90f
+                    }.write(imagesFlow)
+                }
         }
-        .withTiming("PDF to TIFF Conversion time")
-        .withLogging("PDF to TIFF Conversion log")
+            .withTiming("PDF to TIFF Conversion time")
+            .withLogging("PDF to TIFF Conversion log")
 
         // Execute the flow: pass the input file pair to the flow
         // Use execute method, which is a convenient wrapper around the transform method

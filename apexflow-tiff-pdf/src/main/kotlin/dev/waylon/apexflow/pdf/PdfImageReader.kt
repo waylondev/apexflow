@@ -1,7 +1,7 @@
 package dev.waylon.apexflow.pdf
 
 import java.awt.image.BufferedImage
-import java.io.InputStream
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
@@ -55,7 +55,7 @@ class PdfImageReaderConfig {
  * Only supports reading from InputStream
  */
 class PdfImageReader(
-    private val inputStream: InputStream,
+    private val inputFile: File,
     private val config: PdfImageReaderConfig.() -> Unit = {}
 ) {
 
@@ -78,8 +78,7 @@ class PdfImageReader(
         logger.info("Starting PDF reading process with DPI: {}", pdfConfig.dpi)
 
         // Read InputStream to ByteArray first (PDFBox doesn't accept InputStream directly)
-        val pdfBytes = inputStream.readAllBytes()
-        Loader.loadPDF(pdfBytes).use { document ->
+        Loader.loadPDF(inputFile).use { document ->
             logger.debug("Loaded PDF document successfully")
 
             val renderer = PDFRenderer(document)

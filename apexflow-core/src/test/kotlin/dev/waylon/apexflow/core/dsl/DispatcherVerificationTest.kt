@@ -18,15 +18,15 @@ class DispatcherVerificationTest {
             println("Flow emitting on: ${Thread.currentThread().name}")
             emit(1)
         }
-        .transformOn(Dispatchers.IO) { 
+        .transformOnIO {
             println("TransformOn IO running on: ${Thread.currentThread().name}")
             it * 2
         }
-        .transformOn(Dispatchers.Default) { 
+        .transformOnDefault {
             println("TransformOn Default running on: ${Thread.currentThread().name}")
             it + 1
         }
-        .transformOn(Dispatchers.IO) { 
+        .transformOnIO {
             println("TransformOn IO again running on: ${Thread.currentThread().name}")
             "Result: $it"
         }

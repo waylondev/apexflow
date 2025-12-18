@@ -1,7 +1,7 @@
 package dev.waylon.apexflow.tiff
 
 import java.awt.image.BufferedImage
-import java.io.OutputStream
+import java.io.File
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
@@ -62,7 +62,7 @@ class TiffWriterConfig {
  * Writes BufferedImage to TIFF files
  */
 class TiffWriter(
-    private val outputStream: OutputStream,
+    private val outputFile: File,
     private val config: TiffWriterConfig.() -> Unit = {}
 ) {
 
@@ -80,7 +80,7 @@ class TiffWriter(
         logger.info("Starting TIFF writing process")
 
         // Create ImageOutputStream from the provided OutputStream
-        ImageIO.createImageOutputStream(outputStream).use { imageOutputStream ->
+        ImageIO.createImageOutputStream(outputFile).use { imageOutputStream ->
             // Get TIFF ImageWriter
             val writerIterator = ImageIO.getImageWritersByFormatName("tiff")
 
