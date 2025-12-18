@@ -15,15 +15,15 @@ import kotlinx.coroutines.flow.flowOf
 
 /**
  * DSL for branch handling in ApexFlow, inspired by Kotlin's `when` expression
- * 
+ *
  * Provides type-safe, readable branch logic while maintaining the "Everything is Flow" principle.
  * This DSL allows defining conditional branches with different transformations, similar to a switch-case statement
  * but with Flow transformations as outcomes.
- * 
+ *
  * The whenFlow DSL supports two syntax styles:
  * 1. Traditional lambda syntax for explicit transformations
  * 2. Infix syntax (recommended) for more readable, natural language-like code
- * 
+ *
  * **Key Features:**
  * - **Dual Syntax Support**: Both traditional and infix syntax available
  * - **Type Safety**: Comprehensive compile-time checks
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.flowOf
  * - **Value Matching**: Match exact values with concise syntax
  * - **Predicate Matching**: Use complex conditions with lambda expressions
  * - **Fallback Support**: Ensure all cases are covered with elseCase
- * 
+ *
  * Usage Example with traditional syntax:
  * ```kotlin
  * val workflow = apexFlow<Int, String> {
@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.flowOf
  *     }
  * }
  * ```
- * 
+ *
  * Usage Example with infix syntax (recommended for better readability):
  * ```kotlin
  * val workflow = apexFlow<Int, String> {
@@ -62,18 +62,18 @@ import kotlinx.coroutines.flow.flowOf
  *     }
  * }
  * ```
- * 
+ *
  * **Type Safety Features:**
  * - Compile-time checks for all branch conditions
  * - Explicit type annotations for lambda parameters
  * - Clear error messages for type mismatches
  * - Null safety through explicit predicate cases
- * 
+ *
  * **Extension Points:**
  * - Can be extended with custom case types
  * - Compatible with all Flow transformations
  * - Works with any input/output type combination
- * 
+ *
  * @param configure Lambda to configure the branch cases
  * @return Flow with branch logic applied
  */
@@ -84,7 +84,7 @@ fun <I, O> Flow<I>.whenFlow(
 ): Flow<O> {
     val builder = WhenFlowBuilder<I, O>()
     builder.configure()
-    
+
     // Use flatMapLatest for better performance with rapidly changing inputs
     // This cancels transformations for old values when new values arrive
     return this.flatMapLatest { input ->
@@ -109,62 +109,62 @@ class WhenFlowBuilder<I, O> {
 
     /**
      * Define a branch case with a condition and transformation
-     * 
+     *
      * The first matching case will be executed. Cases are evaluated in the order they are defined.
-     * 
+     *
      * @param condition Predicate function that determines if this case matches
      * @param transformation Flow transformation to apply if the condition is met
      */
     fun case(condition: (I) -> Boolean, transformation: (Flow<I>) -> Flow<O>) {
         cases.add(condition to transformation)
     }
-    
+
     /**
      * Define a branch case with a specific value match and transformation
-     * 
+     *
      * This allows for concise syntax when matching exact values: case(10, { map { "Exactly 10" } })
-     * 
+     *
      * @param value Exact value to match
      * @param transformation Flow transformation to apply if the value matches
      */
     fun case(value: I, transformation: (Flow<I>) -> Flow<O>) {
         cases.add({ input: I -> input == value } to transformation)
     }
-    
+
     /**
      * Define a branch case with a condition, returning a CaseHandler for infix operations
-     * 
+     *
      * This allows for more readable syntax: case({ it > 10 }) then map { "Large: $it" }
-     * 
+     *
      * @param condition Predicate function that determines if this case matches
      * @return CaseHandler for infix operations
      */
     fun case(condition: (I) -> Boolean): CaseHandler<I, O> {
         return CaseHandler(this, condition)
     }
-    
+
     /**
      * Define a branch case with a specific value, returning a CaseHandler for infix operations
-     * 
+     *
      * This allows for concise syntax: case(10) then map { "Exactly 10" }
-     * 
+     *
      * @param value Exact value to match
      * @return CaseHandler for infix operations
      */
     fun case(value: I): CaseHandler<I, O> {
         return CaseHandler(this, { input: I -> input == value })
     }
-    
+
     // Null handling is done through explicit predicate cases
     // Example: case({ it == null }) then map { "Null value" }
     // Example: case({ it != null }) then map { "Non-null: $it" }
-    
+
     /**
      * Define the else branch - executed if no other case matches
-     * 
+     *
      * This provides a fallback transformation for all inputs that don't match any case.
      * If no elseCase is defined and no cases match, an IllegalStateException will be thrown.
-     * 
+     *
      * @param transformation Flow transformation to apply as the default case
      */
     fun elseCase(transformation: (Flow<I>) -> Flow<O>) {
@@ -231,9 +231,9 @@ class CaseHandler<I, O>(
 ) {
     /**
      * Infix function to define the transformation for a case
-     * 
+     *
      * Usage: case({ it > 10 }) then map { "Large: $it" }
-     * 
+     *
      * @param transformation Flow transformation to apply if the condition is met
      */
     infix fun then(transformation: (Flow<I>) -> Flow<O>) {
@@ -255,9 +255,9 @@ class ElseHandler<I, O>(
 ) {
     /**
      * Infix function to define the transformation for the else case
-     * 
+     *
      * Usage: elseCase then map { "Small: $it" }
-     * 
+     *
      * @param transformation Flow transformation to apply as the default case
      */
     infix fun then(transformation: (Flow<I>) -> Flow<O>) {

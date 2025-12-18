@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for ApexFlow plugin functionality
- * 
+ *
  * This test covers:
  * - Plugin system
  * - Plugin wrapping
@@ -82,7 +82,7 @@ class ApexFlowPluginTest {
         val enhancedFlow = workflow
             .withPlugin(PrefixPlugin("Prefix: "))
             .withPlugin(SuffixPlugin(" :Suffix"))
-        
+
         val result = enhancedFlow.transform(flowOf(42)).toList()
         assertEquals(listOf("Prefix: 42 :Suffix"), result)
     }

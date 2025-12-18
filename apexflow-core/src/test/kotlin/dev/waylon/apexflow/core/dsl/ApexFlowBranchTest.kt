@@ -1,7 +1,6 @@
 package dev.waylon.apexflow.core.dsl
 
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for ApexFlow branch functionality
- * 
+ *
  * This test covers:
  * - Branch logic with whenFlow
  * - Value matching
@@ -36,7 +35,7 @@ class ApexFlowBranchTest {
 
         val testValues = listOf(10, 5, 0, 7)
         val expected = listOf("Ten: 10", "Five: 5", "Zero: 0", "Other: 7")
-        
+
         val result = workflow.transform(testValues.asFlow()).toList()
         assertEquals(expected, result)
     }
@@ -57,7 +56,7 @@ class ApexFlowBranchTest {
 
         val testValues = listOf(150, 75, 20, 5)
         val expected = listOf("Large: 150", "Medium: 75", "Small: 20", "Tiny: 5")
-        
+
         val result = workflow.transform(testValues.asFlow()).toList()
         assertEquals(expected, result)
     }
@@ -78,7 +77,7 @@ class ApexFlowBranchTest {
 
         val testValues = listOf(42, 10, 7)
         val expected = listOf("Answer: 42", "Even: 10", "Odd: 7")
-        
+
         val result = workflow.transform(testValues.asFlow()).toList()
         assertEquals(expected, result)
     }
@@ -104,7 +103,7 @@ class ApexFlowBranchTest {
 
         val testValues = listOf(15, 7, 3)
         val expected = listOf("Large: 15", "Medium: 7", "Small: 3")
-        
+
         val result = workflow.transform(testValues.asFlow()).toList()
         assertEquals(expected, result)
     }
@@ -125,7 +124,7 @@ class ApexFlowBranchTest {
 
         val testValues = listOf(null, 0, 5, -5)
         val expected = listOf("Null: null", "Zero: 0", "Positive: 5", "Negative: -5")
-        
+
         val result = workflow.transform(testValues.asFlow()).toList()
         assertEquals(expected, result)
     }
@@ -157,7 +156,7 @@ class ApexFlowBranchTest {
             UserDto(50, "Alice", "VIP"),
             UserDto(20, "Bob", "Standard")
         )
-        
+
         val result = workflow.transform(users.asFlow()).toList()
         assertEquals(expected, result)
     }

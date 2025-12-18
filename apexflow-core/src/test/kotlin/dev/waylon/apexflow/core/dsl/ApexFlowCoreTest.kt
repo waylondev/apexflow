@@ -1,6 +1,5 @@
 package dev.waylon.apexflow.core.dsl
 
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for core ApexFlow functionality
- * 
+ *
  * This test covers:
  * - Core DSL functionality
  * - Execution methods

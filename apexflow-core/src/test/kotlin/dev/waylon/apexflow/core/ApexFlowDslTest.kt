@@ -1,7 +1,11 @@
 package dev.waylon.apexflow.core
 
-import dev.waylon.apexflow.core.dsl.*
-import kotlinx.coroutines.flow.*
+import dev.waylon.apexflow.core.dsl.apexFlow
+import dev.waylon.apexflow.core.dsl.execute
+import dev.waylon.apexflow.core.dsl.whenFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -100,7 +104,7 @@ class ApexFlowDslTest {
                 case({ input -> input > 10 }) then { it.map { "Greater than 10: $it" } }
             }
 
-        assertThrows(IllegalStateException::class.java) { 
+        assertThrows(IllegalStateException::class.java) {
             runBlocking { flow.toList() }
         }
     }

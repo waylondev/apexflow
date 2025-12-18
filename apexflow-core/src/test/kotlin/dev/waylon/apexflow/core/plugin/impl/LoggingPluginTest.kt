@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for LoggingPlugin functionality
- * 
+ *
  * This test covers:
  * - Basic logging plugin usage
  * - withLogging convenience function
@@ -31,15 +31,15 @@ class LoggingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "Processed: $it" }
         }
-        
+
         val loggingWorkflow = workflow.withPlugin(LoggingPlugin())
         val result = loggingWorkflow.transform(flowOf(42)).toList()
-        
+
         assertEquals(listOf("Processed: 42"), result)
         // Note: We're mainly testing that the plugin doesn't break functionality
         // Actual logging can be verified through integration tests
     }
-    
+
     /**
      * Test withLogging convenience function
      */
@@ -48,13 +48,13 @@ class LoggingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "Processed: $it" }
         }
-        
+
         val loggingWorkflow = workflow.withLogging()
         val result = loggingWorkflow.transform(flowOf(42)).toList()
-        
+
         assertEquals(listOf("Processed: 42"), result)
     }
-    
+
     /**
      * Test logging plugin with custom logger name
      */
@@ -63,13 +63,13 @@ class LoggingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "Processed: $it" }
         }
-        
+
         val loggingWorkflow = workflow.withPlugin(LoggingPlugin("custom.logger"))
         val result = loggingWorkflow.transform(flowOf(42)).toList()
-        
+
         assertEquals(listOf("Processed: 42"), result)
     }
-    
+
     /**
      * Test logging plugin with multiple values
      */
@@ -78,13 +78,13 @@ class LoggingPluginTest {
         val workflow = apexFlow<Int, Int> {
             map { it * 2 }
         }
-        
+
         val loggingWorkflow = workflow.withLogging()
         val result = loggingWorkflow.transform(flowOf(1, 2, 3, 4, 5)).toList()
-        
+
         assertEquals(listOf(2, 4, 6, 8, 10), result)
     }
-    
+
     /**
      * Test logging plugin composition with other plugins
      */
@@ -101,15 +101,15 @@ class LoggingPluginTest {
                 }
             }
         }
-        
+
         val workflow = apexFlow<Int, String> {
             map { "$it" }
         }
-        
+
         val composedWorkflow = workflow
             .withLogging()
             .withPlugin(PrefixPlugin("Prefixed: "))
-        
+
         val result = composedWorkflow.transform(flowOf(42)).toList()
         assertEquals(listOf("Prefixed: 42"), result)
     }

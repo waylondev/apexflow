@@ -2,7 +2,6 @@ package dev.waylon.apexflow.core.dsl
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for ApexFlow scheduling functionality
- * 
+ *
  * This test covers:
  * - Scheduler management
  * - TransformOn with explicit dispatcher
