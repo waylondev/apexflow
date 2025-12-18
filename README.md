@@ -1,151 +1,36 @@
-# ApexFlow - High Performance Workflow Engine
+总体架构：Clean & SOLID启发的四层架构
+本框架采用一个内核精炼、功能分层、依赖清晰的架构，其核心设计思想是 “稳定内核，可拔插增强”。整个架构围绕一个纯粹的核心引擎展开，通过标准的接口与各种“增强器”连接，以实现编译期分析、运行时监控等高级功能，而所有决策权最终都交还给开发者。
 
-ApexFlow is a modern, high-performance workflow engine built on Kotlin coroutines and Flow API. It provides a **flexible, extensible architecture** for building efficient data processing workflows, supporting **any type of data flow** beyond file conversion.
+graph TD
+    subgraph A [核心引擎层 Core Engine]
+        A1[DSL & 流程定义]
+        A2[类型安全的流程执行器]
+        A3[统一的执行模型]
+    end
 
-## Quick Start
+    subgraph B [静态增强层 (可选)]
+        B1[注解处理器]
+        B2[KSP 静态分析器]
+        B3[生成：洞察报告/流图文档]
+    end
 
-### Simplified TIFF to PDF Conversion
-```kotlin
-import dev.waylon.apexflow.dsl.tiffToPdf
+    subgraph C [运行时增强层 (可选)]
+        C1[拦截器接口]
+        C2[指标收集插件]
+        C3[追踪与诊断插件]
+    end
 
-// Simplest usage: just input and output paths
-val engine = tiffToPdf("input.tif", "output.pdf")
-runBlocking { engine.startAsync() }
-```
+    subgraph D [外围集成层]
+        D1[Ktor/Spring Boot 适配器]
+        D2[Web 仪表盘]
+        D3[IDE 插件]
+    end
 
-### Simplified PDF to TIFF Conversion
-```kotlin
-import dev.waylon.apexflow.dsl.pdfToTiff
-
-// Simplest usage: just input and output paths
-val engine = pdfToTiff("input.pdf", "output.tif")
-runBlocking { engine.startAsync() }
-```
-
-### Traditional DSL Usage
-```kotlin
-// No extra imports needed for core DSL
-val engine = apexFlowWorkflow {
-    reader(TiffReader(inputPath = "input.tif"))
-    processor(WorkflowProcessor.identity())
-    writer(PdfImageWriter("output.pdf"))
-    configure {
-        readBufferSize = 200
-        processBufferSize = 200
-    }
-}
-
-runBlocking { engine.startAsync() }
-```
-
-## Core Architecture
-
-### Key Design Principles
-- **High Performance**: Based on Kotlin coroutines and Flow API, enabling true parallel processing
-- **Extensible**: Modular design with support for custom components
-- **SOLID**: Strict adherence to SOLID principles for clear, maintainable code
-- **Generic**: Supports any data type, not limited to file conversion
-
-### Core Interfaces
-The core advantage of ApexFlow lies in its **generic interface design**, supporting any data type:
-
-```kotlin
-// Read data from any source (file, database, API, etc.)
-interface WorkflowReader<T> {
-    fun read(): Flow<T>
-}
-
-// Process any data transformation (mapping, filtering, aggregation, etc.)
-interface WorkflowProcessor<I, O> {
-    fun process(input: Flow<I>): Flow<O>
-}
-
-// Write to any destination (file, database, console, etc.)
-interface WorkflowWriter<T> {
-    suspend fun write(data: Flow<T>)
-}
-```
-
-### Architecture Advantages
-
-| **Feature** | **ApexFlow (Flow-based)** | **Traditional Methods** | **Performance Gain** |
-|-------------|---------------------------|-------------------------|----------------------|
-| **Processing Model** | Reactive stream, continuous chunk processing | Sequential/in-memory processing | **3-5x faster** |
-| **Concurrency** | Lightweight coroutines, supporting thousands of concurrent tasks | Thread pool limited with high context switching cost | **1000x higher concurrency** |
-| **Memory Management** | Dynamic backpressure, automatic adjustment | Fixed buffer, prone to OOM | **90% reduced memory usage** |
-| **Extensibility** | Modular, plugin-based components | Hard-coded, requires core code modification | **Faster innovation speed** |
-| **Resource Utilization** | CPU and IO always busy | Idle time exists | **5x higher throughput** |
-
-## Key Features
-
-### High Performance
-- **Asynchronous Processing**: Non-blocking execution based on coroutines and Flow API
-- **Parallel Pipeline**: Three-stage parallel processing with optimized dispatcher allocation
-- **Built-in Backpressure**: Automatic backpressure handling for optimized memory usage
-- **Low Overhead Design**: Focus on critical paths with minimal overhead
-
-### Developer Friendly
-- **Fluent DSL**: Type-safe workflow construction with intuitive syntax
-- **Unified Interface**: Consistent API for all conversion types
-- **Comprehensive Error Handling**: Built-in exception management
-- **Immutable Configuration**: Thread-safe workflow configuration
-
-### Extensible Architecture
-- **SOLID Principles**: Clean, maintainable code design
-- **Plug-and-Play Components**: Easy to extend with custom readers, processors, and writers
-- **Format Support**: Built-in PDF and TIFF support, extensible to other formats
-
-## Module Structure
-```
-├── apexflow-core/                    # Core workflow engine (format-agnostic)
-├── apexflow-pdf-pdfbox/             # PDF format support
-├── apexflow-tiff-twelvemonkeys/     # TIFF format support
-├── apexflow-dsl-extensions/         # Simplified DSL extensions
-└── apexflow-example/                # Example code
-```
-
-## Technology Stack
-- **Kotlin**: Modern programming language
-- **Kotlin Coroutines**: Asynchronous programming
-- **Kotlin Flow**: Reactive stream processing
-- **PDFBox**: PDF format support
-- **TwelveMonkeys**: TIFF format support
-- **SLF4J**: Logging abstraction
-
-## Build and Run
-
-### Windows
-```bash
-# Build all modules
-gradlew.bat build
-
-# Build specific module
-gradlew.bat :apexflow-core:build
-```
-
-### Linux/Mac
-```bash
-# Build all modules
-./gradlew build
-
-# Build specific module
-./gradlew :apexflow-core:build
-```
-
-## Performance Benefits
-- **Handle Large Files**: Support for 100GB+ files with no memory limits
-- **High Throughput**: Concurrent processing of hundreds of files
-- **Stable Performance**: Predictable processing time for any file size
-- **Resource Efficient**: Maximize CPU and IO utilization
-
-## Conclusion
-
-ApexFlow is a **high-performance workflow engine** designed for modern Kotlin applications, offering:
-
-- **Simple API**: Intuitive DSL for easy workflow construction
-- **High Performance**: Asynchronous parallel processing with built-in backpressure
-- **Robust Design**: Reliable error handling and edge case management
-- **Extensible Architecture**: Easy to add new formats and custom processing
-- **Modern Technology**: Based on Kotlin coroutines and Flow API
-
-ApexFlow simplifies data processing workflows while delivering exceptional performance, making it ideal for high-volume document processing and custom conversion pipelines.
+    B -- “基于” --> A
+    C -- “注入” --> A
+    D -- “使用或暴露” --> A & B & C
+    
+    style A fill:#e1f5e1
+    style B fill:#e3f2fd
+    style C fill:#fff3e0
+    style D fill:#fce4ec
