@@ -53,41 +53,31 @@ class PdfToTiffConversionTest {
 
         // Core design: Create ApexFlow instance, embodying "Everything is Flow" principle
         val pdfToTiffFlow = apexFlow<Pair<File, File>, Unit> {
-            // Step 1: Open file streams (IO intensive, using IO dispatcher)
+            // Modern approach: Use proper resource management and cleaner flow structure
             transformOnIO { (pdfFile, tiffFile) ->
-                logger.debug("Step 1: Opening streams on {}", Thread.currentThread().name)
-                val inputStream = Files.newInputStream(pdfFile.toPath())
-                val outputStream = Files.newOutputStream(tiffFile.toPath())
-                Triple(inputStream, outputStream, tiffFile) // Return triple, pass to next step
+                // Open and manage streams in this scope, using use blocks for automatic cleanup
+                Files.newInputStream(pdfFile.toPath()).use { inputStream ->
+                    Files.newOutputStream(tiffFile.toPath()).use { outputStream ->
+                        logger.debug("Processing PDF: {} to TIFF: {}", pdfFile.name, tiffFile.name)
+
+                        // Step 1: Read PDF on IO dispatcher (reader handles its own coroutines)
+                        logger.debug("Step 1: Reading PDF on IO dispatcher")
+                        val imagesFlow = PdfImageReader(inputStream) {
+                            dpi = 100f
+                        }.read()
+
+                        // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
+                        logger.debug("Step 2: Writing TIFF on IO dispatcher")
+                        TiffWriter(outputStream) {
+                            compressionType = "JPEG"
+                            compressionQuality = 90f
+                        }.write(imagesFlow)
+                    }
+                }
             }
-
-                // Step 2: Read PDF to get image flow (CPU intensive, using Default dispatcher)
-                .transformOnDefault { (inputStream, outputStream, tiffFile) ->
-                    logger.debug("Step 2: Reading PDF on {}", Thread.currentThread().name)
-                    val pdfReader = PdfImageReader(inputStream) {
-                        dpi = 100f // Set DPI
-                    }
-                    val imagesFlow = pdfReader.read() // Get image flow
-                    Triple(imagesFlow, outputStream, inputStream) // Return triple, pass to next step
-                }
-
-                // Step 3: Create TIFF writer and write (IO intensive, using IO dispatcher)
-                .transformOnIO { (imagesFlow, outputStream, inputStream) ->
-                    logger.debug("Step 3: Writing TIFF on {}", Thread.currentThread().name)
-                    try {
-                        val tiffWriter = TiffWriter(outputStream) {
-                            compressionType = "JPEG" // Set compression type
-                            compressionQuality = 90f // Set compression quality
-                        }
-                        tiffWriter.write(imagesFlow) // Write TIFF file
-                    } finally {
-                        // Ensure streams are closed
-                        inputStream.close()
-                        outputStream.close()
-                    }
-                }
-        }.withTiming("PDF to TIFF Conversion time")
-            .withLogging("PDF to TIFF Conversion log")
+        }
+        .withTiming("PDF to TIFF Conversion time")
+        .withLogging("PDF to TIFF Conversion log")
 
         // Execute the flow: pass the input file pair to the flow
         // Use execute method, which is a convenient wrapper around the transform method
