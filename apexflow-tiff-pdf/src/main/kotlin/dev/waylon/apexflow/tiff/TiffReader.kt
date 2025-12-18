@@ -3,7 +3,6 @@ package dev.waylon.apexflow.tiff
 import dev.waylon.apexflow.conversion.ConversionException
 import dev.waylon.apexflow.conversion.ConversionFormatException
 import dev.waylon.apexflow.conversion.ConversionReadException
-import org.slf4j.LoggerFactory
 import java.awt.image.BufferedImage
 import java.io.InputStream
 import javax.imageio.ImageIO
@@ -12,6 +11,7 @@ import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.slf4j.LoggerFactory
 
 /**
  * TIFF reader configuration
@@ -19,29 +19,29 @@ import kotlinx.coroutines.flow.flow
 class TiffReaderConfig {
     /** Image read parameters for customizing TIFF reading behavior */
     var readParam: ImageReadParam? = null
-    
+
     /**
      * Page numbers to read (0-based index)
      * If empty, all pages will be read
      */
     var pageNumbers: List<Int> = emptyList()
-    
+
     /**
      * Whether to skip blank pages during reading
      */
     var skipBlankPages: Boolean = false
-    
+
     /**
      * Whether to read images in parallel
      */
     var parallelReading: Boolean = false
-    
+
     /**
      * Maximum width for scaled images
      * If 0, no scaling is applied
      */
     var maxWidth: Int = 0
-    
+
     /**
      * Maximum height for scaled images
      * If 0, no scaling is applied
@@ -62,7 +62,7 @@ class TiffReader(
 
     // Logger instance
     private val logger = LoggerFactory.getLogger(TiffReader::class.java)
-    
+
     // Configuration instance
     private val tiffConfig = TiffReaderConfig().apply(config)
 
@@ -74,10 +74,10 @@ class TiffReader(
      * @return Flow<BufferedImage> Flow of images from the TIFF data
      * @throws ConversionReadException if there's an error reading the TIFF data
      */
-    fun read(): Flow<BufferedImage> = flow { 
+    fun read(): Flow<BufferedImage> = flow {
         try {
             logger.info("Starting TIFF reading process")
-            
+
             // Create ImageInputStream from the provided InputStream
             ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
                 // Get appropriate ImageReader
@@ -104,7 +104,7 @@ class TiffReader(
                     }
                 }
             }
-            
+
             logger.info("Completed TIFF reading process successfully")
         } catch (e: Exception) {
             logger.error("Failed to read TIFF data: {}", e.message, e)

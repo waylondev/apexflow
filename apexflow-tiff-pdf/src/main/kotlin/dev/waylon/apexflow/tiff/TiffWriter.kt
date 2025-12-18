@@ -3,6 +3,7 @@ package dev.waylon.apexflow.tiff
 import dev.waylon.apexflow.conversion.ConversionException
 import dev.waylon.apexflow.conversion.ConversionFormatException
 import dev.waylon.apexflow.conversion.ConversionWriteException
+import org.slf4j.LoggerFactory
 import java.awt.image.BufferedImage
 import java.io.OutputStream
 import javax.imageio.IIOImage

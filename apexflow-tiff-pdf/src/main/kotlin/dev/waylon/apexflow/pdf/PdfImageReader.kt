@@ -79,15 +79,22 @@ class PdfImageReader(
         try {
             logger.info("Starting PDF reading process with DPI: {}", pdfConfig.dpi)
             
-            // Use inputStream directly without reading all bytes to memory
-            Loader.loadPDF(inputStream).use { document ->
+            // Read InputStream to ByteArray first (PDFBox doesn't accept InputStream directly)
+            val pdfBytes = inputStream.readAllBytes()
+            Loader.loadPDF(pdfBytes).use { document ->
                 logger.debug("Loaded PDF document successfully")
 
                 val renderer = PDFRenderer(document)
-                val pageCount = document.numberOfPages
+                val pageCount = document.pages.count
                 logger.info("Found {} pages in PDF document", pageCount)
 
-                repeat(pageCount) { pageIndex ->
+                val pagesToRender = if (pdfConfig.pageNumbers.isEmpty()) {
+                    0 until pageCount
+                } else {
+                    pdfConfig.pageNumbers.filter { it in 0 until pageCount }
+                }
+
+                pagesToRender.forEach { pageIndex ->
                     logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
                     // Render the current page with the configured DPI
                     val renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)

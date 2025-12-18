@@ -1,7 +1,6 @@
 package dev.waylon.apexflow.conversion
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.pdf.PdfImageWriterConfig
 import dev.waylon.apexflow.tiff.TiffReader
@@ -19,16 +18,16 @@ import kotlinx.coroutines.flow.map
 class TiffToPdfConfig {
     /** Configuration for TIFF reading */
     var tiffReaderConfig: (TiffReaderConfig.() -> Unit) = {}
-    
+
     /** Configuration for PDF writing */
     var pdfWriterConfig: (PdfImageWriterConfig.() -> Unit) = {}
 }
 
 /**
  * ApexFlow implementation for converting TIFF to PDF
- * 
+ *
  * This flow reads TIFF images from an InputStream and writes them to a PDF OutputStream
- * 
+ *
  * Usage:
  * ```kotlin
  * val tiffToPdfFlow = TiffToPdfFlow {
@@ -44,14 +43,14 @@ class TiffToPdfConfig {
 class TiffToPdfFlow(
     private val config: TiffToPdfConfig.() -> Unit = {}
 ) : ApexFlow<Pair<InputStream, OutputStream>, Unit> {
-    
+
     private val conversionConfig = TiffToPdfConfig().apply(config)
-    
+
     override fun transform(input: Flow<Pair<InputStream, OutputStream>>): Flow<Unit> {
         return input.map { (tiffInputStream, pdfOutputStream) ->
             val tiffReader = TiffReader(tiffInputStream, conversionConfig.tiffReaderConfig)
             val pdfWriter = PdfImageWriter(pdfOutputStream, conversionConfig.pdfWriterConfig)
-            
+
             val images = tiffReader.read()
             pdfWriter.write(images)
         }
@@ -64,7 +63,7 @@ class TiffToPdfFlow(
 class TiffInputStreamToImagesFlow(
     private val config: TiffReaderConfig.() -> Unit = {}
 ) : ApexFlow<InputStream, BufferedImage> {
-    
+
     override fun transform(input: Flow<InputStream>): Flow<BufferedImage> {
         return input.flatMapConcat { stream ->
             TiffReader(stream, config).read()
@@ -78,7 +77,7 @@ class TiffInputStreamToImagesFlow(
 class ImagesToPdfFlow(
     private val config: PdfImageWriterConfig.() -> Unit = {}
 ) : ApexFlow<Pair<Flow<BufferedImage>, OutputStream>, Unit> {
-    
+
     override fun transform(input: Flow<Pair<Flow<BufferedImage>, OutputStream>>): Flow<Unit> {
         return input.map { (images, outputStream) ->
             val pdfWriter = PdfImageWriter(outputStream, config)

@@ -25,7 +25,7 @@ class TiffToPdfFlowTest {
     @Test
     fun `test basic tiff to pdf conversion`() = runBlocking {
         // Create empty input and output streams for testing
-        val tiffInputStream = ByteArrayInputStream(emptyByteArray())
+        val tiffInputStream = ByteArrayInputStream(ByteArray(0))
         val pdfOutputStream = ByteArrayOutputStream()
         
         // Create conversion flow
@@ -33,7 +33,7 @@ class TiffToPdfFlowTest {
         
         // Execute the flow
         try {
-            conversionFlow.transform(flowOf(tiffInputStream to pdfOutputStream)).collect()
+            conversionFlow.transform(flowOf(tiffInputStream to pdfOutputStream)).collect {}
             // If no exception is thrown, the test passes
             assertTrue(true)
         } catch (e: Exception) {
@@ -49,17 +49,15 @@ class TiffToPdfFlowTest {
     @Test
     fun `test custom tiff to pdf configuration`() = runBlocking {
         // Create empty input and output streams for testing
-        val tiffInputStream = ByteArrayInputStream(emptyByteArray())
+        val tiffInputStream = ByteArrayInputStream(ByteArray(0))
         val pdfOutputStream = ByteArrayOutputStream()
         
         // Create conversion flow with custom configuration
-        val conversionFlow = tiffToPdf {
-            // Example configuration - would be used with actual TIFF files
-        }
+        val conversionFlow = tiffToPdf {}
         
         // Execute the flow
         try {
-            conversionFlow.transform(flowOf(tiffInputStream to pdfOutputStream)).collect()
+            conversionFlow.transform(flowOf(tiffInputStream to pdfOutputStream)).collect {}
             // If no exception is thrown, the test passes
             assertTrue(true)
         } catch (e: Exception) {
@@ -74,14 +72,14 @@ class TiffToPdfFlowTest {
     @Test
     fun `test tiff input stream to images flow`() = runBlocking {
         // Create empty TIFF input stream
-        val tiffInputStream = ByteArrayInputStream(emptyByteArray())
+        val tiffInputStream = ByteArrayInputStream(ByteArray(0))
         
         // Create conversion flow
-        val conversionFlow = tiffToImages()
+        val conversionFlow = tiffToImages {}
         
         // Execute the flow
         try {
-            conversionFlow.transform(flowOf(tiffInputStream)).collect()
+            conversionFlow.transform(flowOf(tiffInputStream)).collect {}
             // If no exception is thrown, the test passes
             assertTrue(true)
         } catch (e: Exception) {

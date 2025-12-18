@@ -2,7 +2,6 @@ package dev.waylon.apexflow.pdf
 
 import dev.waylon.apexflow.conversion.ConversionException
 import dev.waylon.apexflow.conversion.ConversionWriteException
-import org.slf4j.LoggerFactory
 import java.awt.image.BufferedImage
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +10,7 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
+import org.slf4j.LoggerFactory
 
 /**
  * PDF image writer configuration
@@ -21,22 +21,22 @@ class PdfImageWriterConfig {
      * Higher values result in better quality but larger file sizes
      */
     var jpegQuality: Float = 85f
-    
+
     /**
      * Whether to compress PDF content
      */
     var compressContent: Boolean = true
-    
+
     /**
      * PDF version to use (e.g., "1.7", "2.0")
      */
     var pdfVersion: String = "1.7"
-    
+
     /**
      * Metadata for the PDF document
      */
     var metadata: PdfMetadata = PdfMetadata()
-    
+
     /**
      * PDF metadata class
      */
@@ -79,16 +79,16 @@ class PdfImageWriter(
     suspend fun write(data: Flow<BufferedImage>) {
         try {
             logger.info("Starting PDF writing process with JPEG quality: {}", pdfConfig.jpegQuality)
-            
+
             val quality = pdfConfig.jpegQuality / 100f
             PDDocument().use { document ->
                 logger.debug("Created new PDF document")
-                
+
                 var pageIndex = 0
                 data.collect { image ->
                     pageIndex++
                     logger.debug("Adding page {} to PDF document (size: {}x{})", pageIndex, image.width, image.height)
-                    
+
                     // Create page with the same size as the image
                     val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
                     document.addPage(page)
@@ -100,10 +100,10 @@ class PdfImageWriter(
                         // Draw image to fit the entire page
                         contentStream.drawImage(pdImage, 0f, 0f)
                     }
-                    
+
                     logger.debug("Successfully added page {} to PDF document", pageIndex)
                 }
-                
+
                 logger.info("Adding {} pages to PDF document", pageIndex)
                 // Save the document to the output stream
                 logger.debug("Saving PDF document to output stream")
@@ -111,7 +111,7 @@ class PdfImageWriter(
                 outputStream.flush()
                 logger.debug("PDF document saved successfully")
             }
-            
+
             logger.info("Completed PDF writing process successfully")
         } catch (e: Exception) {
             logger.error("Failed to write PDF data: {}", e.message, e)

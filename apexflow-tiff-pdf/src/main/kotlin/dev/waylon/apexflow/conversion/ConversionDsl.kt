@@ -8,9 +8,9 @@ import dev.waylon.apexflow.tiff.TiffWriterConfig
 
 /**
  * Top-level DSL function for creating a TiffToPdf conversion flow
- * 
+ *
  * This flow converts TIFF files to PDF files, supporting multi-page documents.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val tiffToPdfFlow = tiffToPdf {
@@ -31,7 +31,7 @@ import dev.waylon.apexflow.tiff.TiffWriterConfig
  *     }
  * }
  * ```
- * 
+ *
  * @param config Configuration block for TiffToPdf conversion
  * @return Configured TiffToPdfFlow instance
  */
@@ -42,9 +42,9 @@ fun tiffToPdf(config: TiffToPdfConfig.() -> Unit = {}): TiffToPdfFlow {
 
 /**
  * Top-level DSL function for creating a PdfToTiff conversion flow
- * 
+ *
  * This flow converts PDF files to TIFF files, supporting multi-page documents.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val pdfToTiffFlow = pdfToTiff {
@@ -62,7 +62,7 @@ fun tiffToPdf(config: TiffToPdfConfig.() -> Unit = {}): TiffToPdfFlow {
  *     }
  * }
  * ```
- * 
+ *
  * @param config Configuration block for PdfToTiff conversion
  * @return Configured PdfToTiffFlow instance
  */
@@ -73,9 +73,9 @@ fun pdfToTiff(config: PdfToTiffConfig.() -> Unit = {}): PdfToTiffFlow {
 
 /**
  * Top-level DSL function for creating a TiffInputStreamToImages conversion flow
- * 
+ *
  * This flow converts TIFF input streams to a flow of BufferedImage objects.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val tiffImagesFlow = tiffToImages {
@@ -85,7 +85,7 @@ fun pdfToTiff(config: PdfToTiffConfig.() -> Unit = {}): PdfToTiffFlow {
  *     pageNumbers = (0..4).toList()
  * }
  * ```
- * 
+ *
  * @param config Configuration block for TiffInputStreamToImages conversion
  * @return Configured TiffInputStreamToImagesFlow instance
  */
@@ -96,9 +96,9 @@ fun tiffToImages(config: TiffReaderConfig.() -> Unit = {}): TiffInputStreamToIma
 
 /**
  * Top-level DSL function for creating a PdfInputStreamToImages conversion flow
- * 
+ *
  * This flow converts PDF input streams to a flow of BufferedImage objects.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val pdfImagesFlow = pdfToImages {
@@ -110,7 +110,7 @@ fun tiffToImages(config: TiffReaderConfig.() -> Unit = {}): TiffInputStreamToIma
  *     skipBlankPages = true
  * }
  * ```
- * 
+ *
  * @param config Configuration block for PdfInputStreamToImages conversion
  * @return Configured PdfInputStreamToImagesFlow instance
  */
@@ -121,9 +121,9 @@ fun pdfToImages(config: PdfImageReaderConfig.() -> Unit = {}): PdfInputStreamToI
 
 /**
  * Top-level DSL function for creating an ImagesToPdf conversion flow
- * 
+ *
  * This flow converts a flow of BufferedImage objects to PDF files.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val imagesToPdfFlow = imagesToPdf {
@@ -139,7 +139,7 @@ fun pdfToImages(config: PdfImageReaderConfig.() -> Unit = {}): PdfInputStreamToI
  *     }
  * }
  * ```
- * 
+ *
  * @param config Configuration block for ImagesToPdf conversion
  * @return Configured ImagesToPdfFlow instance
  */
@@ -150,9 +150,9 @@ fun imagesToPdf(config: PdfImageWriterConfig.() -> Unit = {}): ImagesToPdfFlow {
 
 /**
  * Top-level DSL function for creating an ImagesToTiff conversion flow
- * 
+ *
  * This flow converts a flow of BufferedImage objects to TIFF files.
- * 
+ *
  * Usage Example:
  * ```kotlin
  * val imagesToTiffFlow = imagesToTiff {
@@ -163,7 +163,7 @@ fun imagesToPdf(config: PdfImageWriterConfig.() -> Unit = {}): ImagesToPdfFlow {
  *     photometricInterpretation = TiffWriterConfig.PhotometricInterpretation.RGB
  * }
  * ```
- * 
+ *
  * @param config Configuration block for ImagesToTiff conversion
  * @return Configured ImagesToTiffFlow instance
  */
