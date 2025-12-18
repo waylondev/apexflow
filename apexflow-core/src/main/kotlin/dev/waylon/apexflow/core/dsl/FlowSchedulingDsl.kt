@@ -4,22 +4,21 @@ import dev.waylon.apexflow.core.ApexFlowDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 /**
  * Simple transformation operation with explicit coroutine dispatcher
  *
- * This function combines [map()] and [flowOn()] into a single convenient operation,
- * ensuring the transformation block runs on the specified coroutine dispatcher.
- * The flowOn() is applied after the map() to ensure the transformation runs on the specified dispatcher.
+ * This function ensures that the transformation block runs on the specified coroutine dispatcher
+ * using withContext(), which provides more reliable dispatcher switching than flowOn().
  *
  * **Key Benefits:**
  * - **Clear Dispatcher Specification**: Explicitly define which dispatcher to use
- * - **Reduced Boilerplate**: Combines multiple operations into one
+ * - **Reduced Boilerplate**: Combines transformation and dispatcher switching into one operation
  * - **Improved Readability**: Clear intent about execution context
  * - **Type Safety**: Comprehensive compile-time checks
- * - **Correct Dispatcher Application**: Ensures transformation runs on the specified dispatcher
+ * - **Reliable Dispatcher Switching**: Ensures each transformation runs on its specified dispatcher
  *
  * **Usage Examples:**
  * ```kotlin
@@ -47,7 +46,11 @@ inline fun <I, O> Flow<I>.transformOn(
     dispatcher: CoroutineDispatcher,
     crossinline block: suspend (I) -> O
 ): Flow<O> {
-    return this.map(block).flowOn(dispatcher)
+    return this.map { value ->
+        withContext(dispatcher) {
+            block(value)
+        }
+    }
 }
 
 /**
