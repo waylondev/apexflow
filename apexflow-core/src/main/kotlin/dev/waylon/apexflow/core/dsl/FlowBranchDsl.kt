@@ -15,11 +15,23 @@ import kotlinx.coroutines.flow.flowOf
 
 /**
  * DSL for branch handling in ApexFlow, inspired by Kotlin's `when` expression
- *
+ * 
  * Provides type-safe, readable branch logic while maintaining the "Everything is Flow" principle.
  * This DSL allows defining conditional branches with different transformations, similar to a switch-case statement
  * but with Flow transformations as outcomes.
- *
+ * 
+ * The whenFlow DSL supports two syntax styles:
+ * 1. Traditional lambda syntax for explicit transformations
+ * 2. Infix syntax (recommended) for more readable, natural language-like code
+ * 
+ * **Key Features:**
+ * - **Dual Syntax Support**: Both traditional and infix syntax available
+ * - **Type Safety**: Comprehensive compile-time checks
+ * - **Nullable Support**: Handle null values with explicit predicate cases
+ * - **Value Matching**: Match exact values with concise syntax
+ * - **Predicate Matching**: Use complex conditions with lambda expressions
+ * - **Fallback Support**: Ensure all cases are covered with elseCase
+ * 
  * Usage Example with traditional syntax:
  * ```kotlin
  * val workflow = apexFlow<Int, String> {
@@ -36,18 +48,32 @@ import kotlinx.coroutines.flow.flowOf
  *     }
  * }
  * ```
- *
+ * 
  * Usage Example with infix syntax (recommended for better readability):
  * ```kotlin
  * val workflow = apexFlow<Int, String> {
  *     whenFlow {
  *         case({ it > 10 }) then map { "Large: $it" }
- *         case({ it > 5 }) then map { "Medium: $it" }
- *         elseCase then map { "Small: $it" }
+ *         case(5) then map { "Exactly 5" }
+ *         case(0) then map { "Zero: $it" }
+ *         case({ it < 0 }) then map { "Negative: $it" }
+ *         case({ it == null }) then map { "Null value" }
+ *         elseCase then map { "Other: $it" }
  *     }
  * }
  * ```
- *
+ * 
+ * **Type Safety Features:**
+ * - Compile-time checks for all branch conditions
+ * - Explicit type annotations for lambda parameters
+ * - Clear error messages for type mismatches
+ * - Null safety through explicit predicate cases
+ * 
+ * **Extension Points:**
+ * - Can be extended with custom case types
+ * - Compatible with all Flow transformations
+ * - Works with any input/output type combination
+ * 
  * @param configure Lambda to configure the branch cases
  * @return Flow with branch logic applied
  */
