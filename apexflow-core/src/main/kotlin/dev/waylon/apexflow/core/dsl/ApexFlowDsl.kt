@@ -9,11 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 
 /**
  * Top-level DSL function for creating ApexFlow workflows
- * Focused on "everything is Flow" principle
+ * Focused on "everything is Flow" principle - simple and pure
  *
  * @param block Flow transformation function
  * @return Configured ApexFlow instance
@@ -69,6 +68,15 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
 @FlowDsl
 fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"): ApexFlow<I, O> {
     return LoggingPlugin(loggerName).wrap(this)
+}
+
+/**
+ * Convenience extension function to execute ApexFlow
+ * Provides a more readable API: flow.execute(inputFlow)
+ */
+@FlowDsl
+fun <I, O> ApexFlow<I, O>.execute(input: Flow<I>): Flow<O> {
+    return this.transform(input)
 }
 
 

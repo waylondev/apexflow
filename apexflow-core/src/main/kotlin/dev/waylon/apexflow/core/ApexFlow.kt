@@ -10,23 +10,8 @@ import kotlinx.coroutines.flow.Flow
 annotation class FlowDsl
 
 /**
- * Lightweight configuration for ApexFlow workflows
- * Provides core parameter control without heavy context abstraction
- */
-data class ApexFlowConfig(
-    /** Whether to enable debug logging */
-    val debugMode: Boolean = false,
-    /** Maximum concurrency for parallel operations */
-    val maxConcurrency: Int = 4,
-    /** Timeout for flow operations in milliseconds */
-    val operationTimeoutMs: Long = 30000
-)
-
-
-/**
- * Top-level flow interface representing a complete workflow, used to orchestrate multiple FlowNodes
- * Conforms to Clean Architecture's core layer, with no dependencies on external implementations
- * Using Kotlin 2.3.0 modern features including context receivers and improved type system
+ * Top-level flow interface representing a complete workflow
+ * Core design principle: "Everything is Flow" - pure transformation from Flow<T> to Flow<R>
  *
  * @param I Input type
  * @param O Output type
@@ -41,29 +26,15 @@ interface ApexFlow<I, O> {
 
     /**
      * Compose this flow with another flow to create a new composed flow
+     * Example: flow1 + flow2 + flow3
+     *
      * @param next Next flow to execute after this one
      * @return Composed flow that executes both flows in sequence
      */
     operator fun <N> plus(next: ApexFlow<O, N>): ApexFlow<I, N> =
-        ApexFlow.compose(this, next)
+        compose(this, next)
 
-    /**
-     * Modern nested type aliases for simplifying complex Flow type declarations
-     * Leveraging Kotlin 2.3.0's nested type alias feature
-     */
     companion object {
-        /** Identity flow that passes through input unchanged */
-        typealias Identity<I> = ApexFlow<I, I>
-
-        /** Basic flow chain with single input/output */
-        typealias Chain<I, O> = ApexFlow<I, O>
-
-        /** Composed flow that combines two flows */
-        typealias Composed<I, M, O> = ApexFlow<I, O>
-
-        /** Function type for composing two flows */
-        typealias Composer<I, M, O> = (ApexFlow<I, M>, ApexFlow<M, O>) -> ApexFlow<I, O>
-
         /**
          * Compose two flows into a single composed flow
          * @param first First flow to execute
@@ -77,5 +48,19 @@ interface ApexFlow<I, O> {
                 }
             }
         }
+
+        /**
+         * Create an identity flow that passes through input unchanged
+         * @return Identity flow
+         */
+        fun <I> identity(): ApexFlow<I, I> {
+            return object : ApexFlow<I, I> {
+                override fun transform(input: Flow<I>): Flow<I> {
+                    return input
+                }
+            }
+        }
     }
 }
+
+
