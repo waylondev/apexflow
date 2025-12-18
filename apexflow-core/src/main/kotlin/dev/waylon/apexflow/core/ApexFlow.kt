@@ -4,27 +4,24 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Flow context marker for ApexFlow DSL
- * Used with context receivers to improve DSL experience in Kotlin 2.3.0
+ * Used to restrict DSL scope
  */
 @DslMarker
 annotation class FlowDsl
 
 /**
- * Flow execution context for configuring workflows
- * Leverages Kotlin 2.3.0 context receivers for better DSL experience
+ * Lightweight configuration for ApexFlow workflows
+ * Provides core parameter control without heavy context abstraction
  */
-interface FlowContext {
-    /** Maximum concurrency level for parallel operations */
-    val maxConcurrency: Int get() = 4
-
+data class ApexFlowConfig(
     /** Whether to enable debug logging */
-    val debugMode: Boolean get() = false
-}
+    val debugMode: Boolean = false,
+    /** Maximum concurrency for parallel operations */
+    val maxConcurrency: Int = 4,
+    /** Timeout for flow operations in milliseconds */
+    val operationTimeoutMs: Long = 30000
+)
 
-/**
- * Default implementation of FlowContext
- */
-val DefaultFlowContext: FlowContext = object : FlowContext {}
 
 /**
  * Top-level flow interface representing a complete workflow, used to orchestrate multiple FlowNodes
