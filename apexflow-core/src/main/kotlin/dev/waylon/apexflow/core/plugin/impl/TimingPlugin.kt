@@ -21,6 +21,9 @@ class TimingPlugin(
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {
         return object : ApexFlow<I, O> {
             override fun transform(input: Flow<I>): Flow<O> {
+                // Use a mutable ref that's scoped to this transform call
+                var startTime: Long = 0
+                
                 return input
                     .onStart { startTime = System.currentTimeMillis() }
                     .let { originalFlow -> flow.transform(originalFlow) }
@@ -36,8 +39,6 @@ class TimingPlugin(
                         logger.info("Flow execution completed in ${duration}ms")
                     }
             }
-
-            private var startTime: Long = 0
         }
     }
 }
