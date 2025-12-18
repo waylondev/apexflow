@@ -10,15 +10,16 @@ import kotlinx.coroutines.flow.map
 /**
  * Simple transformation operation with explicit coroutine dispatcher
  *
- * This function combines [flowOn()] and [map()] into a single convenient operation,
- * allowing explicit dispatcher specification for transformations. This follows the Single Responsibility Principle
- * by separating transformation logic from dispatcher management.
+ * This function combines [map()] and [flowOn()] into a single convenient operation,
+ * ensuring the transformation block runs on the specified coroutine dispatcher.
+ * The flowOn() is applied after the map() to ensure the transformation runs on the specified dispatcher.
  *
  * **Key Benefits:**
  * - **Clear Dispatcher Specification**: Explicitly define which dispatcher to use
- * - **Reduced Boilerplate**: Combines two operations into one
+ * - **Reduced Boilerplate**: Combines multiple operations into one
  * - **Improved Readability**: Clear intent about execution context
  * - **Type Safety**: Comprehensive compile-time checks
+ * - **Correct Dispatcher Application**: Ensures transformation runs on the specified dispatcher
  *
  * **Usage Examples:**
  * ```kotlin
@@ -46,7 +47,7 @@ inline fun <I, O> Flow<I>.transformOn(
     dispatcher: CoroutineDispatcher,
     crossinline block: suspend (I) -> O
 ): Flow<O> {
-    return this.flowOn(dispatcher).map(block)
+    return this.map(block).flowOn(dispatcher)
 }
 
 /**
