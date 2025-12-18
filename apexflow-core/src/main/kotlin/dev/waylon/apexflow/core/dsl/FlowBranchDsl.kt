@@ -1,9 +1,10 @@
 package dev.waylon.apexflow.core.dsl
 
 import dev.waylon.apexflow.core.ApexFlowDsl
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * DSL for branch handling in ApexFlow, inspired by Kotlin's `when` expression
@@ -51,6 +52,7 @@ import kotlinx.coroutines.flow.flow
  * @return Flow with branch logic applied
  */
 @ApexFlowDsl
+@OptIn(ExperimentalCoroutinesApi::class)
 fun <I, O> Flow<I>.whenFlow(
     configure: WhenFlowBuilder<I, O>.() -> Unit
 ): Flow<O> {
@@ -81,26 +83,50 @@ class WhenFlowBuilder<I, O> {
 
     /**
      * Define a branch case with a condition and transformation
-     *
+     * 
      * The first matching case will be executed. Cases are evaluated in the order they are defined.
-     *
+     * 
      * @param condition Predicate function that determines if this case matches
      * @param transformation Flow transformation to apply if the condition is met
      */
     fun case(condition: (I) -> Boolean, transformation: (Flow<I>) -> Flow<O>) {
         cases.add(condition to transformation)
     }
-
+    
+    /**
+     * Define a branch case with a specific value match and transformation
+     * 
+     * This allows for concise syntax when matching exact values: case(10, { map { "Exactly 10" } })
+     * 
+     * @param value Exact value to match
+     * @param transformation Flow transformation to apply if the value matches
+     */
+    fun case(value: I, transformation: (Flow<I>) -> Flow<O>) {
+        cases.add({ input: I -> input == value } to transformation)
+    }
+    
     /**
      * Define a branch case with a condition, returning a CaseHandler for infix operations
-     *
+     * 
      * This allows for more readable syntax: case({ it > 10 }) then map { "Large: $it" }
-     *
+     * 
      * @param condition Predicate function that determines if this case matches
      * @return CaseHandler for infix operations
      */
     fun case(condition: (I) -> Boolean): CaseHandler<I, O> {
         return CaseHandler(this, condition)
+    }
+    
+    /**
+     * Define a branch case with a specific value, returning a CaseHandler for infix operations
+     * 
+     * This allows for concise syntax: case(10) then map { "Exactly 10" }
+     * 
+     * @param value Exact value to match
+     * @return CaseHandler for infix operations
+     */
+    fun case(value: I): CaseHandler<I, O> {
+        return CaseHandler(this, { input: I -> input == value })
     }
 
     /**
@@ -142,7 +168,7 @@ class WhenFlowBuilder<I, O> {
         ?: throw IllegalStateException("No matching case found for input: $input")
 
         // Create a single-element Flow for the input and apply the transformation
-        return transformation(flow { emit(input) })
+        return transformation(flowOf(input))
     }
 
     /**
