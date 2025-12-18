@@ -45,7 +45,7 @@ inline fun <I, O> Flow<I>.transformOn(
     dispatcher: CoroutineDispatcher,
     crossinline block: suspend (I) -> O
 ): Flow<O> {
-    return this.map(block).flowOn(dispatcher)
+    return this.flowOn(dispatcher).map(block)
 }
 
 /**
@@ -96,7 +96,7 @@ inline fun <I, O> Flow<I>.transformOn(
  */
 @ApexFlowDsl
 inline fun <I, O> Flow<I>.transformOnIO(crossinline block: suspend (I) -> O): Flow<O> {
-    return transformOn(Dispatchers.IO) { block(it) }
+    return transformOn(Dispatchers.IO, block)
 }
 
 /**

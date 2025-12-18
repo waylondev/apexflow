@@ -23,7 +23,7 @@ class TimingPlugin(
             override fun transform(input: Flow<I>): Flow<O> {
                 // Use a mutable ref that's scoped to this transform call
                 var startTime: Long = 0
-                
+
                 return input
                     .onStart { startTime = System.currentTimeMillis() }
                     .let { originalFlow -> flow.transform(originalFlow) }

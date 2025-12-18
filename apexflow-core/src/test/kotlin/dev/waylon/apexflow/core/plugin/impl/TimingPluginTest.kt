@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * Test suite for TimingPlugin functionality
- * 
+ *
  * This test covers:
  * - Basic timing plugin usage
  * - withTiming convenience function
@@ -30,18 +30,18 @@ class TimingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "$it" }
         }
-        
+
         // Create timing plugin instance
         val timingPlugin = TimingPlugin()
         val timedWorkflow = timingPlugin.wrap(workflow)
-        
+
         // Execute the workflow
         val result = timedWorkflow.transform(flowOf(42)).toList()
-        
+
         // Verify the result
         assertEquals(listOf("42"), result)
     }
-    
+
     /**
      * Test withTiming convenience function
      */
@@ -51,17 +51,17 @@ class TimingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "$it" }
         }
-        
+
         // Use the convenience function
         val timedWorkflow = workflow.withTiming()
-        
+
         // Execute the workflow
         val result = timedWorkflow.transform(flowOf(42)).toList()
-        
+
         // Verify the result
         assertEquals(listOf("42"), result)
     }
-    
+
     /**
      * Test withTiming with custom logger name
      */
@@ -71,17 +71,17 @@ class TimingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "$it" }
         }
-        
+
         // Use the convenience function with custom logger
         val timedWorkflow = workflow.withTiming("custom.timing.logger")
-        
+
         // Execute the workflow
         val result = timedWorkflow.transform(flowOf(42)).toList()
-        
+
         // Verify the result
         assertEquals(listOf("42"), result)
     }
-    
+
     /**
      * Test timing plugin composition with other plugins
      */
@@ -91,16 +91,16 @@ class TimingPluginTest {
         val workflow = apexFlow<Int, String> {
             map { "$it" }
         }
-        
+
         // Apply multiple plugins
         val composedWorkflow = workflow
             .withTiming()
             .withLogging()
             .withPlugin(TimingPlugin())
-        
+
         // Execute the workflow
         val result = composedWorkflow.transform(flowOf(42)).toList()
-        
+
         // Verify the result
         assertEquals(listOf("42"), result)
     }

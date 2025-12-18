@@ -81,7 +81,7 @@ class PdfToTiffConversionTest {
 
         // Execute the flow: pass the input file pair to the flow
         // Use execute method, which is a convenient wrapper around the transform method
-        val result = pdfToTiffFlow.execute(inputPdf to outputTiff).toList()
+        pdfToTiffFlow.execute(inputPdf to outputTiff).toList()
 
         // Verify that output file was created
         assertTrue(outputTiff.exists(), "Output TIFF file was not created")
