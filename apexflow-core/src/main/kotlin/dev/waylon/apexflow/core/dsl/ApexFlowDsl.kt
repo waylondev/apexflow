@@ -1,7 +1,7 @@
 package dev.waylon.apexflow.core.dsl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.FlowDsl
+import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.plugin.impl.LoggingPlugin
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
  * @param block Flow transformation function
  * @return Configured ApexFlow instance
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> apexFlow(block: Flow<I>.() -> Flow<O>): ApexFlow<I, O> {
     return object : ApexFlow<I, O> {
         override fun transform(input: Flow<I>): Flow<O> {
@@ -30,7 +30,7 @@ fun <I, O> apexFlow(block: Flow<I>.() -> Flow<O>): ApexFlow<I, O> {
  * Simple transformation operation with coroutine dispatcher
  * Core Flow transformation with dispatcher support
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> Flow<I>.transformOn(
     dispatcher: CoroutineDispatcher,
     block: suspend (I) -> O
@@ -41,7 +41,7 @@ fun <I, O> Flow<I>.transformOn(
 /**
  * Extension function: IO-intensive transformation operation
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> Flow<I>.transformOnIO(block: suspend (I) -> O): Flow<O> {
     return transformOn(Dispatchers.IO, block)
 }
@@ -49,7 +49,7 @@ fun <I, O> Flow<I>.transformOnIO(block: suspend (I) -> O): Flow<O> {
 /**
  * Extension function: CPU-intensive transformation operation
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> Flow<I>.transformOnDefault(block: suspend (I) -> O): Flow<O> {
     return transformOn(Dispatchers.Default, block)
 }
@@ -57,7 +57,7 @@ fun <I, O> Flow<I>.transformOnDefault(block: suspend (I) -> O): Flow<O> {
 /**
  * Extension function: wrap flow with plugin
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
     return plugin.wrap(this)
 }
@@ -65,7 +65,7 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
 /**
  * Extension function: add logging plugin
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"): ApexFlow<I, O> {
     return LoggingPlugin(loggerName).wrap(this)
 }
@@ -74,7 +74,7 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"
  * Convenience extension function to execute ApexFlow
  * Provides a more readable API: flow.execute(inputFlow)
  */
-@FlowDsl
+@ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.execute(input: Flow<I>): Flow<O> {
     return this.transform(input)
 }

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
  * Used to restrict DSL scope
  */
 @DslMarker
-annotation class FlowDsl
+annotation class ApexFlowDsl
 
 /**
  * Top-level flow interface representing a complete workflow
