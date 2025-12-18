@@ -18,6 +18,8 @@ java {
 dependencies {
     // Core dependencies - using version catalog for consistency
     implementation(libs.kotlinx.coroutines.core)
+    // 添加 SLF4J API 依赖，不依赖具体实现
+    implementation(libs.slf4j.api)
 
     // Test dependencies - Kotlin testing framework
     testImplementation(libs.kotlin.test)
