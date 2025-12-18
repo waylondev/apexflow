@@ -8,6 +8,8 @@ import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.tiff.TiffWriter
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -61,6 +63,7 @@ class PdfToTiffConversionTest {
                 val imagesFlow = PdfImageReader(pdfFile) {
                     dpi = 100f
                 }.read()
+                    .flowOn(Dispatchers.IO)
 
                 // Return the pair of tiffFile and imagesFlow
                 Pair(tiffFile, imagesFlow)
@@ -70,6 +73,7 @@ class PdfToTiffConversionTest {
                     logger.debug("Processing TIFF: {}", tiffFile.name)
                     // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
                     logger.debug("Step 2: Writing TIFF on IO dispatcher")
+
                     TiffWriter(tiffFile) {
                         compressionType = "JPEG"
                         compressionQuality = 90f

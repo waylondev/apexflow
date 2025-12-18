@@ -101,7 +101,7 @@ class PdfImageWriter(
                 logger.debug("Successfully added page {} to PDF document", pageIndex)
             }
 
-            logger.info("Adding {} pages to PDF document", pageIndex)
+            logger.debug("Adding {} pages to PDF document", pageIndex)
             // Save the document to the output stream
             logger.debug("Saving PDF document to output stream")
             document.save(outputStream)
