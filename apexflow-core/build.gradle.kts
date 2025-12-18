@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id("java-library")
@@ -75,3 +77,19 @@ publishing {
     }
 }
 
+// Kotlin 2.3.0 compiler options using modern compilerOptions DSL
+tasks.withType<KotlinCompile> {
+    compilerOptions {
+        // Enable context parameters (Kotlin 2.3.0 recommended syntax)
+        freeCompilerArgs.add("-Xcontext-parameters")
+        // Enable nested type aliases (Kotlin 2.3.0 feature)
+        freeCompilerArgs.add("-Xnested-type-aliases")
+        // Use latest language version
+        apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+    }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
+}

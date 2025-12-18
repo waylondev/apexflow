@@ -1,45 +1,45 @@
 package dev.waylon.apexflow.core.node.impl
 
 import dev.waylon.apexflow.core.node.FlowNode
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 缓存节点，用于缓存转换结果
- * 典型的FlowNode实现，用于演示状态管理和缓存功能
- * @param I 输入类型
- * @param O 输出类型
- * @property transformer 转换函数
+ * Cache node for caching transformation results
+ * Typical FlowNode implementation demonstrating state management and caching functionality
+ * @param I Input type
+ * @param O Output type
+ * @property transformer Transformation function
  */
 class CacheFlowNode<I, O>(
     private val transformer: suspend (I) -> O
 ) : FlowNode<I, O> {
-    
-    // 使用ConcurrentHashMap作为线程安全的缓存
+
+    // Using ConcurrentHashMap as thread-safe cache
     private val cache = ConcurrentHashMap<I, O>()
-    
+
     override fun transform(input: Flow<I>): Flow<O> {
         return input.map { inputData ->
-            // 检查缓存，如果存在则直接返回
+            // Check cache, return directly if exists
             cache[inputData] ?: run {
-                // 缓存不存在，执行转换并缓存结果
+                // Cache miss, execute transformation and cache result
                 val result = transformer(inputData)
                 cache[inputData] = result
                 result
             }
         }
     }
-    
+
     /**
-     * 清除缓存
+     * Clear the cache
      */
     fun clearCache() {
         cache.clear()
     }
-    
+
     /**
-     * 获取缓存大小
+     * Get the current cache size
      */
     fun cacheSize(): Int {
         return cache.size
