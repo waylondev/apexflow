@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.waylon.apexflow"
-version = "0.0.1"
+version = "0.0.2"
 
 description = "ApexFlow PDF-PDFBox Library - PDF writing functionality using PDFBox"
 
@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     // Add core module dependency from local Maven repository
-    implementation("dev.waylon.apexflow:apexflow-core:0.0.1")
+    implementation("dev.waylon.apexflow:apexflow-core:0.0.2")
 
     // PDFBox dependencies
     implementation(libs.pdfbox)

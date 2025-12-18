@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "dev.waylon.apexflow"
-version = "0.0.1"
+version = "0.0.2"
 description = "ApexFlow Core Library - High Performance TIFF to PDF Conversion Engine"
 
 // Configure Java 21
