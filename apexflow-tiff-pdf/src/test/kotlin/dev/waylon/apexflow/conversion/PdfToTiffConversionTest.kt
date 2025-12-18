@@ -4,6 +4,8 @@ import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
 import dev.waylon.apexflow.core.dsl.transformOnDefault
 import dev.waylon.apexflow.core.dsl.transformOnIO
+import dev.waylon.apexflow.core.dsl.withLogging
+import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.tiff.TiffWriter
 import java.io.File
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 
 /**
  * Test case for converting a specific PDF file to TIFF
@@ -19,6 +22,8 @@ import org.junit.jupiter.api.Test
  * This test converts the spring-boot-reference-3.3.0-977.pdf file from the build directory to TIFF
  */
 class PdfToTiffConversionTest {
+
+    private val logger = LoggerFactory.getLogger(PdfToTiffConversionTest::class.java)
 
     /**
      * Test converting spring-boot-reference-3.3.0-977.pdf to TIFF
@@ -41,57 +46,58 @@ class PdfToTiffConversionTest {
         // Check if input file exists
         assertTrue(inputPdf.exists(), "Input PDF file does not exist: ${inputPdf.absolutePath}")
 
-        println("Converting PDF to TIFF...")
-        println("Input: ${inputPdf.absolutePath}")
-        println("Output: ${outputTiff.absolutePath}")
-        println("Input size: ${inputPdf.length() / 1024} KB")
+        logger.info("Converting PDF to TIFF...")
+        logger.info("Input: {}", inputPdf.absolutePath)
+        logger.info("Output: {}", outputTiff.absolutePath)
+        logger.info("Input size: {} KB", inputPdf.length() / 1024)
 
-        // 核心设计：创建ApexFlow实例，体现"Everything is Flow"原则
+        // Core design: Create ApexFlow instance, embodying "Everything is Flow" principle
         val pdfToTiffFlow = apexFlow<Pair<File, File>, Unit> {
-            // Step 1: 打开文件流 (IO密集型，使用IO调度器)
+            // Step 1: Open file streams (IO intensive, using IO dispatcher)
             transformOnIO { (pdfFile, tiffFile) ->
-                println("Step 1: Opening streams on ${Thread.currentThread().name}")
+                logger.debug("Step 1: Opening streams on {}", Thread.currentThread().name)
                 val inputStream = Files.newInputStream(pdfFile.toPath())
                 val outputStream = Files.newOutputStream(tiffFile.toPath())
-                Triple(inputStream, outputStream, tiffFile) // 返回三元组，传递给下一步
+                Triple(inputStream, outputStream, tiffFile) // Return triple, pass to next step
             }
 
-                // Step 2: 读取PDF获取图像流 (CPU密集型，使用Default调度器)
+                // Step 2: Read PDF to get image flow (CPU intensive, using Default dispatcher)
                 .transformOnDefault { (inputStream, outputStream, tiffFile) ->
-                    println("Step 2: Reading PDF on ${Thread.currentThread().name}")
+                    logger.debug("Step 2: Reading PDF on {}", Thread.currentThread().name)
                     val pdfReader = PdfImageReader(inputStream) {
-                        dpi = 100f // 设置DPI
+                        dpi = 100f // Set DPI
                     }
-                    val imagesFlow = pdfReader.read() // 获取图像流
-                    Triple(imagesFlow, outputStream, inputStream) // 返回三元组，传递给下一步
+                    val imagesFlow = pdfReader.read() // Get image flow
+                    Triple(imagesFlow, outputStream, inputStream) // Return triple, pass to next step
                 }
 
-                // Step 3: 创建TIFF写入器并写入 (IO密集型，使用IO调度器)
+                // Step 3: Create TIFF writer and write (IO intensive, using IO dispatcher)
                 .transformOnIO { (imagesFlow, outputStream, inputStream) ->
-                    println("Step 3: Writing TIFF on ${Thread.currentThread().name}")
+                    logger.debug("Step 3: Writing TIFF on {}", Thread.currentThread().name)
                     try {
                         val tiffWriter = TiffWriter(outputStream) {
-                            compressionType = "JPEG" // 设置压缩类型
-                            compressionQuality = 90f // 设置压缩质量
+                            compressionType = "JPEG" // Set compression type
+                            compressionQuality = 90f // Set compression quality
                         }
-                        tiffWriter.write(imagesFlow) // 写入TIFF文件
+                        tiffWriter.write(imagesFlow) // Write TIFF file
                     } finally {
-                        // 确保流被关闭
+                        // Ensure streams are closed
                         inputStream.close()
                         outputStream.close()
                     }
                 }
-        }
+        }.withTiming("PDF to TIFF Conversion time")
+            .withLogging("PDF to TIFF Conversion log")
 
-        // 执行流程：将输入文件对传递给流程
-        // 使用execute方法，它是transform方法的便捷封装
+        // Execute the flow: pass the input file pair to the flow
+        // Use execute method, which is a convenient wrapper around the transform method
         val result = pdfToTiffFlow.execute(inputPdf to outputTiff).toList()
 
         // Verify that output file was created
         assertTrue(outputTiff.exists(), "Output TIFF file was not created")
         assertTrue(outputTiff.length() > 0, "Output TIFF file is empty")
 
-        println("Conversion completed successfully!")
-        println("Output size: ${outputTiff.length() / 1024} KB")
+        logger.info("Conversion completed successfully!")
+        logger.info("Output size: {} KB", outputTiff.length() / 1024)
     }
 }
