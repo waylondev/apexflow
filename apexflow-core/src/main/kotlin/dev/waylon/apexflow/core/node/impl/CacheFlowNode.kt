@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.core.node.impl
 
-import dev.waylon.apexflow.core.node.FlowNode
+import dev.waylon.apexflow.core.node.ApexFlowNode
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
  */
 class CacheFlowNode<I, O>(
     private val transformer: suspend (I) -> O
-) : FlowNode<I, O> {
+) : ApexFlowNode<I, O> {
 
     // Using ConcurrentHashMap as thread-safe cache
     // We'll track cache membership separately for null values
