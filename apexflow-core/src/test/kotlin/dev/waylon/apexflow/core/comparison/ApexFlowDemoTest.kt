@@ -88,43 +88,44 @@ class BusinessFlowComparisonTest {
     }
 
     /**
-     * ApexFlow implementation of business flow
+     *
      */
     private fun createApexFlow(): ApexFlow<Request, Response> {
-        val validateFlow = apexFlow {
+        val validationComponent = apexFlow {
             map(::validatedRequest)
         }
 
-
-        val parallelAndMergeFlow = apexFlow {
-            map { validatedRequest ->
+        val parallelComponent = apexFlow {
+            map { validated ->
                 coroutineScope {
-                    val dbDeferred = async { queryDb(validatedRequest) }
-                    val apiDeferred = async { callThirdPartyApi(validatedRequest) }
-
-                    val dbResult = dbDeferred.await()
-                    val apiResult = apiDeferred.await()
-
-                    MergedResult(
-                        id = validatedRequest.id,
-                        dbData = dbResult.dbData,
-                        apiData = apiResult.apiData
-                    )
+                    val dbDeferred = async { queryDb(validated) }
+                    val apiDeferred = async { callThirdPartyApi(validated) }
+                    Pair(dbDeferred.await(), apiDeferred.await())
                 }
             }
         }
 
-        val responseFlow = apexFlow<MergedResult, Response> {
-            map { mergedResult ->
-                Response(
-                    id = mergedResult.id,
-                    status = "SUCCESS",
-                    data = mergedResult
+        val mergeComponent = apexFlow<Pair<DbResult, ApiResult>, MergedResult> {
+            map { (dbResult, apiResult) ->
+                MergedResult(
+                    id = dbResult.id,
+                    dbData = dbResult.dbData,
+                    apiData = apiResult.apiData
                 )
             }
         }
 
-        return validateFlow + parallelAndMergeFlow + responseFlow
+        val responseComponent = apexFlow<MergedResult, Response> {
+            map { merged ->
+                Response(
+                    id = merged.id,
+                    status = "SUCCESS",
+                    data = merged
+                )
+            }
+        }
+
+        return validationComponent + parallelComponent + mergeComponent + responseComponent
     }
 
 
