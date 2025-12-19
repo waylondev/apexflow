@@ -1,5 +1,8 @@
 package dev.waylon.apexflow.conversion
 
+import dev.waylon.apexflow.core.dsl.apexFlow
+import dev.waylon.apexflow.core.dsl.transformOnIO
+import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageReaderConfig
 import dev.waylon.apexflow.tiff.TiffWriter
@@ -9,15 +12,15 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.withTiming
 
 /**
  * PDF to TIFF conversion DSL
- * 
+ *
  * Provides a fluent API for converting PDF files to TIFF format
  * with support for file-based input/output and flexible configurations.
- * 
+ *
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
@@ -25,7 +28,7 @@ import kotlinx.coroutines.flow.withTiming
  *     pdfConfig = { dpi = 150f },
  *     tiffConfig = { compressionType = "JPEG" }
  * ).convert(inputFile, outputFile)
- * 
+ *
  * // Convert from String path to String path with default settings
  * pdfToTiff().convert("input.pdf", "output.tiff")
  * ```
@@ -46,7 +49,7 @@ class PdfToTiffConverter internal constructor(
     private val pdfConfig: PdfImageReaderConfig,
     private val tiffConfig: TiffWriterConfig
 ) {
-    
+
     /**
      * Convert PDF file to TIFF file
      * 
@@ -54,14 +57,12 @@ class PdfToTiffConverter internal constructor(
      * @param outputFile Output TIFF file
      */
     suspend fun convert(inputFile: File, outputFile: File) {
-        // Use constructor with config object
-        val imagesFlow = PdfImageReader(inputFile, pdfConfig)
-            .read()
-            .withTiming("dev.waylon.apexflow.pdf.reader")
-            .flowOn(Dispatchers.IO)
-        
-        TiffWriter(outputFile, tiffConfig)
-            .write(imagesFlow)
+        // Delegate to stream version - reduce code duplication
+        inputFile.inputStream().use { inputStream ->
+            outputFile.outputStream().use { outputStream ->
+                convert(inputStream, outputStream)
+            }
+        }
     }
     
     /**
@@ -71,19 +72,42 @@ class PdfToTiffConverter internal constructor(
      * @param outputStream Output TIFF OutputStream
      */
     suspend fun convert(inputStream: InputStream, outputStream: OutputStream) {
-        // Use constructor with config object
-        val imagesFlow = PdfImageReader(inputStream, pdfConfig)
-            .read()
-            .withTiming("dev.waylon.apexflow.pdf.reader")
-            .flowOn(Dispatchers.IO)
+        // Create a simple flow with the input stream
+        val inputFlow = flow { emit(inputStream to outputStream) }
         
-        TiffWriter(outputStream, tiffConfig)
-            .write(imagesFlow)
+        // Stage 1: PDF Reading - Only responsible for reading PDF pages
+        val pdfReadFlow = apexFlow<Pair<InputStream, OutputStream>, Pair<OutputStream, Flow<java.awt.image.BufferedImage>>> {
+            transformOnIO { (input, output) ->
+                val imagesFlow = PdfImageReader(input, pdfConfig)
+                    .read()
+                    .withTiming("dev.waylon.apexflow.pdf.reader")
+                    .flowOn(Dispatchers.IO)
+                
+                Pair(output, imagesFlow)
+            }
+        }
+        .withTiming("PDF Reading Stage")
+        
+        // Stage 2: TIFF Writing - Only responsible for writing TIFF pages
+        val tiffWriteFlow = apexFlow<Pair<OutputStream, Flow<java.awt.image.BufferedImage>>, Unit> {
+            transformOnIO { (output, imagesFlow) ->
+                TiffWriter(output, tiffConfig)
+                    .write(imagesFlow)
+            }
+        }
+        .withTiming("TIFF Writing Stage")
+        
+        // Combine stages into complete flow
+        val pdfToTiffFlow = pdfReadFlow + tiffWriteFlow
+            .withTiming("Total PDF to TIFF Conversion")
+        
+        // Execute the combined flow
+        pdfToTiffFlow.transform(inputFlow).collect { }
     }
-    
+
     /**
      * Convert PDF file to TIFF file using string paths
-     * 
+     *
      * @param inputPath Input PDF file path
      * @param outputPath Output TIFF file path
      */
@@ -96,7 +120,7 @@ class PdfToTiffConverter internal constructor(
 
 /**
  * Extension function: Convert File to TIFF with DSL configuration
- * 
+ *
  * @param outputFile Output TIFF file
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
@@ -111,7 +135,7 @@ suspend fun File.toTiff(
 
 /**
  * Extension function: Convert File to TIFF with output stream
- * 
+ *
  * @param outputStream Output TIFF stream
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
@@ -126,7 +150,7 @@ suspend fun File.toTiff(
 
 /**
  * Extension function: Convert File to TIFF with string path
- * 
+ *
  * @param outputPath Output TIFF file path
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
@@ -141,7 +165,7 @@ suspend fun File.toTiff(
 
 /**
  * Extension function: Convert InputStream to TIFF with output file
- * 
+ *
  * @param outputFile Output TIFF file
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
@@ -156,7 +180,7 @@ suspend fun InputStream.toTiff(
 
 /**
  * Extension function: Convert InputStream to TIFF with output stream
- * 
+ *
  * @param outputStream Output TIFF stream
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
@@ -171,7 +195,7 @@ suspend fun InputStream.toTiff(
 
 /**
  * Extension function: Convert InputStream to TIFF with string path
- * 
+ *
  * @param outputPath Output TIFF file path
  * @param pdfConfig PDF reading configuration
  * @param tiffConfig TIFF writing configuration
