@@ -53,51 +53,18 @@ class PdfToTiffConversionTest {
         logger.info("Output: {}", outputTiff.absolutePath)
         logger.info("Input size: {} KB", inputPdf.length() / 1024)
 
-        // Core design: Create ApexFlow instance, embodying "Everything is Flow" principle
-
-        // Step 1: PDF Reading - As an independent ApexFlow instance
-        val pdfReadFlow = apexFlow<Pair<File, File>, Pair<File, Flow<BufferedImage>>> {
-            transformOnIO { (pdfFile, tiffFile) ->
-                logger.info("Starting PDF reading step. file: {}", pdfFile.name)
-
-                // Step 1: Read PDF on IO dispatcher (reader handles its own coroutines)
-                val imagesFlow = PdfImageReader(pdfFile) {
-                    dpi = 100f
-                }.read()
-                    .withTiming("dev.waylon.apexflow.pdf.reader")
-                    .flowOn(Dispatchers.IO)
-
-
-                // Return the pair of tiffFile and imagesFlow
-                Pair(tiffFile, imagesFlow)
+        // Use the new PDF to TIFF conversion DSL
+        pdfToTiff {
+            // Configure PDF reading settings
+            pdf {
+                dpi = 100f
             }
-        }
-            .withTiming("PDF Reading Phase Duration")
-            .withLogging("PDF Reading Phase Log")
-
-        // Step 2: TIFF Writing - As an independent ApexFlow instance
-        val tiffWriteFlow = apexFlow<Pair<File, Flow<BufferedImage>>, Unit> {
-            transformOnIO { (tiffFile, imagesFlow) ->
-                logger.info("Starting TIFF writing step. file: {}", tiffFile.name)
-
-                // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
-                TiffWriter(tiffFile) {
-                    compressionType = "JPEG"
-                    compressionQuality = 90f
-                }.write(imagesFlow)
+            // Configure TIFF writing settings
+            tiff {
+                compressionType = "JPEG"
+                compressionQuality = 90f
             }
-        }
-            .withTiming("TIFF Writing Phase Duration")
-            .withLogging("TIFF Writing Phase Log")
-
-        // Combine both steps and add total duration statistics
-        val pdfToTiffFlow = (pdfReadFlow + tiffWriteFlow)
-            .withTiming("Total PDF to TIFF Conversion Duration")
-            .withLogging("PDF to TIFF Conversion Detailed Log")
-
-        // Execute the flow: pass the input file pair to the flow
-        // Use execute method, which is a convenient wrapper around the transform method
-        pdfToTiffFlow.execute(inputPdf to outputTiff).toList()
+        }.convert(inputPdf, outputTiff)
 
         // Verify that output file was created
         assertTrue(outputTiff.exists(), "Output TIFF file was not created")
