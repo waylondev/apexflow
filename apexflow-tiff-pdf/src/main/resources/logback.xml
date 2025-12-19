@@ -19,9 +19,9 @@
         </encoder>
     </appender>
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
     </root>
 
-     <logger name="dev.waylon.apexflow" level="INFO" />
+    <logger name="dev.waylon.apexflow" level="INFO"/>
 </configuration>

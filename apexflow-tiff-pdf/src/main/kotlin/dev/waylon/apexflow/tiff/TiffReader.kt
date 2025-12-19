@@ -1,6 +1,7 @@
 package dev.waylon.apexflow.tiff
 
 import java.awt.image.BufferedImage
+import java.io.File
 import java.io.InputStream
 import javax.imageio.ImageIO
 import javax.imageio.ImageReadParam
@@ -27,14 +28,34 @@ class TiffReaderConfig {
  */
 class TiffReader(
     private val inputStream: InputStream,
-    config: TiffReaderConfig.() -> Unit = {}
+    private val config: TiffReaderConfig = TiffReaderConfig()
 ) {
+    /**
+     * 便捷构造函数：InputStream + 配置lambda
+     */
+    constructor(
+        inputStream: InputStream,
+        config: TiffReaderConfig.() -> Unit
+    ) : this(inputStream, TiffReaderConfig().apply(config))
+    
+    /**
+     * 便捷构造函数：File + 配置对象
+     */
+    constructor(
+        file: File,
+        config: TiffReaderConfig = TiffReaderConfig()
+    ) : this(file.inputStream(), config)
+    
+    /**
+     * 便捷构造函数：File + 配置lambda
+     */
+    constructor(
+        file: File,
+        config: TiffReaderConfig.() -> Unit
+    ) : this(file.inputStream(), TiffReaderConfig().apply(config))
 
     // Logger instance
     private val logger = LoggerFactory.getLogger(TiffReader::class.java)
-
-    // Configuration instance
-    private val tiffConfig = TiffReaderConfig().apply(config)
 
     /**
      * Read TIFF data from InputStream and return a Flow of BufferedImage
@@ -60,44 +81,4 @@ class TiffReader(
                 logger.info("Found {} pages in TIFF file", numPages)
 
                 // Use custom read param if provided, otherwise default
-                val readParam = tiffConfig.readParam ?: imageReader.defaultReadParam
-
-                // Read each page
-                repeat(numPages) { pageIndex ->
-                    logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
-                    val image = imageReader.read(pageIndex, readParam)
-                    emit(image)
-                    image.flush()
-                    logger.debug("Successfully read TIFF page {}/{}", pageIndex + 1, numPages)
-                }
-            }
-        }
-
-        logger.info("Completed TIFF reading process successfully")
-
-    }
-
-    /**
-     * Get appropriate ImageReader for the given ImageInputStream
-     */
-    private fun getImageReader(input: ImageInputStream): ImageReader {
-        val readers = ImageIO.getImageReaders(input)
-        return if (readers.hasNext()) {
-            readers.next()
-        } else {
-            val readersByFormat = ImageIO.getImageReadersByFormatName("tiff")
-            readersByFormat.next()
-        }
-    }
-}
-
-/**
- * Extension function to automatically dispose ImageReader resources
- */
-private inline fun <R> ImageReader.use(block: (ImageReader) -> R): R {
-    return try {
-        block(this)
-    } finally {
-        this.dispose()
-    }
-}
+                val readParam = config.readParam ?: imageReader.defaultReadParam

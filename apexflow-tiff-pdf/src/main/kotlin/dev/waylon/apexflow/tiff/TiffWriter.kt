@@ -66,19 +66,12 @@ class TiffWriter(
     private val outputStream: OutputStream,
     private val config: TiffWriterConfig = TiffWriterConfig()
 ) {
-
-    constructor(
-        outputStream: OutputStream,
-        config: TiffWriterConfig.() -> Unit
-    ) : this(outputStream, TiffWriterConfig().apply(config))
-
-    constructor(
-        file: File
-    ) : this(file.outputStream())
-
+    /**
+     * 便捷构造函数：File + 配置对象
+     */
     constructor(
         file: File,
-        config: TiffWriterConfig.() -> Unit
+        config: TiffWriterConfig = TiffWriterConfig()
     ) : this(file.outputStream(), config)
 
     private val logger = LoggerFactory.getLogger(TiffWriter::class.java)
@@ -132,4 +125,24 @@ class TiffWriter(
 
         logger.info("Completed TIFF writing process successfully")
     }
+}
+
+/**
+ * Extension function: Convert OutputStream to TiffWriter with lambda configuration
+ *
+ * @param config Lambda function to configure TIFF writer settings
+ * @return TiffWriter instance with specified configuration
+ */
+fun OutputStream.toTiffWriter(config: TiffWriterConfig.() -> Unit = {}): TiffWriter {
+    return TiffWriter(this, TiffWriterConfig().apply(config))
+}
+
+/**
+ * Extension function: Convert File to TiffWriter with lambda configuration
+ *
+ * @param config Lambda function to configure TIFF writer settings
+ * @return TiffWriter instance with specified configuration
+ */
+fun File.toTiffWriter(config: TiffWriterConfig.() -> Unit = {}): TiffWriter {
+    return TiffWriter(this, TiffWriterConfig().apply(config))
 }
