@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.tiff
 
+import dev.waylon.apexflow.core.util.logger
 import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
 import java.io.File
@@ -10,7 +11,6 @@ import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.slf4j.LoggerFactory
 
 /**
  * TIFF reader configuration
