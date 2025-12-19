@@ -3,8 +3,8 @@ package dev.waylon.apexflow.core.plugin.impl
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
+import dev.waylon.apexflow.core.util.createLogger
 import kotlinx.coroutines.flow.Flow
-import org.slf4j.LoggerFactory
 
 /**
  * Timing plugin for measuring flow execution time
@@ -14,7 +14,7 @@ class ApexTimingPlugin(
     private val loggerName: String = "dev.waylon.apexflow.timing"
 ) : ApexFlowPlugin {
 
-    private val logger = LoggerFactory.getLogger(loggerName)
+    private val logger = createLogger(loggerName)
 
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {
         return object : ApexFlow<I, O> {

@@ -3,31 +3,25 @@ package dev.waylon.apexflow.core.plugin.impl
 import com.sun.management.OperatingSystemMXBean
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
-import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
-import java.lang.management.MemoryPoolMXBean
-import java.lang.management.MemoryType
-import java.lang.management.MemoryUsage
-import java.lang.management.ThreadInfo
-import java.lang.management.ThreadMXBean
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import dev.waylon.apexflow.core.util.createLogger
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Performance monitoring plugin for ApexFlow
- * 
+ *
  * Enhanced plugin that tracks comprehensive system metrics including:
  * - CPU usage (process and system-wide)
  * - Memory usage (heap, non-heap, pools)
  * - Thread states and contention
  * - Garbage collection statistics
  * - Memory pool utilization
- * 
+ *
  * Uses more effective JMX APIs and reduces logging overhead
  */
 class ApexPerformanceMonitoringPlugin(
@@ -36,7 +30,7 @@ class ApexPerformanceMonitoringPlugin(
     private val enableDetailedMetrics: Boolean = false
 ) : ApexFlowPlugin {
 
-    private val logger: Logger = LoggerFactory.getLogger(loggerName)
+    private val logger: Logger = createLogger(loggerName)
     private val osBean: OperatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
     private val memoryBean = ManagementFactory.getMemoryMXBean()
     private val threadBean = ManagementFactory.getThreadMXBean()
@@ -93,7 +87,7 @@ class ApexPerformanceMonitoringPlugin(
         logger.info("Start Time: $startTime")
         logger.info("Available Processors: ${osBean.availableProcessors}")
         logger.info("System Load Average: ${formatLoadAverage(osBean.systemLoadAverage)}")
-        
+
         if (enableDetailedMetrics) {
             logDetailedMemoryMetrics()
             logThreadStateMetrics()
@@ -102,10 +96,10 @@ class ApexPerformanceMonitoringPlugin(
 
     private fun logSampleMetrics(currentTime: Long) {
         val elapsedTime = currentTime - startTime
-        
+
         logger.debug("=== Flow Sample ===")
         logger.debug("Elapsed Time: ${elapsedTime}ms")
-        
+
         if (enableDetailedMetrics) {
             logCpuMetrics(elapsedTime)
             logMemoryMetrics()
@@ -118,7 +112,7 @@ class ApexPerformanceMonitoringPlugin(
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - startTime
         val cpuUsed = getProcessCpuTime() - initialCpuTime
-        
+
         logger.error("=== Flow Execution Failed ===")
         logger.error("Elapsed Time: ${elapsedTime}ms")
         logger.error("CPU Time Used: ${cpuUsed}ms")
@@ -133,14 +127,14 @@ class ApexPerformanceMonitoringPlugin(
         val threadCountChange = threadBean.threadCount - initialThreadCount
         val gcCountChange = getTotalGcCount() - initialGcCount
         val gcTimeChange = getTotalGcTime() - initialGcTime
-        
+
         if (cause == null) {
             logger.info("=== Flow Execution Completed Successfully ===")
         } else {
             logger.error("=== Flow Execution Completed with Error ===")
             logger.error("Error Cause: ${cause.message}", cause)
         }
-        
+
         logger.info("Total Execution Time: ${elapsedTime}ms")
         logger.info("Total CPU Time Used: ${cpuUsed}ms")
         logger.info("Heap Memory Used: ${formatBytes(memoryBean.heapMemoryUsage.used)} (${formatBytes(memoryUsed)} since start)")
@@ -154,17 +148,29 @@ class ApexPerformanceMonitoringPlugin(
         val cpuUsagePercent = if (elapsedTime > 0) (cpuUsed.toDouble() / elapsedTime) * 100 else 0.0
         val processCpuLoad = osBean.processCpuLoad * 100
         val systemCpuLoad = osBean.systemCpuLoad * 100
-        
-        logger.debug("CPU Usage: ${cpuUsagePercent.format(2)}% (process), ${processCpuLoad.format(2)}% (system), ${systemCpuLoad.format(2)}% (total)")
+
+        logger.debug(
+            "CPU Usage: ${cpuUsagePercent.format(2)}% (process), ${processCpuLoad.format(2)}% (system), ${
+                systemCpuLoad.format(
+                    2
+                )
+            }% (total)"
+        )
     }
 
     private fun logMemoryMetrics() {
         val heapUsage = memoryBean.heapMemoryUsage
         val nonHeapUsage = memoryBean.nonHeapMemoryUsage
-        
-        logger.debug("Heap Memory: ${formatBytes(heapUsage.used)}/${formatBytes(heapUsage.max)} (${(heapUsage.used.toDouble() / heapUsage.max * 100).format(2)}%)")
+
+        logger.debug(
+            "Heap Memory: ${formatBytes(heapUsage.used)}/${formatBytes(heapUsage.max)} (${
+                (heapUsage.used.toDouble() / heapUsage.max * 100).format(
+                    2
+                )
+            }%)"
+        )
         logger.debug("Non-Heap Memory: ${formatBytes(nonHeapUsage.used)}/${formatBytes(nonHeapUsage.max)}")
-        
+
         if (enableDetailedMetrics) {
             logDetailedMemoryMetrics()
         }
@@ -174,9 +180,9 @@ class ApexPerformanceMonitoringPlugin(
         val threadCount = threadBean.threadCount
         val daemonThreadCount = threadBean.daemonThreadCount
         val peakThreadCount = threadBean.peakThreadCount
-        
+
         logger.debug("Threads: $threadCount total, $daemonThreadCount daemon, $peakThreadCount peak")
-        
+
         if (enableDetailedMetrics) {
             logThreadStateMetrics()
         }
@@ -186,8 +192,8 @@ class ApexPerformanceMonitoringPlugin(
         val gcCount = getTotalGcCount()
         val gcTime = getTotalGcTime()
         val gcCountChange = gcCount - initialGcCount
-        val gcTimeChange = gcTime - initialGcTime
-        
+        gcTime - initialGcTime
+
         logger.debug("GC: $gcCount collections, $gcTime ms total (${gcCountChange} since start)")
     }
 
@@ -196,7 +202,13 @@ class ApexPerformanceMonitoringPlugin(
             val usage = pool.usage
             if (usage.max > 0) {
                 val usagePercent = (usage.used.toDouble() / usage.max) * 100
-                logger.debug("${pool.name}: ${formatBytes(usage.used)}/${formatBytes(usage.max)} (${usagePercent.format(2)}%)")
+                logger.debug(
+                    "${pool.name}: ${formatBytes(usage.used)}/${formatBytes(usage.max)} (${
+                        usagePercent.format(
+                            2
+                        )
+                    }%)"
+                )
             }
         }
     }
@@ -204,7 +216,7 @@ class ApexPerformanceMonitoringPlugin(
     private fun logThreadStateMetrics() {
         val threadInfos = threadBean.getThreadInfo(threadBean.allThreadIds)
         val stateCounts = threadInfos.groupBy { it?.threadState }
-        
+
         stateCounts.forEach { (state, threads) ->
             if (state != null && threads.isNotEmpty()) {
                 logger.debug("Thread State ${state}: ${threads.size} threads")
@@ -213,8 +225,8 @@ class ApexPerformanceMonitoringPlugin(
     }
 
     private fun getProcessCpuTime(): Long {
-        return if (osBean is com.sun.management.OperatingSystemMXBean) {
-            (osBean as com.sun.management.OperatingSystemMXBean).processCpuTime / 1_000_000 // Convert nanoseconds to milliseconds
+        return if (osBean is OperatingSystemMXBean) {
+            (osBean as OperatingSystemMXBean).processCpuTime / 1_000_000 // Convert nanoseconds to milliseconds
         } else {
             threadBean.currentThreadCpuTime / 1_000_000 // Fallback to current thread CPU time
         }

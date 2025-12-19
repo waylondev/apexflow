@@ -2,12 +2,12 @@ package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
+import dev.waylon.apexflow.core.util.createLogger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import org.slf4j.LoggerFactory
 
 /**
  * Core logging plugin for ApexFlow
@@ -20,7 +20,7 @@ class ApexLoggingPlugin(private val loggerName: String = "dev.waylon.apexflow") 
 
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {
         // Create SLF4J logger
-        val logger = LoggerFactory.getLogger(loggerName)
+        val logger = createLogger(loggerName)
 
         return object : ApexFlow<I, O> {
             override fun transform(input: Flow<I>): Flow<O> {

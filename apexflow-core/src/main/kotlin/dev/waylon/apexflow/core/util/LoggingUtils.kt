@@ -5,19 +5,19 @@ import org.slf4j.LoggerFactory
 
 /**
  * Unified logging utility class
- * 
+ *
  * Provides concise logging creation methods, eliminating repetitive LoggerFactory.getLogger calls
  * Follows Kotlin best practices using extension functions and properties
  */
 
 /**
  * Extension property: provides logger property for any class
- * 
+ *
  * Usage example:
  * ```kotlin
  * class MyClass {
  *     private val logger = logger
- *     
+ *
  *     fun myMethod() {
  *         logger.info("Method called")
  *     }
@@ -29,7 +29,7 @@ val <T : Any> T.logger: Logger
 
 /**
  * Extension function: creates logger for a class
- * 
+ *
  * Usage example:
  * ```kotlin
  * class MyClass {
@@ -41,7 +41,7 @@ inline fun <reified T> createLogger(): Logger = LoggerFactory.getLogger(T::class
 
 /**
  * Top-level function: creates logger with specified name
- * 
+ *
  * Usage example:
  * ```kotlin
  * private val logger = createLogger("custom-logger-name")
@@ -51,7 +51,7 @@ fun createLogger(name: String): Logger = LoggerFactory.getLogger(name)
 
 /**
  * Safe logging extension functions
- * 
+ *
  * Provides null-safe logging methods to avoid null pointer exceptions
  */
 
@@ -75,7 +75,7 @@ inline fun Logger.traceSafe(lazyMessage: () -> String) {
 
 /**
  * Context-aware logging
- * 
+ *
  * Adds context information to log messages for easier debugging and tracing
  */
 fun Logger.infoWithContext(message: String, context: Map<String, Any?>) {

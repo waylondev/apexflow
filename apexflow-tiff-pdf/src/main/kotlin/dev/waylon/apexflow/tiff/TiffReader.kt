@@ -40,8 +40,8 @@ class TiffReader @JvmOverloads constructor(
         config: TiffReaderConfig = TiffReaderConfig()
     ) : this(file.inputStream(), config)
 
-    // Logger instance
-    private val logger = LoggerFactory.getLogger(TiffReader::class.java)
+    // Logger instance using unified logging utility
+    private val logger = logger
 
     /**
      * Read TIFF data from InputStream and return a Flow of BufferedImage

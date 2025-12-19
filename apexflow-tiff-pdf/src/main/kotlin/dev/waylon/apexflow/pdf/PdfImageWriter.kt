@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.pdf
 
+import dev.waylon.apexflow.core.util.logger
 import dev.waylon.apexflow.image.ApexImageWriter
 import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
@@ -11,7 +12,6 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
-import org.slf4j.LoggerFactory
 
 /**
  * PDF image writer configuration
@@ -69,7 +69,7 @@ class PdfImageWriter @JvmOverloads constructor(
         config: PdfImageWriterConfig = PdfImageWriterConfig()
     ) : this(file.outputStream(), config)
 
-    private val logger = LoggerFactory.getLogger(PdfImageWriter::class.java)
+    private val logger = logger
 
 
     /**

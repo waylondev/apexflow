@@ -7,7 +7,7 @@ import java.io.File
 import java.time.Duration
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
+import dev.waylon.apexflow.core.util.logger
 
 /**
  * Simple benchmark test for PDF to TIFF and TIFF to PDF conversion
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
  */
 class SimpleConversionBenchmark {
 
-    private val logger = LoggerFactory.getLogger(SimpleConversionBenchmark::class.java)
+    private val logger = logger
 
     // Test PDF file path
     private val testPdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")

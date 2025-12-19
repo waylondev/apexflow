@@ -1,10 +1,10 @@
 package dev.waylon.apexflow.core.dsl
 
+import dev.waylon.apexflow.core.util.createLogger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import org.slf4j.LoggerFactory
 
 /**
  * Extension function: add timing functionality to standard Kotlin Flow
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
  * @return Flow instance with execution time measurement enabled
  */
 fun <T> Flow<T>.withTiming(loggerName: String = "dev.waylon.apexflow.standard-flow.timing"): Flow<T> {
-    val logger = LoggerFactory.getLogger(loggerName)
+    val logger = createLogger(loggerName)
     var startTime: Long = 0
 
     return this
