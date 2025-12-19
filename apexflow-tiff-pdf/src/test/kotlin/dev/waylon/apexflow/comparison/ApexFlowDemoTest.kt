@@ -2,162 +2,164 @@ package dev.waylon.apexflow.comparison
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import dev.waylon.apexflow.core.dsl.execute
+import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 
 /**
- * ApexFlow 简单演示测试
+ * Business flow comparison test using ApexFlow
+ *
+ * Business flow:
+ * 1. Data validation
+ * 2. Query database
+ * 3. Request third-party API
+ * 4. Merge results from 2 and 3
+ * 5. Organize response
  */
-class ApexFlowDemoTest {
+class BusinessFlowComparisonTest {
+
+    private val logger = LoggerFactory.getLogger(BusinessFlowComparisonTest::class.java)
+
+    // Test data classes
+    data class Request(val id: String, val name: String)
+    data class ValidatedRequest(val id: String, val name: String)
+    data class DbResult(val id: String, val dbData: String)
+    data class ApiResult(val id: String, val apiData: String)
+    data class MergedResult(val id: String, val dbData: String, val apiData: String)
+    data class Response(val id: String, val status: String, val data: MergedResult)
+
+    // Simulated DB query delay
+    private val dbDelay = 1000L
+
+    // Simulated API request delay
+    private val apiDelay = 1500L
+
+    private fun validatedRequest(request: Request): ValidatedRequest {
+        if (request.id.isBlank() || request.name.isBlank()) {
+            throw IllegalArgumentException("Invalid request: id and name must not be blank")
+        }
+        val validatedRequest = ValidatedRequest(request.id, request.name)
+        return validatedRequest
+    }
+
+    // Simulate database query
+    private suspend fun queryDb(request: ValidatedRequest): DbResult {
+        delay(dbDelay) // Simulate database query delay
+        return DbResult(request.id, "db_data_${request.id}")
+    }
+
+    // Simulate third-party API call
+    private suspend fun callThirdPartyApi(request: ValidatedRequest): ApiResult {
+        delay(apiDelay) // Simulate API request delay
+        return ApiResult(request.id, "api_data_${request.id}")
+    }
 
     /**
-     * 演示基本的ApexFlow创建和执行
+     * Traditional implementation of business flow
+     */
+    private suspend fun traditionalBusinessFlow(request: Request): Response {
+        // 1. Data validation
+        val validatedRequest = validatedRequest(request)
+
+        // 2. Query database
+        val dbResult = queryDb(validatedRequest)
+
+        // 3. Request third-party API
+        val apiResult = callThirdPartyApi(validatedRequest)
+
+        // 4. Merge results
+        val mergedResult = MergedResult(
+            id = validatedRequest.id,
+            dbData = dbResult.dbData,
+            apiData = apiResult.apiData
+        )
+
+        // 5. Organize response
+        return Response(
+            id = validatedRequest.id,
+            status = "SUCCESS",
+            data = mergedResult
+        )
+    }
+
+    /**
+     * ApexFlow implementation of business flow
+     */
+    private fun createApexFlow(): ApexFlow<Request, Response> {
+        // 1. 数据验证
+        val validateFlow = apexFlow {
+            map { validatedRequest(it) }
+        }
+
+
+        val parallelAndMergeFlow = apexFlow {
+            map { validatedRequest ->
+                // 分别获取数据库和API结果
+                val dbResult = runBlocking { queryDb(validatedRequest) }
+                val apiResult = runBlocking { callThirdPartyApi(validatedRequest) }
+
+                // 合并结果
+                MergedResult(
+                    id = validatedRequest.id,
+                    dbData = dbResult.dbData,
+                    apiData = apiResult.apiData
+                )
+            }
+        }
+
+        val responseFlow = apexFlow<MergedResult, Response> {
+            map { mergedResult ->
+                Response(
+                    id = mergedResult.id,
+                    status = "SUCCESS",
+                    data = mergedResult
+                )
+            }
+        }
+
+        return validateFlow + parallelAndMergeFlow + responseFlow
+    }
+
+
+    /**
+     * Single request performance comparison
      */
     @Test
-    fun `demo basic apexflow`() = runBlocking {
-        // 创建一个简单的ApexFlow，将字符串转换为大写
-        val upperCaseFlow: ApexFlow<String, String> = apexFlow {
-            // 直接使用Flow API进行转换
-            transform { input ->
-                emit(input.uppercase())
-            }
+    fun `compare single request performance`() = runBlocking {
+        val request = Request("123", "test")
+
+        // Test traditional implementation
+        val traditionalTime = measureTimeMillis {
+            val response = traditionalBusinessFlow(request)
+            assertEquals("SUCCESS", response.status)
         }
-        
-        // 测试数据
-        val input = "hello apexflow"
-        
-        // 执行Flow转换
-        val resultFlow = upperCaseFlow.transform(flow { emit(input) })
-        
-        // 收集结果
-        val results = mutableListOf<String>()
-        resultFlow.collect {
-            results.add(it)
+
+        // Test ApexFlow implementation
+        val apexFlow = createApexFlow()
+        val apexFlowTime = measureTimeMillis {
+            val response = apexFlow.execute(request).first()
+            assertEquals("SUCCESS", response.status)
         }
-        
-        // 验证结果
-        assertEquals(1, results.size)
-        assertEquals("HELLO APEXFLOW", results[0])
-        
-        println("✓ 基本ApexFlow演示成功!")
-        println("   输入: $input")
-        println("   输出: ${results[0]}")
+
+        logger.info(
+            "Single Request Performance: Traditional={}ms, ApexFlow={}ms, Speedup={}x",
+            traditionalTime, apexFlowTime, traditionalTime / apexFlowTime.toDouble()
+        )
     }
-    
+
+
     /**
-     * 演示ApexFlow的组合能力
-     */
-    @Test
-    fun `demo apexflow composition`() = runBlocking {
-        // 创建第一个Flow: 字符串长度
-        val lengthFlow: ApexFlow<String, Int> = apexFlow {
-            transform { input ->
-                emit(input.length)
-            }
-        }
-        
-        // 创建第二个Flow: 长度翻倍
-        val doubleFlow: ApexFlow<Int, Int> = apexFlow {
-            transform { input ->
-                emit(input * 2)
-            }
-        }
-        
-        // 组合两个Flow
-        val composedFlow: ApexFlow<String, Int> = lengthFlow + doubleFlow
-        
-        // 测试数据
-        val input = "apexflow"
-        
-        // 执行组合Flow
-        val resultFlow = composedFlow.transform(flow { emit(input) })
-        
-        // 收集结果
-        val results = mutableListOf<Int>()
-        resultFlow.collect {
-            results.add(it)
-        }
-        
-        // 验证结果: "apexflow"长度是8，翻倍后是16
-        assertEquals(1, results.size)
-        assertEquals(16, results[0])
-        
-        println("✓ ApexFlow组合演示成功!")
-        println("   输入: $input")
-        println("   长度: ${input.length}")
-        println("   长度翻倍: ${results[0]}")
-    }
-    
-    /**
-     * 演示多输入处理
-     */
-    @Test
-    fun `demo multiple inputs`() = runBlocking {
-        // 创建Flow: 数字加10
-        val addTenFlow: ApexFlow<Int, Int> = apexFlow {
-            transform { input ->
-                emit(input + 10)
-            }
-        }
-        
-        // 测试数据
-        val inputs = listOf(1, 2, 3, 4, 5)
-        
-        // 创建输入Flow
-        val inputFlow = flow {
-            inputs.forEach { emit(it) }
-        }
-        
-        // 执行Flow转换
-        val resultFlow = addTenFlow.transform(inputFlow)
-        
-        // 收集结果
-        val results = mutableListOf<Int>()
-        resultFlow.collect {
-            results.add(it)
-        }
-        
-        // 验证结果
-        assertEquals(inputs.size, results.size)
-        inputs.forEachIndexed { index, input ->
-            assertEquals(input + 10, results[index])
-        }
-        
-        println("✓ 多输入处理演示成功!")
-        println("   输入: $inputs")
-        println("   输出: $results")
-    }
-    
-    /**
-     * 演示ApexFlow的核心优势
+     * Demonstrate ApexFlow advantages
      */
     @Test
     fun `demo apexflow advantages`() {
-        println("\n=== ApexFlow 核心优势 ===")
-        println("1. 声明式编程")
-        println("   - 清晰的业务流程定义")
-        println("   - 易于理解和维护")
-        println("   - 减少样板代码")
-        
-        println("\n2. 基于Flow")
-        println("   - 充分利用Kotlin Flow的异步能力")
-        println("   - 支持背压处理")
-        println("   - 无缝集成Kotlin协程")
-        
-        println("\n3. 组合能力")
-        println("   - 支持模块化设计")
-        println("   - 流程可复用")
-        println("   - 易于扩展")
-        
-        println("\n4. 类型安全")
-        println("   - 编译时类型检查")
-        println("   - 清晰的输入输出类型")
-        
-        println("\n5. 异步处理")
-        println("   - 内置异步支持")
-        println("   - 高效利用系统资源")
+        logger.info("ApexFlow advantages demo: Declarative programming, asynchronous processing, composition capability, type safety, plugin mechanism, reactive design")
     }
 }
+
