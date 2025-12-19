@@ -21,7 +21,7 @@ class PdfToTiffDslTest {
     private val logger = LoggerFactory.getLogger(PdfToTiffDslTest::class.java)
     
     // Test PDF file path
-    private val testPdfFile = File("build/spring-boot-reference-406.pdf")
+    private val testPdfFile = File("build/test-pdf-to-tiff-dsl.pdf")
     
     // Test TIFF file path (will be created during test)
     private val testTiffFile = File("build/test-pdf-to-tiff-dsl.tiff")
@@ -189,7 +189,7 @@ class PdfToTiffDslTest {
     /**
      * Clean up test files after all tests
      */
-    @Test
+//    @Test
     fun `clean up test files`() {
         logger.info("=== Test: Clean up test files ===")
         
