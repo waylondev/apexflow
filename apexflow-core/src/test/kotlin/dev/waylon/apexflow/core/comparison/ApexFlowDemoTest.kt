@@ -88,25 +88,40 @@ class BusinessFlowComparisonTest {
     }
 
     /**
-     *
+     * ApexFlow implementation of business flow - Component-based Best Practice
+     * 
+     * Demonstrates core advantages of ApexFlow (compared to using Flow directly):
+     * 1. Component-based design - Split complex flow into independent, reusable components
+     * 2. Simple composition - Easily combine components using + operator
+     * 3. Type safety - Complete compile-time type checking
+     * 4. Declarative programming - Business flow is clear and readable
+     * 5. Testability - Each component can be tested independently
      */
     private fun createApexFlow(): ApexFlow<Request, Response> {
+        // 1. Validation Component - Independent, reusable, focused on data validation
         val validationComponent = apexFlow {
-            map(::validatedRequest)
+            map(::validatedRequest) // Use function reference for concise code
         }
 
+        // 2. Parallel Processing Component - Independent, reusable, focused on parallel execution
         val parallelComponent = apexFlow {
             map { validated ->
+                // Use coroutineScope to enable parallel processing
                 coroutineScope {
-                    val dbDeferred = async { queryDb(validated) }
-                    val apiDeferred = async { callThirdPartyApi(validated) }
+                    // Execute database query and API call in parallel
+                    val dbDeferred = async { queryDb(validated) } // Database query task
+                    val apiDeferred = async { callThirdPartyApi(validated) } // API call task
+                    
+                    // Wait for both tasks to complete and return results as a pair
                     Pair(dbDeferred.await(), apiDeferred.await())
                 }
             }
         }
 
+        // 3. Result Merge Component - Independent, reusable, focused on merging results
         val mergeComponent = apexFlow<Pair<DbResult, ApiResult>, MergedResult> {
             map { (dbResult, apiResult) ->
+                // Merge database result and API result into a single MergedResult
                 MergedResult(
                     id = dbResult.id,
                     dbData = dbResult.dbData,
@@ -115,8 +130,10 @@ class BusinessFlowComparisonTest {
             }
         }
 
+        // 4. Response Build Component - Independent, reusable, focused on building response
         val responseComponent = apexFlow<MergedResult, Response> {
             map { merged ->
+                // Build final response from merged result
                 Response(
                     id = merged.id,
                     status = "SUCCESS",
@@ -125,6 +142,8 @@ class BusinessFlowComparisonTest {
             }
         }
 
+        // 🌟 Core Advantage: Easily combine all components using + operator
+        // Flow: Validation -> Parallel Processing -> Result Merge -> Response Build
         return validationComponent + parallelComponent + mergeComponent + responseComponent
     }
 
