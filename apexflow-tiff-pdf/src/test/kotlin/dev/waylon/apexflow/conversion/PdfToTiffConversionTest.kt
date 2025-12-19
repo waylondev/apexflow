@@ -53,18 +53,14 @@ class PdfToTiffConversionTest {
         logger.info("Output: {}", outputTiff.absolutePath)
         logger.info("Input size: {} KB", inputPdf.length() / 1024)
 
-        // Use the new PDF to TIFF conversion DSL
-        pdfToTiff {
-            // Configure PDF reading settings
-            pdf {
-                dpi = 100f
-            }
-            // Configure TIFF writing settings
-            tiff {
+        // Use the new simplified PDF to TIFF conversion DSL
+        pdfToTiff(
+            pdfConfig = { dpi = 100f },
+            tiffConfig = { 
                 compressionType = "JPEG"
                 compressionQuality = 90f
             }
-        }.convert(inputPdf, outputTiff)
+        ).convert(inputPdf, outputTiff)
 
         // Verify that output file was created
         assertTrue(outputTiff.exists(), "Output TIFF file was not created")

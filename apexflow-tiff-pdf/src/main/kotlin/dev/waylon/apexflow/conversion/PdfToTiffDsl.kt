@@ -17,62 +17,38 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.toList
 
 /**
- * PDF to TIFF conversion configuration
- */
-class PdfToTiffConfig {
-    /**
-     * PDF reading configuration
-     */
-    val pdfConfig = PdfImageReaderConfig()
-    
-    /**
-     * TIFF writing configuration
-     */
-    val tiffConfig = TiffWriterConfig()
-    
-    /**
-     * Configure PDF reading settings
-     */
-    fun pdf(config: PdfImageReaderConfig.() -> Unit) {
-        pdfConfig.apply(config)
-    }
-    
-    /**
-     * Configure TIFF writing settings
-     */
-    fun tiff(config: TiffWriterConfig.() -> Unit) {
-        tiffConfig.apply(config)
-    }
-}
-
-/**
  * PDF to TIFF conversion DSL
  * 
- * Provides a fluent API for converting PDF files to TIFF format
+ * Provides a simple API for converting PDF files to TIFF format
  * with support for file-based input/output and flexible configurations.
  * 
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
- * pdfToTiff {
- *     pdf { dpi = 150f }
- *     tiff { compressionType = "JPEG" }
- * }.convert(inputFile, outputFile)
+ * pdfToTiff(
+ *     pdfConfig = { dpi = 150f },
+ *     tiffConfig = { compressionType = "JPEG" }
+ * ).convert(inputFile, outputFile)
  * 
  * // Convert from String path to String path with default settings
  * pdfToTiff().convert("input.pdf", "output.tiff")
  * ```
  */
-fun pdfToTiff(config: PdfToTiffConfig.() -> Unit = {}): PdfToTiffConverter {
-    val pdfToTiffConfig = PdfToTiffConfig().apply(config)
-    return PdfToTiffConverter(pdfToTiffConfig)
+fun pdfToTiff(
+    pdfConfig: PdfImageReaderConfig.() -> Unit = {},
+    tiffConfig: TiffWriterConfig.() -> Unit = {}
+): PdfToTiffConverter {
+    val readerConfig = PdfImageReaderConfig().apply(pdfConfig)
+    val writerConfig = TiffWriterConfig().apply(tiffConfig)
+    return PdfToTiffConverter(readerConfig, writerConfig)
 }
 
 /**
  * PDF to TIFF converter implementation
  */
 class PdfToTiffConverter internal constructor(
-    private val config: PdfToTiffConfig
+    private val pdfConfig: PdfImageReaderConfig,
+    private val tiffConfig: TiffWriterConfig
 ) {
     
     /**
@@ -85,7 +61,7 @@ class PdfToTiffConverter internal constructor(
         // Create PDF read flow (IO intensive)
         val pdfReadFlow = apexFlow<Pair<File, File>, Pair<File, Flow<BufferedImage>>> {
             transformOnIO { (pdfFile, tiffFile) ->
-                val imagesFlow = PdfImageReader(pdfFile, config.pdfConfig)
+                val imagesFlow = PdfImageReader(pdfFile, pdfConfig)
                     .read()
                     .withTiming("dev.waylon.apexflow.pdf.reader")
                     .flowOn(Dispatchers.IO)
@@ -99,7 +75,7 @@ class PdfToTiffConverter internal constructor(
         // Create TIFF write flow (IO intensive)
         val tiffWriteFlow = apexFlow<Pair<File, Flow<BufferedImage>>, Unit> {
             transformOnIO { (tiffFile, imagesFlow) ->
-                TiffWriter(tiffFile, config.tiffConfig)
+                TiffWriter(tiffFile, tiffConfig)
                     .write(imagesFlow)
             }
         }
@@ -111,7 +87,7 @@ class PdfToTiffConverter internal constructor(
             .withTiming("Total PDF to TIFF Conversion")
             .withLogging("PDF to TIFF Conversion")
         
-        pdfToTiffFlow.execute(inputFile to outputFile).toList()
+        pdfToTiffFlow.execute(inputFile to outputFile).collect {  }
     }
     
     /**
