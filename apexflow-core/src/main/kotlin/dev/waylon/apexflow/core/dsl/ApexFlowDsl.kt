@@ -47,21 +47,7 @@ inline fun <I, O> apexFlow(crossinline block: Flow<I>.() -> Flow<O>): ApexFlow<I
     }
 }
 
-/**
- * Create a simple ApexFlow that maps input values
- */
-@ApexFlowDsl
-inline fun <I, O> mapFlow(crossinline mapper: (I) -> O): ApexFlow<I, O> {
-    return apexFlow { map(mapper) }
-}
 
-/**
- * Create a simple ApexFlow that filters input values
- */
-@ApexFlowDsl
-inline fun <I> filterFlow(crossinline predicate: (I) -> Boolean): ApexFlow<I, I> {
-    return apexFlow { filter(predicate) }
-}
 
 
 
