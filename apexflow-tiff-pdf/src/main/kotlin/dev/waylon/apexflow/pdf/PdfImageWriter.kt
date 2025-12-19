@@ -6,12 +6,12 @@ import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.flow.Flow
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 
 /**
  * PDF image writer configuration
@@ -37,6 +37,16 @@ class PdfImageWriterConfig {
      * Metadata for the PDF document
      */
     var metadata: PdfMetadata = PdfMetadata()
+    
+    /**
+     * Whether to write pages in parallel
+     */
+    var parallelWriting: Boolean = false
+    
+    /**
+     * Maximum number of pages to write in parallel
+     */
+    var parallelism: Int = Runtime.getRuntime().availableProcessors()
 
     /**
      * PDF metadata class
@@ -71,7 +81,6 @@ class PdfImageWriter @JvmOverloads constructor(
 
     private val logger = createLogger<PdfImageWriter>()
 
-
     /**
      * Write BufferedImage flow to PDF OutputStream
      *
@@ -83,39 +92,43 @@ class PdfImageWriter @JvmOverloads constructor(
         logger.info("Starting PDF writing process with JPEG quality: {}", config.jpegQuality)
 
         val quality = config.jpegQuality / 100f
-        PDDocument().use { document ->
+        val document = PDDocument()
+        
+        try {
             logger.debug("Created new PDF document")
-
+            val images = data.toList()
             var pageIndex = 0
-            data.collect { image ->
+            
+            logger.debug("Writing {} images to PDF", images.size)
+                
+            images.forEach { image ->
                 pageIndex++
-                logger.debug("Adding page {} to PDF document (size: {}x{})", pageIndex, image.width, image.height)
-
-                // Create page with the same size as the image
-                val page = PDPage(PDRectangle(image.width.toFloat(), image.height.toFloat()))
+                logger.debug("Adding page {} to PDF document")
+                
+                val page = PDPage()
                 document.addPage(page)
-
-                // Create content stream for writing image
-                PDPageContentStream(document, page).use { contentStream ->
-                    // Create PDImageXObject from BufferedImage with JPEG compression
+                logger.debug("Created PDF page {}", pageIndex)
+                
+                val contentStream = PDPageContentStream(document, page)
+                
+                try {
                     val pdImage = JPEGFactory.createFromImage(document, image, quality)
-                    // Draw image to fit the entire page
                     contentStream.drawImage(pdImage, 0f, 0f)
+                } finally {
+                    contentStream.close()
                 }
-
-                logger.debug("Successfully added page {} to PDF document", pageIndex)
+                
+                image.flush()
+                logger.debug("Successfully wrote PDF page {}", pageIndex)
             }
-
-            logger.debug("Adding {} pages to PDF document", pageIndex)
-            // Save the document to the output stream
-            logger.debug("Saving PDF document to output stream")
+            
+            // Save the document to output stream
             document.save(outputStream)
-            outputStream.flush()
-            logger.debug("PDF document saved successfully")
+        } finally {
+            document.close()
         }
 
         logger.info("Completed PDF writing process successfully")
-
     }
 }
 
