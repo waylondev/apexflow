@@ -5,7 +5,6 @@ import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexPerformanceMonitoringPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexTimingPlugin
 
 /**
  * Extension function: wrap flow with plugin
