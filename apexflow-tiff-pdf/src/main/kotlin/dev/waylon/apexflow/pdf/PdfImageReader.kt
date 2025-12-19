@@ -52,32 +52,27 @@ class PdfImageReaderConfig {
 /**
  * PDF image reader implementation using PDFBox library
  *
- * Only supports reading from InputStream
+ * Supports reading from File
  */
 class PdfImageReader(
     private val inputFile: File,
-    config: PdfImageReaderConfig.() -> Unit = {}
+    config: PdfImageReaderConfig = PdfImageReaderConfig()
 ) {
 
     private val logger = LoggerFactory.getLogger(PdfImageReader::class.java)
-    private val pdfConfig = PdfImageReaderConfig().apply(config)
-
-    fun configure(config: PdfImageReaderConfig.() -> Unit) {
-        pdfConfig.apply(config)
-        logger.debug("Configured PDF reader with DPI: {}", pdfConfig.dpi)
-    }
+    private val config = config
 
     /**
-     * Read PDF pages from InputStream and return a Flow of BufferedImage
+     * Read PDF pages and return a Flow of BufferedImage
      *
      * Each page is rendered as a separate BufferedImage with the configured DPI
      *
      * @return Flow<BufferedImage> Flow of rendered pages
      */
     fun read(): Flow<BufferedImage> = flow {
-        logger.info("Starting PDF reading process with DPI: {}", pdfConfig.dpi)
+        logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
-        // Read InputStream to ByteArray first (PDFBox doesn't accept InputStream directly)
+        // Load PDF document from file
         Loader.loadPDF(inputFile).use { document ->
             logger.debug("Loaded PDF document successfully")
 
@@ -85,16 +80,16 @@ class PdfImageReader(
             val pageCount = document.pages.count
             logger.info("Found {} pages in PDF document", pageCount)
 
-            val pagesToRender = if (pdfConfig.pageNumbers.isEmpty()) {
+            val pagesToRender = if (config.pageNumbers.isEmpty()) {
                 0 until pageCount
             } else {
-                pdfConfig.pageNumbers.filter { it in 0 until pageCount }
+                config.pageNumbers.filter { it in 0 until pageCount }
             }
 
             pagesToRender.forEach { pageIndex ->
                 logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
                 // Render the current page with the configured DPI
-                val renderedImage = renderer.renderImageWithDPI(pageIndex, pdfConfig.dpi)
+                val renderedImage = renderer.renderImageWithDPI(pageIndex, config.dpi)
 
                 // Emit the final image
                 emit(renderedImage)

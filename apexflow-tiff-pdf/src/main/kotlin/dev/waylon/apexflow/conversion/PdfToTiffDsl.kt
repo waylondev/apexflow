@@ -85,13 +85,8 @@ class PdfToTiffConverter internal constructor(
         // Create PDF read flow (IO intensive)
         val pdfReadFlow = apexFlow<Pair<File, File>, Pair<File, Flow<BufferedImage>>> {
             transformOnIO { (pdfFile, tiffFile) ->
-                val imagesFlow = PdfImageReader(pdfFile) {
-                    // Apply PDF configuration
-                    dpi = config.pdfConfig.dpi
-                    pageNumbers = config.pdfConfig.pageNumbers
-                    skipBlankPages = config.pdfConfig.skipBlankPages
-                    imageType = config.pdfConfig.imageType
-                }.read()
+                val imagesFlow = PdfImageReader(pdfFile, config.pdfConfig)
+                    .read()
                     .withTiming("dev.waylon.apexflow.pdf.reader")
                     .flowOn(Dispatchers.IO)
                 
@@ -104,13 +99,8 @@ class PdfToTiffConverter internal constructor(
         // Create TIFF write flow (IO intensive)
         val tiffWriteFlow = apexFlow<Pair<File, Flow<BufferedImage>>, Unit> {
             transformOnIO { (tiffFile, imagesFlow) ->
-                TiffWriter(tiffFile) {
-                    // Apply TIFF configuration
-                    compressionType = config.tiffConfig.compressionType
-                    compressionQuality = config.tiffConfig.compressionQuality
-                    parallelWriting = config.tiffConfig.parallelWriting
-                    photometricInterpretation = config.tiffConfig.photometricInterpretation
-                }.write(imagesFlow)
+                TiffWriter(tiffFile, config.tiffConfig)
+                    .write(imagesFlow)
             }
         }
         .withTiming("TIFF Writing Phase")

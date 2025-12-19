@@ -63,13 +63,13 @@ class TiffWriterConfig {
  */
 class TiffWriter(
     private val outputFile: File,
-    config: TiffWriterConfig.() -> Unit = {}
+    tiffConfig: TiffWriterConfig = TiffWriterConfig()
 ) {
 
     private val logger = LoggerFactory.getLogger(TiffWriter::class.java)
 
     // Configuration instance
-    private val tiffConfig = TiffWriterConfig().apply(config)
+    private val config = tiffConfig
 
     /**
      * Write BufferedImage flow to TIFF OutputStream
@@ -89,7 +89,7 @@ class TiffWriter(
             logger.debug("Using TIFF writer: {}", writer::class.simpleName)
 
             // Create write param with JPEG compression
-            val writeParam = tiffConfig.writeParam ?: writer.defaultWriteParam
+            val writeParam = config.writeParam ?: writer.defaultWriteParam
 
             // Step 1: Prepare write sequence for multi-page TIFF
             writer.prepareWriteSequence(null)
