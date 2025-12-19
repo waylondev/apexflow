@@ -1,5 +1,7 @@
-package dev.waylon.apexflow.conversion
+package dev.waylon.apexflow.pdf2tiff
 
+import dev.waylon.apexflow.conversion.pdfToTiff
+import dev.waylon.apexflow.conversion.toTiff
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.runBlocking

@@ -1,4 +1,4 @@
-package dev.waylon.apexflow.conversion.benchmark
+package dev.waylon.apexflow.conversion
 
 import dev.waylon.apexflow.conversion.pdfToTiff
 import dev.waylon.apexflow.conversion.tiffToPdf

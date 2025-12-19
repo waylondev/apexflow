@@ -1,5 +1,6 @@
-package dev.waylon.apexflow.conversion
+package dev.waylon.apexflow.pdf2tiff
 
+import dev.waylon.apexflow.conversion.pdfToTiff
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach

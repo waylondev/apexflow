@@ -1,5 +1,6 @@
-package dev.waylon.apexflow.conversion
+package dev.waylon.apexflow.tiff2pdf
 
+import dev.waylon.apexflow.conversion.tiffToPdf
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
