@@ -4,13 +4,13 @@ import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
 import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 /**
  * Business flow comparison test using ApexFlow
@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory
  * 5. Organize response
  */
 class BusinessFlowComparisonTest {
-
-    private val logger = LoggerFactory.getLogger(BusinessFlowComparisonTest::class.java)
 
     // Test data classes
     data class Request(val id: String, val name: String)
@@ -99,14 +97,19 @@ class BusinessFlowComparisonTest {
 
         val parallelAndMergeFlow = apexFlow {
             map { validatedRequest ->
-                val dbResult = queryDb(validatedRequest)
-                val apiResult = callThirdPartyApi(validatedRequest)
+                kotlinx.coroutines.coroutineScope {
+                    val dbDeferred = async { queryDb(validatedRequest) }
+                    val apiDeferred = async { callThirdPartyApi(validatedRequest) }
 
-                MergedResult(
-                    id = validatedRequest.id,
-                    dbData = dbResult.dbData,
-                    apiData = apiResult.apiData
-                )
+                    val dbResult = dbDeferred.await()
+                    val apiResult = apiDeferred.await()
+
+                    MergedResult(
+                        id = validatedRequest.id,
+                        dbData = dbResult.dbData,
+                        apiData = apiResult.apiData
+                    )
+                }
             }
         }
 
@@ -144,19 +147,12 @@ class BusinessFlowComparisonTest {
             assertEquals("SUCCESS", response.status)
         }
 
-        logger.info(
-            "Single Request Performance: Traditional={}ms, ApexFlow={}ms, Speedup={}x",
-            traditionalTime, apexFlowTime, traditionalTime / apexFlowTime.toDouble()
+        val speedup = traditionalTime / apexFlowTime.toDouble()
+        println(
+            "Single Request Performance: Traditional=$traditionalTime ms, ApexFlow=$apexFlowTime ms, Speedup=$speedup x"
         )
     }
 
 
-    /**
-     * Demonstrate ApexFlow advantages
-     */
-    @Test
-    fun `demo apexflow advantages`() {
-        logger.info("ApexFlow advantages demo: Declarative programming, asynchronous processing, composition capability, type safety, plugin mechanism, reactive design")
-    }
 }
 
