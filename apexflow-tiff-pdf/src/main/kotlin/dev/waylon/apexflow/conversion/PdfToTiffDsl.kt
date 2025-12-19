@@ -105,7 +105,7 @@ class PdfToTiffConverter internal constructor(
                     val imagesFlow = PdfImageReader(input, pdfConfig)
                         .read()
                         .withTiming("dev.waylon.apexflow.pdf.reader")
-                        .flowOn(Dispatchers.Default)
+                        .flowOn(Dispatchers.IO)
 
                     Pair(output, imagesFlow)
                 }
