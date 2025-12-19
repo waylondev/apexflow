@@ -146,9 +146,9 @@ class ApexPerformanceMonitoringPlugin(
         logger.info("GC Time: ${getTotalGcTime()}ms (${gcTimeChange}ms since start)")
     }
 
-    private fun logCpuMetrics(elapsedTime: Long) {
+    private fun logCpuMetrics(elapsedTime: Duration) {
         val cpuUsed = getProcessCpuTime() - initialCpuTime
-        val cpuUsagePercent = if (elapsedTime > 0) (cpuUsed.toDouble() / elapsedTime) * 100 else 0.0
+        val cpuUsagePercent = if (elapsedTime.inWholeNanoseconds > 0) (cpuUsed.toDouble() / elapsedTime.inWholeNanoseconds) * 100 else 0.0
         val processCpuLoad = osBean.processCpuLoad * 100
         val systemCpuLoad = osBean.cpuLoad * 100
 

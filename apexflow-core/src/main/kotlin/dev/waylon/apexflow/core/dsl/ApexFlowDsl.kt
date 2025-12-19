@@ -63,12 +63,6 @@ inline fun <I> filterFlow(crossinline predicate: (I) -> Boolean): ApexFlow<I, I>
     return apexFlow { filter(predicate) }
 }
 
-/**
- * Create a simple ApexFlow that retries failed operations
- */
-@ApexFlowDsl
-fun <I, O> retryFlow(maxRetries: Long = 3, delayMs: Long = 1000): ApexFlow<I, O> {
-    return apexFlow { retry(maxRetries) }
-}
+
 
 
