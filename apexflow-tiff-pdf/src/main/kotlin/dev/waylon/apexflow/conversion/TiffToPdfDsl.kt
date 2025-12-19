@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.flowOn
 
 /**
  * TIFF to PDF conversion DSL
- * 
+ *
  * Provides a fluent API for converting TIFF files to PDF format
  * with support for file-based input/output and flexible configurations.
- * 
+ *
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.flowOn
  *     tiffConfig = { /* TIFF config */ },
  *     pdfConfig = { jpegQuality = 90f }
  * ).convert(inputFile, outputFile)
- * 
+ *
  * // Convert from String path to String path with default settings
  * tiffToPdf().convert("input.tiff", "output.pdf")
  * ```
@@ -52,7 +52,7 @@ class TiffToPdfConverter internal constructor(
 
     /**
      * Convert TIFF file to PDF file
-     * 
+     *
      * @param inputFile Input TIFF file
      * @param outputFile Output PDF file
      */
@@ -64,30 +64,31 @@ class TiffToPdfConverter internal constructor(
             }
         }
     }
-    
+
     /**
      * Convert TIFF InputStream to PDF OutputStream
-     * 
+     *
      * @param inputStream Input TIFF InputStream
      * @param outputStream Output PDF OutputStream
      */
     suspend fun convert(inputStream: InputStream, outputStream: OutputStream) {
         // Create a simple flow with the input stream
         val inputFlow = flow { emit(inputStream to outputStream) }
-        
+
         // Stage 1: TIFF Reading - Only responsible for reading TIFF pages
-        val tiffReadFlow = apexFlow<Pair<InputStream, OutputStream>, Pair<OutputStream, Flow<java.awt.image.BufferedImage>>> {
-            transformOnIO { (input, output) ->
-                val imagesFlow = TiffReader(input, tiffConfig)
-                    .read()
-                    .withTiming("dev.waylon.apexflow.tiff.reader")
-                    .flowOn(Dispatchers.IO)
-                
-                Pair(output, imagesFlow)
+        val tiffReadFlow =
+            apexFlow<Pair<InputStream, OutputStream>, Pair<OutputStream, Flow<java.awt.image.BufferedImage>>> {
+                transformOnIO { (input, output) ->
+                    val imagesFlow = TiffReader(input, tiffConfig)
+                        .read()
+                        .withTiming("dev.waylon.apexflow.tiff.reader")
+                        .flowOn(Dispatchers.IO)
+
+                    Pair(output, imagesFlow)
+                }
             }
-        }
-        .withTiming("TIFF Reading Stage")
-        
+                .withTiming("TIFF Reading Stage")
+
         // Stage 2: PDF Writing - Only responsible for writing PDF pages
         val pdfWriteFlow = apexFlow<Pair<OutputStream, Flow<java.awt.image.BufferedImage>>, Unit> {
             transformOnIO { (output, imagesFlow) ->
@@ -95,12 +96,12 @@ class TiffToPdfConverter internal constructor(
                     .write(imagesFlow)
             }
         }
-        .withTiming("PDF Writing Stage")
-        
+            .withTiming("PDF Writing Stage")
+
         // Combine stages into complete flow
         val tiffToPdfFlow = tiffReadFlow + pdfWriteFlow
             .withTiming("Total TIFF to PDF Conversion")
-        
+
         // Execute the combined flow
         tiffToPdfFlow.transform(inputFlow).collect { }
     }
