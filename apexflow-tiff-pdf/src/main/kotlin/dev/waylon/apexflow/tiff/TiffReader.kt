@@ -3,14 +3,18 @@ package dev.waylon.apexflow.tiff
 import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import javax.imageio.ImageIO
 import javax.imageio.ImageReadParam
 import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 
 /**
  * TIFF reader configuration
@@ -18,6 +22,12 @@ import kotlinx.coroutines.flow.flow
 class TiffReaderConfig {
     /** Image read parameters for customizing TIFF reading behavior */
     var readParam: ImageReadParam? = null
+
+    /** Whether to read pages in parallel */
+    var parallelReading: Boolean = false
+
+    /** Maximum number of pages to read in parallel */
+    var parallelism: Int = Runtime.getRuntime().availableProcessors()
 
 }
 
@@ -47,11 +57,15 @@ class TiffReader @JvmOverloads constructor(
      * Read TIFF data from InputStream and return a Flow of BufferedImage
      *
      * For multi-page image files, returns each page as a separate BufferedImage
+     * Supports parallel reading when parallelReading is enabled while maintaining streaming characteristics
      *
-     * @return Flow<BufferedImage> Flow of images from the TIFF data
+     * @return Flow<BufferedImage> Flow of images from the TIFF data in original order
      */
     override fun read(): Flow<BufferedImage> = flow {
-        logger.info("Starting TIFF reading process")
+        logger.info(
+            "Starting TIFF reading process, parallelReading: {}, parallelism: {}",
+            config.parallelReading, config.parallelism
+        )
 
         // Create ImageInputStream from the provided InputStream
         ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
@@ -69,13 +83,102 @@ class TiffReader @JvmOverloads constructor(
                 // Use custom read param if provided, otherwise default
                 val readParam = config.readParam ?: imageReader.defaultReadParam
 
-                // Read each page
-                repeat(numPages) { pageIndex ->
-                    logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
-                    val image = imageReader.read(pageIndex, readParam)
-                    emit(image)
-                    image.flush()
-                    logger.debug("Successfully read TIFF page {}/{}", pageIndex + 1, numPages)
+                if (config.parallelReading && numPages > 1) {
+                    // Parallel reading mode while maintaining streaming behavior
+                    logger.debug("Using parallel streaming reading mode for {} pages", numPages)
+
+                    // Create a channel to hold read images with their original indices
+                    val channel = Channel<Pair<Int, BufferedImage>>(config.parallelism)
+
+                    // Read the entire input stream into memory for thread-safe access
+                    val inputBytes = inputStream.markSupported().let {
+                        if (it) {
+                            inputStream.reset()
+                            inputStream.readAllBytes()
+                        } else {
+                            // Already consumed the input stream, use the bytes we have
+                            ByteArray(0) // This case shouldn't happen since we already read the numPages
+                        }
+                    }
+
+                    // Run in parallel using coroutines
+                    coroutineScope {
+                        // Start producer coroutines for parallel reading
+                        val producerJobs = (0 until numPages).map { pageIndex ->
+                            launch(Dispatchers.IO) { // Use IO dispatcher for blocking operations
+                                logger.debug(
+                                    "Reading TIFF page {}/{} in thread {}",
+                                    pageIndex + 1, numPages, Thread.currentThread().name
+                                )
+
+                                // Create a new ImageReader instance for each thread (ImageReader is not thread-safe)
+                                ByteArrayInputStream(inputBytes).use { threadInputStream ->
+                                    ImageIO.createImageInputStream(threadInputStream).use { threadImageInputStream ->
+                                        getImageReader(threadImageInputStream).use { threadReader ->
+                                            threadReader.input = threadImageInputStream
+                                            val threadReadParam = config.readParam ?: threadReader.defaultReadParam
+                                            val image = threadReader.read(pageIndex, threadReadParam)
+
+                                            // Send the result with its original index to maintain order
+                                            channel.send(pageIndex to image)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Start consumer coroutine to emit images in order
+                        launch { // Run in the same context as the flow
+                            // Track which index we're expecting next
+                            var nextExpectedIndex = 0
+                            // Map to store images that arrived out of order
+                            val imageMap = mutableMapOf<Int, BufferedImage>()
+
+                            // Collect all read images
+                            repeat(producerJobs.size) {
+                                val (originalIndex, image) = channel.receive()
+
+                                if (originalIndex == nextExpectedIndex) {
+                                    // This is the next image we need, emit it immediately
+                                    emit(image)
+                                    image.flush()
+                                    nextExpectedIndex++
+
+                                    // Check if any subsequent images are already available
+                                    while (imageMap.containsKey(nextExpectedIndex)) {
+                                        val nextImage = imageMap.remove(nextExpectedIndex)!!
+                                        emit(nextImage)
+                                        nextImage.flush()
+                                        nextExpectedIndex++
+                                    }
+                                } else {
+                                    // Store the image for later emission when its turn comes
+                                    imageMap[originalIndex] = image
+                                }
+                            }
+
+                            // Close the channel
+                            channel.close()
+                        }
+
+                        // Wait for all producer jobs to complete
+                        for (job in producerJobs) {
+                            job.join()
+                        }
+
+                    }
+                } else {
+                    // Sequential reading mode (default)
+                    logger.debug("Using sequential reading mode for {} pages", numPages)
+
+                    // Read each page
+                    repeat(numPages) { pageIndex ->
+                        logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
+                        val image = imageReader.read(pageIndex, readParam)
+                        emit(image)
+                        image.flush()
+                        logger.debug("Successfully read TIFF page {}/{}", pageIndex + 1, numPages)
+                    }
                 }
             }
         }

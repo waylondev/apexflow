@@ -61,7 +61,7 @@ ApexFlow's component composition enables:
 - **Extensible**: Easy to add custom conversion logic
 
 ### Modern Technology Stack
-- **Kotlin 1.9+**: Latest Kotlin features
+- **Kotlin 2.3+**: Latest Kotlin features
 - **Kotlin Coroutines**: Asynchronous programming
 - **Flow API**: Reactive streams
 - **PDFBox**: Industry-standard PDF processing
