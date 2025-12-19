@@ -5,6 +5,9 @@ import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.util.createLogger
 import java.lang.management.ManagementFactory
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
@@ -55,8 +58,8 @@ class ApexPerformanceMonitoringPlugin(
                     }
                     .let { originalFlow -> flow.transform(originalFlow) }
                     .onEach { _ ->
-                        val currentTime = System.currentTimeMillis()
-                        if (currentTime - lastSampleTime >= samplingIntervalMs) {
+                        val currentTime = System.nanoTime()
+                        if (currentTime - lastSampleTime >= samplingIntervalMs * 1_000_000) {
                             logSampleMetrics(currentTime)
                             lastSampleTime = currentTime
                         }
@@ -73,7 +76,7 @@ class ApexPerformanceMonitoringPlugin(
     }
 
     private fun initializeMetrics() {
-        startTime = System.currentTimeMillis()
+        startTime = System.nanoTime()
         lastSampleTime = startTime
         initialCpuTime = getProcessCpuTime()
         initialMemoryUsed = memoryBean.heapMemoryUsage.used
@@ -95,10 +98,10 @@ class ApexPerformanceMonitoringPlugin(
     }
 
     private fun logSampleMetrics(currentTime: Long) {
-        val elapsedTime = currentTime - startTime
+        val elapsedTime = (currentTime - startTime).toDuration(DurationUnit.NANOSECONDS)
 
         logger.debug("=== Flow Sample ===")
-        logger.debug("Elapsed Time: ${elapsedTime}ms")
+        logger.debug("Elapsed Time: $elapsedTime")
 
         if (enableDetailedMetrics) {
             logCpuMetrics(elapsedTime)
@@ -109,20 +112,20 @@ class ApexPerformanceMonitoringPlugin(
     }
 
     private fun logErrorMetrics(exception: Throwable) {
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - startTime
-        val cpuUsed = getProcessCpuTime() - initialCpuTime
+        val currentTime = System.nanoTime()
+        val elapsedTime = (currentTime - startTime).toDuration(DurationUnit.NANOSECONDS)
+        val cpuUsed = (getProcessCpuTime() - initialCpuTime).toDuration(DurationUnit.NANOSECONDS)
 
         logger.error("=== Flow Execution Failed ===")
-        logger.error("Elapsed Time: ${elapsedTime}ms")
-        logger.error("CPU Time Used: ${cpuUsed}ms")
+        logger.error("Elapsed Time: $elapsedTime")
+        logger.error("CPU Time Used: $cpuUsed")
         logger.error("Exception: ${exception.message}", exception)
     }
 
     private fun logCompletionMetrics(cause: Throwable?) {
-        val currentTime = System.currentTimeMillis()
-        val elapsedTime = currentTime - startTime
-        val cpuUsed = getProcessCpuTime() - initialCpuTime
+        val currentTime = System.nanoTime()
+        val elapsedTime = (currentTime - startTime).toDuration(DurationUnit.NANOSECONDS)
+        val cpuUsed = (getProcessCpuTime() - initialCpuTime).toDuration(DurationUnit.NANOSECONDS)
         val memoryUsed = memoryBean.heapMemoryUsage.used - initialMemoryUsed
         val threadCountChange = threadBean.threadCount - initialThreadCount
         val gcCountChange = getTotalGcCount() - initialGcCount
@@ -135,8 +138,8 @@ class ApexPerformanceMonitoringPlugin(
             logger.error("Error Cause: ${cause.message}", cause)
         }
 
-        logger.info("Total Execution Time: ${elapsedTime}ms")
-        logger.info("Total CPU Time Used: ${cpuUsed}ms")
+        logger.info("Total Execution Time: $elapsedTime")
+        logger.info("Total CPU Time Used: $cpuUsed")
         logger.info("Heap Memory Used: ${formatBytes(memoryBean.heapMemoryUsage.used)} (${formatBytes(memoryUsed)} since start)")
         logger.info("Thread Count: ${threadBean.threadCount} (${threadCountChange} since start)")
         logger.info("GC Count: ${getTotalGcCount()} (${gcCountChange} since start)")

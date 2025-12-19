@@ -122,15 +122,61 @@ dependencies {
 ```
 
 ### Prerequisites
-- Java 11+
-- Kotlin 1.9+
+- Java 21+
+- Kotlin 2.3+
 
 ## 🎨 Use Cases
 
-- **Document Archiving**: Convert scanned documents to searchable PDFs
-- **Workflow Automation**: Automated document processing pipelines
-- **Microservices**: Lightweight document conversion services
-- **Batch Processing**: Process large volumes of documents efficiently
+### Best Suited For
+
+1. **Complex Workflow Orchestration**
+   - When you need to build complex, multi-step workflows from reusable components
+   - Example: Document processing pipelines with validation, transformation, and storage stages
+
+2. **Asynchronous Stream Processing**
+   - When working with large volumes of data that need to be processed as streams
+   - Example: Real-time document conversion pipelines with backpressure handling
+
+3. **Component Reuse**
+   - When you have common logic that needs to be reused across multiple workflows
+   - Example: Shared validation, error handling, or logging components
+
+4. **Declarative Programming**
+   - When you want to focus on "what to do" rather than "how to do it"
+   - Example: Building workflows using a type-safe DSL with clear, readable syntax
+
+5. **Performance Monitoring**
+   - When you need to track performance metrics of your workflows
+   - Example: Monitoring CPU, memory, and throughput of document conversion processes
+
+6. **MVC Architecture Integration**
+   - **Business Logic Layer**: Perfect for implementing complex service layer logic
+   - **Async Controllers**: Works seamlessly with reactive frameworks like Spring WebFlux
+   - **Workflow Orchestration**: Ideal for multi-step business processes in MVC applications
+   - Example: Order processing pipelines with validation, payment, and shipping stages
+
+### Less Suited For
+
+1. **Trivial Operations**
+   - Simple, one-off tasks that don't require workflow management
+   - Example: A single function call that doesn't need to be reused
+
+2. **Synchronous Blocking Code**
+   - When you need to maintain strict synchronous execution order
+   - Example: Legacy code that relies on blocking I/O operations
+
+3. **Extremely Low-Latency Requirements**
+   - When every microsecond matters and framework overhead is a concern
+   - Example: High-frequency trading systems (though ApexFlow overhead is minimal)
+
+4. **Non-Stream Processing**
+   - When working with small, in-memory data that doesn't need streaming
+   - Example: Simple calculations on small datasets
+
+5. **Traditional MVC Controller Layer**
+   - Not ideal for synchronous blocking controllers (e.g., Spring MVC)
+   - Requires migration to reactive controllers for optimal performance
+   - Example: Legacy Spring MVC applications with synchronous request handling
 
 ## 📄 License
 

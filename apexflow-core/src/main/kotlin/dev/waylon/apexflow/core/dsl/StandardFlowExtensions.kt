@@ -1,6 +1,9 @@
 package dev.waylon.apexflow.core.dsl
 
 import dev.waylon.apexflow.core.util.createLogger
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
@@ -27,20 +30,20 @@ fun <T> Flow<T>.withTiming(loggerName: String = "dev.waylon.apexflow.standard-fl
 
     return this
         .onStart {
-            startTime = System.currentTimeMillis()
+            startTime = System.nanoTime()
             logger.info("Flow execution started")
         }
         .catch { exception ->
-            val duration = System.currentTimeMillis() - startTime
-            logger.error("Flow execution failed after ${duration}ms", exception)
+            val duration = (System.nanoTime() - startTime).toDuration(DurationUnit.NANOSECONDS)
+            logger.error("Flow execution failed after $duration", exception)
             throw exception
         }
         .onCompletion { cause ->
-            val duration = System.currentTimeMillis() - startTime
+            val duration = (System.nanoTime() - startTime).toDuration(DurationUnit.NANOSECONDS)
             if (cause == null) {
-                logger.info("Flow execution completed successfully in ${duration}ms")
+                logger.info("Flow execution completed successfully in $duration")
             } else {
-                logger.error("Flow execution completed with error after ${duration}ms", cause)
+                logger.error("Flow execution completed with error after $duration", cause)
             }
         }
 }

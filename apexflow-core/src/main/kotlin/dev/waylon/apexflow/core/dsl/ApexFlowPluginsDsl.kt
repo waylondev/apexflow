@@ -50,44 +50,20 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"
 }
 
 /**
- * Extension function: add timing plugin
- *
- * Convenience function for adding execution time measurement to ApexFlow instances.
- * Measures and logs the execution time of flow transformations.
- *
- * Usage Example:
- * ```kotlin
- * val flow = apexFlow { ... }
- * val timedFlow = flow.withTiming("my-timed-flow")
- * ```
- *
- * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.timing)
- * @return ApexFlow instance with execution time measurement enabled
- */
-@ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.timing"): ApexFlow<I, O> {
-    return withPlugin(ApexTimingPlugin(loggerName))
-}
-
-/**
  * Extension function: add performance monitoring plugin
  *
- * Enhanced convenience function for adding comprehensive system resource monitoring to ApexFlow instances.
- * Tracks CPU usage, memory consumption, thread states, garbage collection, and memory pool utilization.
+ * Convenience function for adding comprehensive performance monitoring
+ * to ApexFlow instances. Tracks CPU, memory, thread, and GC metrics.
  *
  * Usage Example:
  * ```kotlin
  * val flow = apexFlow { ... }
- * val monitoredFlow = flow.withPerformanceMonitoring(
- *     loggerName = "my-monitored-flow",
- *     samplingIntervalMs = 5000,
- *     enableDetailedMetrics = true
- * )
+ * val monitoredFlow = flow.withPerformanceMonitoring("my-flow")
  * ```
  *
  * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.performance)
- * @param samplingIntervalMs Sampling interval in milliseconds (default: 5000)
- * @param enableDetailedMetrics Enable detailed memory pool and thread state metrics (default: false)
+ * @param samplingIntervalMs Sampling interval for metrics (default: 5000ms)
+ * @param enableDetailedMetrics Whether to enable detailed metrics (default: false)
  * @return ApexFlow instance with performance monitoring enabled
  */
 @ApexFlowDsl
@@ -98,3 +74,5 @@ fun <I, O> ApexFlow<I, O>.withPerformanceMonitoring(
 ): ApexFlow<I, O> {
     return withPlugin(ApexPerformanceMonitoringPlugin(loggerName, samplingIntervalMs, enableDetailedMetrics))
 }
+
+
