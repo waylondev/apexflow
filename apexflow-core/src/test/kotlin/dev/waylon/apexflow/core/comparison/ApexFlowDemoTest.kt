@@ -5,6 +5,7 @@ import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -97,7 +98,7 @@ class BusinessFlowComparisonTest {
 
         val parallelAndMergeFlow = apexFlow {
             map { validatedRequest ->
-                kotlinx.coroutines.coroutineScope {
+                coroutineScope {
                     val dbDeferred = async { queryDb(validatedRequest) }
                     val apiDeferred = async { callThirdPartyApi(validatedRequest) }
 
