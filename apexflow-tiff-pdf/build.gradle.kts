@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
     id("java-library")
-    id("org.jetbrains.kotlinx.benchmark") version "0.5.0"
 }
 
 group = "dev.waylon.apexflow"
@@ -59,10 +58,6 @@ dependencies {
 
     // Test dependencies
     testImplementation(libs.kotlin.test)
-    
-    // Benchmark dependencies
-    benchmarkImplementation(libs.kotlinx.benchmark.runtime)
-    benchmarkImplementation(kotlin("test"))
 }
 
 // Use the Kotlin test runner instead of JUnit to avoid dependency issues
@@ -72,41 +67,7 @@ tasks.test {
     jvmArgs = listOf("-Xmx4g", "-Xms2g")
 }
 
-// Benchmark configuration
-benchmark {
-    targets {
-        register("main") {
-            mode = "throughput"
-            iterations = 5
-            warmups = 2
-            timeUnit = "ms"
-        }
-    }
-    configurations {
-        named("main") {
-            jvmArgs = listOf("-Xmx4g", "-Xms2g")
-        }
-    }
-}
 
-// Add benchmark source set
-sourceSets {
-    create("benchmark") {
-        kotlin {
-            srcDir("src/benchmark/kotlin")
-        }
-        resources {
-            srcDir("src/benchmark/resources")
-        }
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
-    }
-}
-
-// Configure benchmark compilation
-val compileBenchmarkKotlin by tasks.getting(JavaCompile::class) {
-    dependsOn(compileKotlin)
-}
 
 // Configure Maven publishing
 publishing {
