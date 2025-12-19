@@ -1,11 +1,9 @@
 package dev.waylon.apexflow.conversion
 
-import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.slf4j.LoggerFactory
 
 /**
@@ -79,21 +77,21 @@ class PdfToTiffEdgeCaseTest {
 
         // Test different compression types
         val compressionTypes = listOf("JPEG", "LZW", "DEFLATE", "NONE")
-        
+
         compressionTypes.forEach { compressionType ->
             logger.info("Testing compression type: $compressionType")
             val outputFile = File("dist/test-pdf-to-tiff-$compressionType.tiff")
-            
+
             pdfToTiff(
-                tiffConfig = { 
+                tiffConfig = {
                     this.compressionType = compressionType
                     this.compressionQuality = 90f
                 }
             ).convert(testPdfFile, outputFile)
-            
+
             assertTrue(outputFile.exists(), "TIFF file with $compressionType compression was not created")
             assertTrue(outputFile.length() > 0, "TIFF file with $compressionType compression is empty")
-            
+
             // Clean up
             outputFile.delete()
         }
@@ -114,24 +112,24 @@ class PdfToTiffEdgeCaseTest {
         // Test with specific page range
         val pageRangeTiff = File("dist/test-pdf-to-tiff-page-range.tiff")
         pdfToTiff(
-            pdfConfig = { 
+            pdfConfig = {
                 pageNumbers = listOf(0, 1) // First two pages
             },
             tiffConfig = { compressionType = "JPEG" }
         ).convert(testPdfFile, pageRangeTiff)
-        
+
         assertTrue(pageRangeTiff.exists(), "Page range TIFF file was not created")
         assertTrue(pageRangeTiff.length() > 0, "Page range TIFF file is empty")
 
         // Test with invalid page numbers (should be filtered out)
         val invalidPageRangeTiff = File("dist/test-pdf-to-tiff-invalid-page-range.tiff")
         pdfToTiff(
-            pdfConfig = { 
+            pdfConfig = {
                 pageNumbers = listOf(0, 1000, -1) // Some invalid pages
             },
             tiffConfig = { compressionType = "JPEG" }
         ).convert(testPdfFile, invalidPageRangeTiff)
-        
+
         assertTrue(invalidPageRangeTiff.exists(), "Invalid page range TIFF file was not created")
         assertTrue(invalidPageRangeTiff.length() > 0, "Invalid page range TIFF file is empty")
 
@@ -155,24 +153,24 @@ class PdfToTiffEdgeCaseTest {
         // Test with RGB image type
         val rgbTiff = File("dist/test-pdf-to-tiff-rgb.tiff")
         pdfToTiff(
-            pdfConfig = { 
+            pdfConfig = {
                 imageType = dev.waylon.apexflow.pdf.PdfImageReaderConfig.ImageType.RGB
             },
             tiffConfig = { compressionType = "JPEG" }
         ).convert(testPdfFile, rgbTiff)
-        
+
         assertTrue(rgbTiff.exists(), "RGB TIFF file was not created")
         assertTrue(rgbTiff.length() > 0, "RGB TIFF file is empty")
 
         // Test with GRAY image type
         val grayTiff = File("dist/test-pdf-to-tiff-gray.tiff")
         pdfToTiff(
-            pdfConfig = { 
+            pdfConfig = {
                 imageType = dev.waylon.apexflow.pdf.PdfImageReaderConfig.ImageType.GRAY
             },
             tiffConfig = { compressionType = "JPEG" }
         ).convert(testPdfFile, grayTiff)
-        
+
         assertTrue(grayTiff.exists(), "GRAY TIFF file was not created")
         assertTrue(grayTiff.length() > 0, "GRAY TIFF file is empty")
 
@@ -196,12 +194,12 @@ class PdfToTiffEdgeCaseTest {
         // Test with skip blank pages enabled
         val skipBlankTiff = File("dist/test-pdf-to-tiff-skip-blank.tiff")
         pdfToTiff(
-            pdfConfig = { 
+            pdfConfig = {
                 skipBlankPages = true
             },
             tiffConfig = { compressionType = "JPEG" }
         ).convert(testPdfFile, skipBlankTiff)
-        
+
         assertTrue(skipBlankTiff.exists(), "Skip blank pages TIFF file was not created")
         assertTrue(skipBlankTiff.length() > 0, "Skip blank pages TIFF file is empty")
 
@@ -224,12 +222,12 @@ class PdfToTiffEdgeCaseTest {
         // Test with parallel writing enabled
         val parallelTiff = File("dist/test-pdf-to-tiff-parallel.tiff")
         pdfToTiff(
-            tiffConfig = { 
+            tiffConfig = {
                 compressionType = "JPEG"
                 parallelWriting = true
             }
         ).convert(testPdfFile, parallelTiff)
-        
+
         assertTrue(parallelTiff.exists(), "Parallel writing TIFF file was not created")
         assertTrue(parallelTiff.length() > 0, "Parallel writing TIFF file is empty")
 

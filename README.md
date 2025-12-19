@@ -1,131 +1,211 @@
-总体架构：Clean & SOLID启发的四层架构
-本框架采用一个内核精炼、功能分层、依赖清晰的架构，其核心设计思想是 “稳定内核，可拔插增强”。整个架构围绕一个纯粹的核心引擎展开，通过标准的接口与各种“增强器”连接，以实现编译期分析、运行时监控等高级功能，而所有决策权最终都交还给开发者。
+# ApexFlow
 
-graph TD
-    subgraph A [核心引擎层 Core Engine]
-        A1[DSL & 流程定义]
-        A2[类型安全的流程执行器]
-        A3[统一的执行模型]
-    end
+A modern, high-performance, and highly extensible framework for document processing and conversion, built with Kotlin and cutting-edge technologies.
 
-    subgraph B [静态增强层 (可选)]
-        B1[注解处理器]
-        B2[KSP 静态分析器]
-        B3[生成：洞察报告/流图文档]
-    end
+## 🚀 Key Features
 
-    subgraph C [运行时增强层 (可选)]
-        C1[拦截器接口]
-        C2[指标收集插件]
-        C3[追踪与诊断插件]
-    end
+### Modern Architecture
+- **Kotlin-First Design**: Leverages Kotlin's concise syntax, null safety, and functional programming capabilities
+- **Coroutine-Powered**: Built on Kotlin Coroutines for efficient asynchronous processing
+- **Flow-Based API**: Uses Flow API for reactive, backpressure-aware stream processing
+- **DSL-Friendly**: Fluent Domain-Specific Languages for intuitive usage
 
-    subgraph D [外围集成层]
-        D1[Ktor/Spring Boot 适配器]
-        D2[Web 仪表盘]
-        D3[IDE 插件]
-    end
+### High Performance
+- **Stream-Based Processing**: Core design emphasizes stream processing to minimize memory footprint
+- **Efficient I/O Handling**: Optimized for large file processing with minimal buffering
+- **Parallel Execution**: Smart parallelization of CPU-intensive tasks
+- **Low Overhead**: Minimal framework overhead for maximum throughput
 
-    B -- “基于” --> A
-    C -- “注入” --> A
-    D -- “使用或暴露” --> A & B & C
+### Highly Extensible
+- **Modular Architecture**: Clean separation of concerns with pluggable components
+- **Configuration-Driven**: Flexible configuration system for easy customization
+- **Extension Functions**: Rich set of extension functions for enhanced usability
+- **Customizable Processors**: Easy to add custom conversion logic and processors
+
+### Cutting-Edge Technology Stack
+- **Kotlin 1.9+**: Latest Kotlin features including sealed classes, data classes, and type aliases
+- **Kotlin Coroutines**: Asynchronous programming with structured concurrency
+- **Flow API**: Reactive streams with backpressure support
+- **PDFBox**: Industry-standard PDF processing library
+- **TwelveMonkeys ImageIO**: High-performance image processing with TIFF support
+
+## 📋 Core Functionalities
+
+### Document Conversion
+- **PDF to TIFF**: High-quality PDF to TIFF conversion with customizable DPI and compression
+- **TIFF to PDF**: Efficient TIFF to PDF conversion with support for multi-page TIFFs
+- **Bidirectional Support**: Seamless conversion in both directions
+
+### Input/Output Flexibility
+- **File Support**: Direct file-to-file conversion
+- **Stream Support**: InputStream/OutputStream for in-memory processing
+- **Path Support**: String paths for convenient usage
+- **Flow Support**: Flow-based processing for reactive pipelines
+
+### Configuration Options
+- **PDF Configuration**: DPI, page filtering, blank page skipping
+- **TIFF Configuration**: Compression type, quality, color mode
+- **PDF Writing**: JPEG quality, compression, PDF version
+- **Runtime Customization**: Configure processing parameters at runtime
+
+## 🏗️ Architecture
+
+### Core Components
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    ApexFlow Framework                   │
+├───────────────────┬───────────────────┬─────────────────┤
+│   Document DSLs   │   I/O Processors  │   Conversion    │
+│                   │                   │   Pipelines     │
+├───────────────────┼───────────────────┼─────────────────┤
+│ - pdfToTiff()     │ - PdfImageReader  │ - ApexFlow Core │
+│ - tiffToPdf()     │ - TiffWriter      │ - TransformOnIO │
+│ - Extension Funcs │ - TiffReader      │ - WithTiming    │
+│                   │ - PdfImageWriter  │                 │
+└───────────────────┴───────────────────┴─────────────────┘
+```
+
+### Processing Pipeline
+
+1. **Input Handling**: Read from File, InputStream, or String path
+2. **Conversion Stage**: Transform data using specialized processors
+3. **Output Handling**: Write to File, OutputStream, or String path
+4. **Monitoring**: Built-in timing and logging for performance analysis
+
+## 💡 Usage Examples
+
+### Basic PDF to TIFF Conversion
+
+```kotlin
+import dev.waylon.apexflow.conversion.pdfToTiff
+import java.io.File
+import kotlinx.coroutines.runBlocking
+
+fun main() = runBlocking {
+    val inputFile = File("input.pdf")
+    val outputFile = File("output.tiff")
     
-    style A fill:#e1f5e1
-    style B fill:#e3f2fd
-    style C fill:#fff3e0
-    style D fill:#fce4ec
+    // Simple conversion with default settings
+    pdfToTiff().convert(inputFile, outputFile)
+}
+```
 
-第1层：核心引擎层 - 职责：流程定义与执行
-这是框架的唯一强制依赖，必须保持极简、稳定、无副作用。
+### Custom Configuration
 
-声明式DSL：
+```kotlin
+pdfToTiff(
+    pdfConfig = { 
+        dpi = 300f
+        skipBlankPages = true
+    },
+    tiffConfig = { 
+        compressionType = "LZW"
+        compressionQuality = 100f
+    }
+).convert(inputFile, outputFile)
+```
 
-提供类似 apexFlow { ... } 的构建器，让开发者以 transform、filter、branch 等操作声明业务流图。
+### Extension Functions
 
-核心是定义 Flow<T> 到 Flow<R> 的转换链。
+```kotlin
+// File extension functions
+File("input.pdf").toTiff(File("output.tiff"))
+File("input.tiff").toPdf(File("output.pdf"))
 
-统一执行模型：
+// InputStream/OutputStream
+inputStream.toTiff(outputStream)
+inputStream.toPdf(outputStream)
+```
 
-同一个流程定义，应能通过不同终端执行：
+### String Paths
 
-.execute(input): Result (单次)
+```kotlin
+pdfToTiff().convert("input.pdf", "output.tiff")
+tiffToPdf().convert("input.tiff", "output.pdf")
+```
 
-.asFlow(sourceFlow): Flow<Result> (流式)
+## 🎯 Design Principles
 
-.executeAll(list): List<Result> (批量)
+### Simplicity First
+- Intuitive API design with minimal boilerplate
+- Clear, concise documentation
+- Easy to learn, hard to misuse
 
-类型安全构建器：
+### Type Safety
+- No `Any` types in public APIs
+- Compile-time type checking
+- Strongly typed configurations
 
-利用Kotlin泛型，在编译时确保相邻 transform 的输入/输出类型匹配。这是框架提供的最基础的“编译期安全”。
+### Robust Error Handling
+- Comprehensive exception handling
+- Clear error messages
+- Graceful degradation
 
-第2层：静态增强层 - 职责：编译期分析与洞察
-这是实现“深度洞察”的第一把利器，完全在编译期工作。
+### Performance-Oriented
+- Stream-based processing by default
+- Efficient memory usage
+- Optimized for large files
 
-注解驱动的元数据：
+## 🔧 Getting Started
 
-提供 @FlowNode(name=“”, category=CPU/IO) 等注解，让开发者标记关键节点。
+### Installation
 
-KSP静态分析器：
+Add the dependency to your `build.gradle.kts`:
 
-分析被注解的代码，构建完整的流程有向图模型，包含节点、边、数据类型。
+```kotlin
+dependencies {
+    implementation("dev.waylon:apexflow:1.0.0")
+}
+```
 
-执行静态规则检查（如资源生命周期闭环、潜在的死锁模式）。
+### Prerequisites
 
-生成“洞察报告”：
+- Java 11+ (required for PDFBox)
+- Kotlin 1.9+
 
-不生成业务代码，而是输出结构化报告（JSON/HTML），内容包括：
+## 📊 Performance Characteristics
 
-可视化流图。
+- **Memory Usage**: Constant memory footprint for large files
+- **Throughput**: Optimized for high-speed conversion
+- **Scalability**: Handles files of any size
+- **Concurrent Processing**: Safe for concurrent usage
 
-类型流转清单。
+## 🎨 Use Cases
 
-静态优化建议（例如：“节点A和B是纯函数，可合并”）。
+### Business Applications
+- **Document Archiving**: Convert scanned documents to searchable PDFs
+- **Print Workflows**: Prepare documents for printing with optimal formatting
+- **Content Management**: Process and transform documents in CMS systems
+- **E-commerce**: Generate product catalogs and brochures
 
-潜在风险警告。
+### Enterprise Integration
+- **Workflow Automation**: Integrate with workflow engines for automated document processing
+- **Microservices**: Deploy as lightweight microservices for document conversion
+- **Batch Processing**: Process large volumes of documents efficiently
 
-第3层：运行时增强层 - 职责：运行时监控与诊断
-这是实现“深度洞察”的第二把利器，在运行时透明地收集数据。
+## 🔮 Future Roadmap
 
-拦截器接口：
+- [ ] Support for more document formats (PNG, JPEG, etc.)
+- [ ] OCR integration for text extraction
+- [ ] Cloud-native deployment options
+- [ ] WebSocket support for real-time processing
+- [ ] GUI tools for interactive configuration
 
-提供标准的 FlowInterceptor 接口，允许插件在流程执行的各个生命周期（onStart, onEach, onCompletion, onError）注入逻辑。
+## 🤝 Contributing
 
-可观测性插件：
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
 
-指标插件：自动测量每个节点的耗时、吞吐量、错误率，并暴露给 Micrometer 等系统。
+## 📄 License
 
-追踪插件：为流经的数据项分配唯一追踪ID，实现跨节点的请求链路追踪。
+Apache License 2.0
 
-动态诊断与建议：
+## 📞 Support
 
-基于实时指标，在仪表盘中高亮显示瓶颈节点。
+For questions, issues, or feedback, please create an issue in the GitHub repository.
 
-结合静态流图，给出动态建议（如：“该节点平均处理耗时100ms，是上游生产速度的3倍，建议检查其内部逻辑或增加其并行度”）。
+---
 
-第4层：外围集成层 - 职责：易用性与呈现
-让框架能力更好地交付给开发者。
+Built with ❤️ using modern Kotlin technologies
 
-Web框架适配器：
-
-提供与 Ktor、Spring WebFlux 的集成模块，简化将 HTTP 请求/响应映射到流程的方法。
-
-可视化仪表盘：
-
-一个独立的Web应用，融合静态流图和实时指标，提供交互式的系统洞察视图。
-
-IDE插件（远期）：
-
-在IDE中直接显示流程视图和实时洞察。
-
-核心设计原则（SOLID体现）
-单一职责：每层、每个插件只做一件事。核心引擎只编排，KSP只分析，插件只监控。
-
-开闭原则：核心引擎对修改关闭。所有新功能（新分析规则、新监控维度）通过实现插件接口来扩展。
-
-接口隔离：插件接口细粒度划分（如 MetricsInterceptor、TracingInterceptor），让插件按需实现。
-
-依赖倒置：
-
-高层模块（如仪表盘）不依赖低层细节（如具体的指标库），而是依赖抽象的 InsightRepository 接口。
-
-核心引擎绝对不依赖任何增强层。增强层依赖核心引擎的接口。
+ApexFlow - The future of document processing
