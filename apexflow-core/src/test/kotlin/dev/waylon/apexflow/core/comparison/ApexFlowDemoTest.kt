@@ -99,8 +99,8 @@ class BusinessFlowComparisonTest {
 
         val parallelAndMergeFlow = apexFlow {
             map { validatedRequest ->
-                val dbResult = runBlocking { queryDb(validatedRequest) }
-                val apiResult = runBlocking { callThirdPartyApi(validatedRequest) }
+                val dbResult = queryDb(validatedRequest)
+                val apiResult = callThirdPartyApi(validatedRequest)
 
                 MergedResult(
                     id = validatedRequest.id,

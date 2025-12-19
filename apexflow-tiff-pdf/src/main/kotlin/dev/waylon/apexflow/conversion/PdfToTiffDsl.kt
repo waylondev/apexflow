@@ -12,6 +12,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -125,7 +126,7 @@ class PdfToTiffConverter internal constructor(
             .withTiming("Total PDF to TIFF Conversion")
 
         // Execute the combined flow
-        pdfToTiffFlow.transform(inputFlow).collect { }
+        pdfToTiffFlow.transform(inputFlow).first()
     }
 
     /**
