@@ -1,8 +1,8 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.dsl.withTiming
+import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import kotlinx.coroutines.flow.Flow
 import org.slf4j.LoggerFactory
 

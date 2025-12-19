@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory
 fun <T> Flow<T>.withTiming(loggerName: String = "dev.waylon.apexflow.standard-flow.timing"): Flow<T> {
     val logger = LoggerFactory.getLogger(loggerName)
     var startTime: Long = 0
-    
+
     return this
-        .onStart { 
+        .onStart {
             startTime = System.currentTimeMillis()
             logger.info("Flow execution started")
         }
