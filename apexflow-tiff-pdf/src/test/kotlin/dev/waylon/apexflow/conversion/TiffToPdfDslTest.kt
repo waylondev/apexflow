@@ -2,9 +2,10 @@ package dev.waylon.apexflow.conversion
 
 import java.io.File
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 /**
  * Test file for TIFF to PDF conversion DSL
@@ -17,21 +18,24 @@ import org.slf4j.LoggerFactory
  */
 class TiffToPdfDslTest {
 
-    private val logger = LoggerFactory.getLogger(TiffToPdfDslTest::class.java)
-
-    // Test TIFF file path (will be created during test)
+    // Test TIFF file path
     private val testTiffFile = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
 
     // Temporary output file for testing
     private val tempOutputFile = File("build/test-tiff-to-pdf-dsl-output.pdf")
 
-    /**
-     * Ensure we have a test TIFF file by converting from PDF if needed
-     */
-    private fun ensureTestTiffExists() {
-        logger.info("Creating test TIFF file from PDF...")
-        assertTrue(testTiffFile.exists(), "Failed to create test TIFF file")
-        logger.info("Test TIFF file created successfully: ${testTiffFile.absolutePath}")
+    @BeforeEach
+    fun setUp() {
+        // Ensure output directory exists
+        tempOutputFile.parentFile?.mkdirs()
+        // Verify test TIFF file exists
+        assertTrue(testTiffFile.exists(), "Test TIFF file does not exist")
+    }
+
+    @AfterEach
+    fun tearDown() {
+        // Clean up temporary files
+        tempOutputFile.delete()
     }
 
     /**
@@ -39,22 +43,12 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test basic tiff to pdf conversion`() = runBlocking {
-        logger.info("=== Test: Basic TIFF to PDF conversion ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
         // Test basic DSL conversion
         tiffToPdf().convert(testTiffFile, tempOutputFile)
 
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ Basic TIFF to PDF conversion successful")
     }
 
     /**
@@ -62,11 +56,6 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test tiff to pdf with custom configuration`() = runBlocking {
-        logger.info("=== Test: TIFF to PDF with custom configuration ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
         // Test DSL with custom configuration
         tiffToPdf(
             tiffConfig = { /* TIFF config */ },
@@ -80,11 +69,6 @@ class TiffToPdfDslTest {
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ TIFF to PDF with custom configuration successful")
     }
 
     /**
@@ -92,22 +76,12 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test File toPdf extension function`() = runBlocking {
-        logger.info("=== Test: File.toPdf extension function ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
         // Test File.toPdf extension function
         testTiffFile.toPdf(tempOutputFile)
 
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ File.toPdf extension function successful")
     }
 
     /**
@@ -115,22 +89,12 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test InputStream to PDF conversion`() = runBlocking {
-        logger.info("=== Test: InputStream to PDF conversion ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
-        // Test DSL with File parameters (already tested InputStream in other test)
+        // Test DSL with File parameters
         tiffToPdf().convert(testTiffFile, tempOutputFile)
 
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ InputStream to PDF conversion successful")
     }
 
     /**
@@ -138,11 +102,6 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test String path conversion`() = runBlocking {
-        logger.info("=== Test: String path conversion ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
         // Test DSL with String paths
         val inputPath = testTiffFile.absolutePath
         val outputPath = tempOutputFile.absolutePath
@@ -152,11 +111,6 @@ class TiffToPdfDslTest {
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ String path conversion successful")
     }
 
     /**
@@ -164,11 +118,6 @@ class TiffToPdfDslTest {
      */
     @Test
     fun `test InputStream toPdf extension function`() = runBlocking {
-        logger.info("=== Test: InputStream.toPdf extension function ===")
-
-        // Ensure we have a test TIFF file
-        ensureTestTiffExists()
-
         // Create input stream from file
         testTiffFile.inputStream().use { inputStream ->
             // Test InputStream.toPdf extension function
@@ -178,31 +127,5 @@ class TiffToPdfDslTest {
         // Verify output file was created
         assertTrue(tempOutputFile.exists(), "Output PDF file was not created")
         assertTrue(tempOutputFile.length() > 0, "Output PDF file is empty")
-
-        // Clean up
-        tempOutputFile.delete()
-
-        logger.info("✓ InputStream.toPdf extension function successful")
-    }
-
-    /**
-     * Clean up test files after all tests
-     */
-//    @Test
-    fun `clean up test files`() {
-        logger.info("=== Test: Clean up test files ===")
-
-        // Delete temporary files if they exist
-//        if (testTiffFile.exists()) {
-//            testTiffFile.delete()
-//            logger.info("✓ Deleted test TIFF file: ${testTiffFile.absolutePath}")
-//        }
-
-        if (tempOutputFile.exists()) {
-            tempOutputFile.delete()
-            logger.info("✓ Deleted temporary output file: ${tempOutputFile.absolutePath}")
-        }
-
-        logger.info("✓ Clean up completed")
     }
 }
