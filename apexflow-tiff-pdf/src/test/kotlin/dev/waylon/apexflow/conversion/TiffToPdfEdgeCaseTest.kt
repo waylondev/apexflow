@@ -3,14 +3,13 @@ package dev.waylon.apexflow.conversion
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 /**
- * Edge case tests for PDF to TIFF conversion
+ * Edge case tests for TIFF to PDF conversion
  *
  * Tests various error conditions and edge cases including:
  * - Invalid input files
@@ -19,34 +18,31 @@ import org.slf4j.LoggerFactory
  * - Exception handling
  * - Invalid configurations
  */
-class PdfToTiffEdgeCaseTest {
+class TiffToPdfEdgeCaseTest {
 
-    private val logger = LoggerFactory.getLogger(PdfToTiffEdgeCaseTest::class.java)
-
-    // Small test PDF file
-    private val smallTestPdfFile = File("dist/test-pdf-to-tiff-dsl.pdf")
+    private val logger = LoggerFactory.getLogger(TiffToPdfEdgeCaseTest::class.java)
 
     /**
-     * Test conversion with invalid PDF file
+     * Test conversion with invalid TIFF file
      */
     @Test
-    fun `test conversion with invalid pdf file`() = runBlocking {
-        logger.info("=== Test: Conversion with invalid PDF file ===")
+    fun `test conversion with invalid tiff file`() = runBlocking {
+        logger.info("=== Test: Conversion with invalid TIFF file ===")
 
-        // Create a non-PDF file
-        val invalidPdfFile = File.createTempFile("invalid", ".pdf")
-        invalidPdfFile.writeText("This is not a valid PDF file")
+        // Create a non-TIFF file
+        val invalidTiffFile = File.createTempFile("invalid", ".tiff")
+        invalidTiffFile.writeText("This is not a valid TIFF file")
 
         try {
             // This should throw an exception
             assertThrows(Exception::class.java) {
                 runBlocking {
-                    pdfToTiff().convert(invalidPdfFile, File.createTempFile("output", ".tiff"))
+                    tiffToPdf().convert(invalidTiffFile, File.createTempFile("output", ".pdf"))
                 }
             }
-            logger.info("✓ Conversion with invalid PDF file correctly threw exception")
+            logger.info("✓ Conversion with invalid TIFF file correctly threw exception")
         } finally {
-            invalidPdfFile.delete()
+            invalidTiffFile.delete()
         }
     }
 
@@ -65,7 +61,7 @@ class PdfToTiffEdgeCaseTest {
             // This should throw an exception
             assertThrows(Exception::class.java) {
                 runBlocking {
-                    pdfToTiff().convert(emptyInputStream, outputStream)
+                    tiffToPdf().convert(emptyInputStream, outputStream)
                 }
             }
             logger.info("✓ Conversion with empty input stream correctly threw exception")
@@ -76,25 +72,25 @@ class PdfToTiffEdgeCaseTest {
     }
 
     /**
-     * Test conversion with corrupted PDF data
+     * Test conversion with corrupted TIFF data
      */
     @Test
-    fun `test conversion with corrupted pdf data`() = runBlocking {
-        logger.info("=== Test: Conversion with corrupted PDF data ===")
+    fun `test conversion with corrupted tiff data`() = runBlocking {
+        logger.info("=== Test: Conversion with corrupted TIFF data ===")
 
-        // Create corrupted PDF data (valid PDF header but corrupted content)
-        val corruptedPdfData = ("%PDF-1.7\n" + "".padStart(100, 'x') + "\n%%EOF").toByteArray()
-        val corruptedInputStream = ByteArrayInputStream(corruptedPdfData)
+        // Create corrupted TIFF data (some random bytes that aren't a valid TIFF)
+        val corruptedTiffData = ByteArray(100) { it.toByte() }
+        val corruptedInputStream = ByteArrayInputStream(corruptedTiffData)
         val outputStream = ByteArrayOutputStream()
 
         try {
             // This should throw an exception
             assertThrows(Exception::class.java) {
                 runBlocking {
-                    pdfToTiff().convert(corruptedInputStream, outputStream)
+                    tiffToPdf().convert(corruptedInputStream, outputStream)
                 }
             }
-            logger.info("✓ Conversion with corrupted PDF data correctly threw exception")
+            logger.info("✓ Conversion with corrupted TIFF data correctly threw exception")
         } finally {
             corruptedInputStream.close()
             outputStream.close()
@@ -109,14 +105,14 @@ class PdfToTiffEdgeCaseTest {
         logger.info("=== Test: Conversion with non-existent input file ===")
 
         // Non-existent file
-        val nonExistentFile = File("non-existent-file.pdf")
-        val outputFile = File.createTempFile("output", ".tiff")
+        val nonExistentFile = File("non-existent-file.tiff")
+        val outputFile = File.createTempFile("output", ".pdf")
 
         try {
             // This should throw an exception
             assertThrows(Exception::class.java) {
                 runBlocking {
-                    pdfToTiff().convert(nonExistentFile, outputFile)
+                    tiffToPdf().convert(nonExistentFile, outputFile)
                 }
             }
             logger.info("✓ Conversion with non-existent input file correctly threw exception")
@@ -126,33 +122,34 @@ class PdfToTiffEdgeCaseTest {
     }
 
     /**
-     * Test conversion with invalid DPI configuration
+     * Test conversion with invalid PDF version configuration
      */
     @Test
-    fun `test conversion with invalid dpi configuration`() = runBlocking {
-        logger.info("=== Test: Conversion with invalid DPI configuration ===")
+    fun `test conversion with invalid pdf version configuration`() = runBlocking {
+        logger.info("=== Test: Conversion with invalid PDF version configuration ===")
 
-        // Check if test PDF exists
-        if (!smallTestPdfFile.exists()) {
-            logger.warn("Small test PDF not found, skipping test")
+        // Check if test TIFF exists
+        val testTiffFile = File("dist/test-tiff-to-pdf-dsl.tiff")
+        if (!testTiffFile.exists()) {
+            logger.warn("Test TIFF file not found, skipping test")
             return@runBlocking
         }
 
-        val outputFile = File.createTempFile("output", ".tiff")
+        val outputFile = File.createTempFile("output", ".pdf")
 
         try {
-            // This should either fail or handle gracefully with minimum DPI
-            pdfToTiff(
+            // This should either fail or handle gracefully
+            tiffToPdf(
                 pdfConfig = {
-                    dpi = 0f // Invalid DPI
+                    pdfVersion = "invalid-version" // Invalid PDF version
                 }
-            ).convert(smallTestPdfFile, outputFile)
+            ).convert(testTiffFile, outputFile)
 
             // If it doesn't throw, verify output was created
             assert(outputFile.exists() && outputFile.length() > 0)
-            logger.info("✓ Conversion with invalid DPI configuration handled gracefully")
+            logger.info("✓ Conversion with invalid PDF version configuration handled gracefully")
         } catch (e: Exception) {
-            logger.info("✓ Conversion with invalid DPI configuration correctly threw exception: ${e.message}")
+            logger.info("✓ Conversion with invalid PDF version configuration correctly threw exception: ${e.message}")
         } finally {
             outputFile.delete()
         }

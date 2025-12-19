@@ -65,6 +65,8 @@ dependencies {
 // Use the Kotlin test runner instead of JUnit to avoid dependency issues
 tasks.test {
     useJUnitPlatform()
+    // Increase heap size for testing large files
+    jvmArgs = listOf("-Xmx4g", "-Xms2g")
 }
 
 // Configure Maven publishing
