@@ -9,6 +9,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -164,7 +165,7 @@ class BusinessFlowComparisonTest {
         // Test ApexFlow implementation
         val apexFlow = createApexFlow()
         val apexFlowTime = measureTimeMillis {
-            val response = apexFlow.execute(request).first()
+            val response = apexFlow.execute(request).toList().first()
             assertEquals("SUCCESS", response.status)
         }
 

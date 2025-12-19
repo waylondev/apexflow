@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.toList
 
 /**
  * TIFF to PDF conversion DSL
@@ -127,7 +128,7 @@ class TiffToPdfConverter internal constructor(
             .withTiming("Total TIFF to PDF Conversion")
 
         // Execute the combined flow
-        tiffToPdfFlow.transform(inputFlow).first()
+        tiffToPdfFlow.transform(inputFlow).toList()
     }
 
     /**
