@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.flowOn
 
 /**
  * TIFF to PDF conversion DSL
- *
+ * 
  * Provides a fluent API for converting TIFF files to PDF format
  * with support for file-based input/output and flexible configurations.
- *
+ * 
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.flowOn
  *     tiffConfig = { /* TIFF config */ },
  *     pdfConfig = { jpegQuality = 90f }
  * ).convert(inputFile, outputFile)
- *
+ * 
  * // Convert from String path to String path with default settings
  * tiffToPdf().convert("input.tiff", "output.pdf")
  * ```

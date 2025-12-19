@@ -59,28 +59,12 @@ class PdfImageWriter(
     private val config: PdfImageWriterConfig = PdfImageWriterConfig()
 ) {
     /**
-     * 便捷构造函数：OutputStream + 配置lambda
-     */
-    constructor(
-        outputStream: OutputStream,
-        config: PdfImageWriterConfig.() -> Unit
-    ) : this(outputStream, PdfImageWriterConfig().apply(config))
-
-    /**
      * 便捷构造函数：File + 配置对象
      */
     constructor(
         file: File,
         config: PdfImageWriterConfig = PdfImageWriterConfig()
     ) : this(file.outputStream(), config)
-
-    /**
-     * 便捷构造函数：File + 配置lambda
-     */
-    constructor(
-        file: File,
-        config: PdfImageWriterConfig.() -> Unit
-    ) : this(file.outputStream(), PdfImageWriterConfig().apply(config))
 
     private val logger = LoggerFactory.getLogger(PdfImageWriter::class.java)
 

@@ -31,28 +31,12 @@ class TiffReader(
     private val config: TiffReaderConfig = TiffReaderConfig()
 ) {
     /**
-     * 便捷构造函数：InputStream + 配置lambda
-     */
-    constructor(
-        inputStream: InputStream,
-        config: TiffReaderConfig.() -> Unit
-    ) : this(inputStream, TiffReaderConfig().apply(config))
-
-    /**
      * 便捷构造函数：File + 配置对象
      */
     constructor(
         file: File,
         config: TiffReaderConfig = TiffReaderConfig()
     ) : this(file.inputStream(), config)
-
-    /**
-     * 便捷构造函数：File + 配置lambda
-     */
-    constructor(
-        file: File,
-        config: TiffReaderConfig.() -> Unit
-    ) : this(file.inputStream(), TiffReaderConfig().apply(config))
 
     // Logger instance
     private val logger = LoggerFactory.getLogger(TiffReader::class.java)
