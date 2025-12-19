@@ -1,5 +1,7 @@
 package dev.waylon.apexflow.conversion.benchmark
 
+import dev.waylon.apexflow.conversion.pdfToTiff
+import dev.waylon.apexflow.conversion.tiffToPdf
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
