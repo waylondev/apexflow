@@ -111,13 +111,7 @@ class PdfImageReader(
         logger.info("Completed PDF reading process successfully")
     }
 
-    /**
-     * Configure PDF reader settings
-     */
-    fun configure(block: PdfImageReaderConfig.() -> Unit) {
-        block(config)
-        logger.debug("Configured PDF reader with DPI: {}", config.dpi)
-    }
+
 }
 
 /**

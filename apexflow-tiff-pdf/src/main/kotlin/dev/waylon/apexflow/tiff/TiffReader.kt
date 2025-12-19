@@ -37,7 +37,7 @@ class TiffReader(
         inputStream: InputStream,
         config: TiffReaderConfig.() -> Unit
     ) : this(inputStream, TiffReaderConfig().apply(config))
-    
+
     /**
      * 便捷构造函数：File + 配置对象
      */
@@ -45,7 +45,7 @@ class TiffReader(
         file: File,
         config: TiffReaderConfig = TiffReaderConfig()
     ) : this(file.inputStream(), config)
-    
+
     /**
      * 便捷构造函数：File + 配置lambda
      */
@@ -82,3 +82,63 @@ class TiffReader(
 
                 // Use custom read param if provided, otherwise default
                 val readParam = config.readParam ?: imageReader.defaultReadParam
+
+                // Read each page
+                repeat(numPages) { pageIndex ->
+                    logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
+                    val image = imageReader.read(pageIndex, readParam)
+                    emit(image)
+                    image.flush()
+                    logger.debug("Successfully read TIFF page {}/{}", pageIndex + 1, numPages)
+                }
+            }
+        }
+
+        logger.info("Completed TIFF reading process successfully")
+
+    }
+
+    /**
+     * Get appropriate ImageReader for the given ImageInputStream
+     */
+    private fun getImageReader(input: ImageInputStream): ImageReader {
+        val readers = ImageIO.getImageReaders(input)
+        return if (readers.hasNext()) {
+            readers.next()
+        } else {
+            val readersByFormat = ImageIO.getImageReadersByFormatName("tiff")
+            readersByFormat.next()
+        }
+    }
+}
+
+/**
+ * Extension function to automatically dispose ImageReader resources
+ */
+private inline fun <R> ImageReader.use(block: (ImageReader) -> R): R {
+    return try {
+        block(this)
+    } finally {
+        this.dispose()
+    }
+}
+
+/**
+ * Extension function: Convert InputStream to TiffReader with lambda configuration
+ *
+ * @param config Lambda function to configure TIFF reader settings
+ * @return TiffReader instance with specified configuration
+ */
+fun InputStream.toTiffReader(config: TiffReaderConfig.() -> Unit = {}): TiffReader {
+    return TiffReader(this, TiffReaderConfig().apply(config))
+}
+
+/**
+ * Extension function: Convert File to TiffReader with lambda configuration
+ *
+ * @param config Lambda function to configure TIFF reader settings
+ * @return TiffReader instance with specified configuration
+ */
+fun File.toTiffReader(config: TiffReaderConfig.() -> Unit = {}): TiffReader {
+    return TiffReader(this, TiffReaderConfig().apply(config))
+}

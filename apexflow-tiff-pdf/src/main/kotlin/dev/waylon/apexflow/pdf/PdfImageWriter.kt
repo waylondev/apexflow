@@ -1,6 +1,7 @@
 package dev.waylon.apexflow.pdf
 
 import java.awt.image.BufferedImage
+import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -51,20 +52,38 @@ class PdfImageWriterConfig {
 /**
  * PDF image writer implementation using PDFBox library
  *
- * Only supports writing to OutputStream
+ * Supports writing to OutputStream with configurable options
  */
 class PdfImageWriter(
     private val outputStream: OutputStream,
-    config: PdfImageWriterConfig.() -> Unit = {}
+    private val config: PdfImageWriterConfig = PdfImageWriterConfig()
 ) {
+    /**
+     * 便捷构造函数：OutputStream + 配置lambda
+     */
+    constructor(
+        outputStream: OutputStream,
+        config: PdfImageWriterConfig.() -> Unit
+    ) : this(outputStream, PdfImageWriterConfig().apply(config))
+
+    /**
+     * 便捷构造函数：File + 配置对象
+     */
+    constructor(
+        file: File,
+        config: PdfImageWriterConfig = PdfImageWriterConfig()
+    ) : this(file.outputStream(), config)
+
+    /**
+     * 便捷构造函数：File + 配置lambda
+     */
+    constructor(
+        file: File,
+        config: PdfImageWriterConfig.() -> Unit
+    ) : this(file.outputStream(), PdfImageWriterConfig().apply(config))
 
     private val logger = LoggerFactory.getLogger(PdfImageWriter::class.java)
-    private val pdfConfig = PdfImageWriterConfig().apply(config)
 
-    fun configure(config: PdfImageWriterConfig.() -> Unit) {
-        pdfConfig.apply(config)
-        logger.debug("Configured PDF writer with JPEG quality: {}", pdfConfig.jpegQuality)
-    }
 
     /**
      * Write BufferedImage flow to PDF OutputStream
@@ -74,9 +93,9 @@ class PdfImageWriter(
      * @param data Flow of BufferedImage to write
      */
     suspend fun write(data: Flow<BufferedImage>) {
-        logger.info("Starting PDF writing process with JPEG quality: {}", pdfConfig.jpegQuality)
+        logger.info("Starting PDF writing process with JPEG quality: {}", config.jpegQuality)
 
-        val quality = pdfConfig.jpegQuality / 100f
+        val quality = config.jpegQuality / 100f
         PDDocument().use { document ->
             logger.debug("Created new PDF document")
 
@@ -111,4 +130,24 @@ class PdfImageWriter(
         logger.info("Completed PDF writing process successfully")
 
     }
+}
+
+/**
+ * Extension function: Convert OutputStream to PdfImageWriter with lambda configuration
+ *
+ * @param config Lambda function to configure PDF writer settings
+ * @return PdfImageWriter instance with specified configuration
+ */
+fun OutputStream.toPdfImageWriter(config: PdfImageWriterConfig.() -> Unit = {}): PdfImageWriter {
+    return PdfImageWriter(this, PdfImageWriterConfig().apply(config))
+}
+
+/**
+ * Extension function: Convert File to PdfImageWriter with lambda configuration
+ *
+ * @param config Lambda function to configure PDF writer settings
+ * @return PdfImageWriter instance with specified configuration
+ */
+fun File.toPdfImageWriter(config: PdfImageWriterConfig.() -> Unit = {}): PdfImageWriter {
+    return PdfImageWriter(this, PdfImageWriterConfig().apply(config))
 }
