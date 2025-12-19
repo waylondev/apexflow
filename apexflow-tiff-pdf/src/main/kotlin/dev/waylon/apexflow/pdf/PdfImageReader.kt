@@ -1,5 +1,7 @@
 package dev.waylon.apexflow.pdf
 
+import dev.waylon.apexflow.image.ImageConstants
+import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
@@ -17,7 +19,7 @@ class PdfImageReaderConfig {
      * DPI (dots per inch) for rendering PDF pages
      * Higher values result in better quality but larger file sizes
      */
-    var dpi: Float = 150f
+    var dpi: Float = ImageConstants.DEFAULT_DPI
 
     /**
      * Page numbers to render (0-based index)
@@ -36,17 +38,21 @@ class PdfImageReaderConfig {
     var imageType: ImageType = ImageType.RGB
 
     /**
-     * Image type enumeration for PDF rendering
+     * Image type sealed class for PDF rendering
+     * Provides type-safe extensibility for different image types
      */
-    enum class ImageType {
+    sealed class ImageType {
         /** RGB color space with 8 bits per component */
-        RGB,
+        object RGB : ImageType()
 
         /** Grayscale color space with 8 bits per component */
-        GRAY,
+        object GRAY : ImageType()
 
         /** Binary (black and white) color space */
-        BINARY
+        object BINARY : ImageType()
+
+        /** Custom image type with specified bits per component */
+        data class Custom(val bitsPerComponent: Int) : ImageType()
     }
 }
 
@@ -55,13 +61,14 @@ class PdfImageReaderConfig {
  *
  * Supports reading from InputStream with streaming behavior
  */
-class PdfImageReader(
+class PdfImageReader @JvmOverloads constructor(
     private val inputStream: InputStream,
     private val config: PdfImageReaderConfig = PdfImageReaderConfig()
-) {
+) : ApexImageReader {
     /**
-     * 便捷构造函数：File + 配置对象
+     * Convenience constructor: File + configuration
      */
+    @JvmOverloads
     constructor(
         file: File,
         config: PdfImageReaderConfig = PdfImageReaderConfig()
@@ -76,7 +83,7 @@ class PdfImageReader(
      *
      * @return Flow<BufferedImage> Flow of rendered pages
      */
-    fun read(): Flow<BufferedImage> = flow {
+    override fun read(): Flow<BufferedImage> = flow {
         logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
         // PDFBox 3.0.1 supports ByteArray, so we'll convert InputStream to ByteArray

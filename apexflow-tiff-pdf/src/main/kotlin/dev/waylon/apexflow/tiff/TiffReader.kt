@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.tiff
 
+import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
@@ -26,13 +27,14 @@ class TiffReaderConfig {
  * Supports reading from InputStream with configurable options
  * Reads single and multi-page TIFF files
  */
-class TiffReader(
+class TiffReader @JvmOverloads constructor(
     private val inputStream: InputStream,
     private val config: TiffReaderConfig = TiffReaderConfig()
-) {
+) : ApexImageReader {
     /**
-     * 便捷构造函数：File + 配置对象
+     * Convenience constructor: File + configuration
      */
+    @JvmOverloads
     constructor(
         file: File,
         config: TiffReaderConfig = TiffReaderConfig()
@@ -48,7 +50,7 @@ class TiffReader(
      *
      * @return Flow<BufferedImage> Flow of images from the TIFF data
      */
-    fun read(): Flow<BufferedImage> = flow {
+    override fun read(): Flow<BufferedImage> = flow {
         logger.info("Starting TIFF reading process")
 
         // Create ImageInputStream from the provided InputStream

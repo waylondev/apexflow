@@ -1,5 +1,7 @@
 package dev.waylon.apexflow.tiff
 
+import dev.waylon.apexflow.image.ImageConstants
+import dev.waylon.apexflow.image.ApexImageWriter
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.OutputStream
@@ -20,13 +22,13 @@ class TiffWriterConfig {
      * Compression type to use
      * Common values: "JPEG", "LZW", "DEFLATE", "NONE"
      */
-    var compressionType: String = "JPEG"
+    var compressionType: String = ImageConstants.DEFAULT_TIFF_COMPRESSION_TYPE
 
     /**
      * Compression quality (0-100)
      * Applicable for lossy compression types like JPEG
      */
-    var compressionQuality: Float = 85f
+    var compressionQuality: Float = ImageConstants.DEFAULT_TIFF_COMPRESSION_QUALITY
 
     /**
      * Whether to write pages in parallel
@@ -39,20 +41,24 @@ class TiffWriterConfig {
     var photometricInterpretation: PhotometricInterpretation = PhotometricInterpretation.RGB
 
     /**
-     * TIFF photometric interpretation enumeration
+     * TIFF photometric interpretation sealed class
+     * Provides type-safe extensibility for different photometric interpretations
      */
-    enum class PhotometricInterpretation {
+    sealed class PhotometricInterpretation {
         /** RGB color space */
-        RGB,
+        object RGB : PhotometricInterpretation()
 
         /** Grayscale color space */
-        GRAY,
+        object GRAY : PhotometricInterpretation()
 
         /** Black and white (monochrome) */
-        BLACK_IS_WHITE,
+        object BLACK_IS_WHITE : PhotometricInterpretation()
 
         /** CMYK color space */
-        CMYK
+        object CMYK : PhotometricInterpretation()
+
+        /** Custom photometric interpretation with specified value */
+        data class Custom(val value: Int) : PhotometricInterpretation()
     }
 }
 
@@ -62,13 +68,14 @@ class TiffWriterConfig {
  * Supports writing to OutputStream with direct streaming behavior
  * Writes BufferedImage to TIFF files
  */
-class TiffWriter(
+class TiffWriter @JvmOverloads constructor(
     private val outputStream: OutputStream,
     private val config: TiffWriterConfig = TiffWriterConfig()
-) {
+) : ApexImageWriter {
     /**
-     * 便捷构造函数：File + 配置对象
+     * Convenience constructor: File + configuration
      */
+    @JvmOverloads
     constructor(
         file: File,
         config: TiffWriterConfig = TiffWriterConfig()
@@ -81,7 +88,7 @@ class TiffWriter(
      *
      * @param data Flow of BufferedImage to write
      */
-    suspend fun write(data: Flow<BufferedImage>) {
+    override suspend fun write(data: Flow<BufferedImage>) {
         logger.info("Starting TIFF writing process")
 
         ImageIO.createImageOutputStream(outputStream).use { imageOutputStream ->

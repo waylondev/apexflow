@@ -1,5 +1,7 @@
 package dev.waylon.apexflow.pdf
 
+import dev.waylon.apexflow.image.ImageConstants
+import dev.waylon.apexflow.image.ApexImageWriter
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.OutputStream
@@ -19,7 +21,7 @@ class PdfImageWriterConfig {
      * JPEG compression quality (0-100)
      * Higher values result in better quality but larger file sizes
      */
-    var jpegQuality: Float = 85f
+    var jpegQuality: Float = ImageConstants.DEFAULT_JPEG_QUALITY
 
     /**
      * Whether to compress PDF content
@@ -29,7 +31,7 @@ class PdfImageWriterConfig {
     /**
      * PDF version to use (e.g., "1.7", "2.0")
      */
-    var pdfVersion: String = "1.7"
+    var pdfVersion: String = ImageConstants.DEFAULT_PDF_VERSION
 
     /**
      * Metadata for the PDF document
@@ -44,8 +46,8 @@ class PdfImageWriterConfig {
         var author: String? = null
         var subject: String? = null
         var keywords: String? = null
-        var creator: String = "ApexFlow PDF Writer"
-        var producer: String = "Apache PDFBox"
+        var creator: String = ImageConstants.DEFAULT_PDF_CREATOR
+        var producer: String = ImageConstants.DEFAULT_PDF_PRODUCER
     }
 }
 
@@ -54,13 +56,14 @@ class PdfImageWriterConfig {
  *
  * Supports writing to OutputStream with configurable options
  */
-class PdfImageWriter(
+class PdfImageWriter @JvmOverloads constructor(
     private val outputStream: OutputStream,
     private val config: PdfImageWriterConfig = PdfImageWriterConfig()
-) {
+) : ApexImageWriter {
     /**
-     * 便捷构造函数：File + 配置对象
+     * Convenience constructor: File + configuration
      */
+    @JvmOverloads
     constructor(
         file: File,
         config: PdfImageWriterConfig = PdfImageWriterConfig()
@@ -76,7 +79,7 @@ class PdfImageWriter(
      *
      * @param data Flow of BufferedImage to write
      */
-    suspend fun write(data: Flow<BufferedImage>) {
+    override suspend fun write(data: Flow<BufferedImage>) {
         logger.info("Starting PDF writing process with JPEG quality: {}", config.jpegQuality)
 
         val quality = config.jpegQuality / 100f
