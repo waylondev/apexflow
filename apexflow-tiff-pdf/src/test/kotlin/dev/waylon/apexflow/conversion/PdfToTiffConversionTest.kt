@@ -1,18 +1,6 @@
 package dev.waylon.apexflow.conversion
 
-import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.execute
-import dev.waylon.apexflow.core.dsl.transformOnIO
-import dev.waylon.apexflow.core.dsl.withLogging
-import dev.waylon.apexflow.core.dsl.withTiming
-import dev.waylon.apexflow.pdf.PdfImageReader
-import dev.waylon.apexflow.tiff.TiffWriter
-import java.awt.image.BufferedImage
 import java.io.File
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -56,7 +44,7 @@ class PdfToTiffConversionTest {
         // Use the new simplified PDF to TIFF conversion DSL
         pdfToTiff(
             pdfConfig = { dpi = 100f },
-            tiffConfig = { 
+            tiffConfig = {
                 compressionType = "JPEG"
                 compressionQuality = 90f
             }
