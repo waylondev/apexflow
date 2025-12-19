@@ -67,17 +67,19 @@ class BusinessFlowComparisonTest {
         // 1. Data validation
         val validatedRequest = validatedRequest(request)
 
-        // 2. Query database
-        val dbResult = queryDb(validatedRequest)
-
-        // 3. Request third-party API
-        val apiResult = callThirdPartyApi(validatedRequest)
+        val result = coroutineScope {
+            // 2. Query database
+            val dbDeferred = async { queryDb(validatedRequest) } // Database query task
+            // 3. Call third party api
+            val apiDeferred = async { callThirdPartyApi(validatedRequest) } // API call task
+            Pair(dbDeferred.await(), apiDeferred.await())
+        }
 
         // 4. Merge results
         val mergedResult = MergedResult(
             id = validatedRequest.id,
-            dbData = dbResult.dbData,
-            apiData = apiResult.apiData
+            dbData = result.first.dbData,
+            apiData = result.second.apiData
         )
 
         // 5. Organize response
