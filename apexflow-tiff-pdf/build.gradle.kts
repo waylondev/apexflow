@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
     id("java-library")
+    id("me.champeau.jmh") version "0.7.2"
 }
 
 group = "dev.waylon.apexflow"
@@ -36,6 +37,14 @@ compileTestKotlin.compilerOptions {
     languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
 }
 
+// Configure JMH Kotlin compiler options
+val compileJmhKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileJmhKotlin.compilerOptions {
+    freeCompilerArgs.addAll(listOf("-Xskip-prerelease-check"))
+    apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+    languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
+}
+
 
 repositories {
     mavenCentral()
@@ -60,6 +69,12 @@ dependencies {
 
     // Test dependencies
     testImplementation(libs.kotlin.test)
+    
+    // JMH Benchmark dependencies
+    jmhImplementation("org.openjdk.jmh:jmh-core:1.37")
+    jmhImplementation("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    jmhImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    jmhImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 }
 
 // Use the Kotlin test runner instead of JUnit to avoid dependency issues

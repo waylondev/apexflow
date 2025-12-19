@@ -3,7 +3,6 @@ package dev.waylon.apexflow.conversion
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 /**
  * Performance tests for PDF to TIFF conversion
@@ -11,31 +10,23 @@ import org.slf4j.LoggerFactory
  * Tests the performance of various conversion scenarios including:
  * - Large file conversion
  * - Conversion with different configurations
- * - Batch processing
  */
 class PdfToTiffPerformanceTest {
-
-    private val logger = LoggerFactory.getLogger(PdfToTiffPerformanceTest::class.java)
 
     /**
      * Test performance of large PDF to TIFF conversion
      */
     @Test
     fun `test large pdf to tiff conversion performance`() = runBlocking {
-        logger.info("=== Performance Test: Large PDF to TIFF conversion ===")
-
         // Use a larger PDF file for performance testing
         val largePdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
         if (!largePdfFile.exists()) {
-            logger.warn("Large test PDF not found, skipping performance test")
             return@runBlocking
         }
 
         val outputFile = File("build/large-pdf.tiff")
 
         try {
-            logger.info("Starting conversion of large PDF file (${largePdfFile.length() / 1024 / 1024} MB)")
-
             // Record start time
             val startTime = System.currentTimeMillis()
 
@@ -44,10 +35,6 @@ class PdfToTiffPerformanceTest {
 
             // Calculate duration
             val duration = System.currentTimeMillis() - startTime
-
-            logger.info("✓ Large PDF to TIFF conversion completed in ${duration}ms")
-            logger.info("  Output file size: ${outputFile.length() / 1024 / 1024} MB")
-            logger.info("  Conversion speed: ${(largePdfFile.length() / 1024) / (duration / 1000.0)} KB/s")
 
         } finally {
             // Clean up
@@ -60,11 +47,8 @@ class PdfToTiffPerformanceTest {
      */
     @Test
     fun `test performance with different dpi settings`() = runBlocking {
-        logger.info("=== Performance Test: Different DPI settings ===")
-
         val testPdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
         if (!testPdfFile.exists()) {
-            logger.warn("Test PDF not found, skipping DPI performance test")
             return@runBlocking
         }
 
@@ -75,8 +59,7 @@ class PdfToTiffPerformanceTest {
             val outputFile = File.createTempFile("dpi-test-${dpi}", ".tiff")
 
             try {
-                logger.info("Testing with DPI: ${dpi}")
-
+                // Record start time
                 val startTime = System.currentTimeMillis()
 
                 pdfToTiff(
@@ -85,9 +68,8 @@ class PdfToTiffPerformanceTest {
                     }
                 ).convert(testPdfFile, outputFile)
 
+                // Calculate duration
                 val duration = System.currentTimeMillis() - startTime
-
-                logger.info("  ✓ DPI ${dpi}: ${duration}ms, Output size: ${outputFile.length() / 1024} KB")
 
             } finally {
                 outputFile.delete()
@@ -100,20 +82,15 @@ class PdfToTiffPerformanceTest {
      */
     @Test
     fun `test tiff to pdf conversion performance`() = runBlocking {
-        logger.info("=== Performance Test: TIFF to PDF conversion ===")
-
         // Use a larger TIFF file for performance testing
         val largeTiffFile = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
         if (!largeTiffFile.exists()) {
-            logger.warn("Large test TIFF not found, skipping performance test")
             return@runBlocking
         }
 
         val outputFile = File("build/large-tiff.pdf")
 
         try {
-            logger.info("Starting conversion of large TIFF file (${largeTiffFile.length() / 1024 / 1024} MB)")
-
             // Record start time
             val startTime = System.currentTimeMillis()
 
@@ -122,10 +99,6 @@ class PdfToTiffPerformanceTest {
 
             // Calculate duration
             val duration = System.currentTimeMillis() - startTime
-
-            logger.info("✓ Large TIFF to PDF conversion completed in ${duration}ms")
-            logger.info("  Output file size: ${outputFile.length() / 1024 / 1024} MB")
-            logger.info("  Conversion speed: ${(largeTiffFile.length() / 1024) / (duration / 1000.0)} KB/s")
 
         } finally {
             // Clean up

@@ -2,24 +2,36 @@ package dev.waylon.apexflow.conversion
 
 import java.io.File
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 /**
  * Test case for converting a specific PDF file to TIFF
  *
- * This test converts the spring-boot-reference-3.3.0-977.pdf file from the build directory to TIFF
+ * This test converts the test-pdf-to-tiff-dsl.pdf file from resources to TIFF
  */
 class PdfToTiffConversionTest {
 
-    private val logger = LoggerFactory.getLogger(PdfToTiffConversionTest::class.java)
+    // Define input and output file paths
+    private val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
+    private val outputTiff = File("build/test-pdf-to-tiff-dsl.tiff")
+
+    @BeforeEach
+    fun setUp() {
+        // Ensure output directory exists
+        outputTiff.parentFile?.mkdirs()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        // Clean up test files
+        outputTiff.delete()
+    }
 
     /**
-     * Test converting spring-boot-reference-3.3.0-977.pdf to TIFF
-     *
-     * This test demonstrates the core ApexFlow design: "Everything is Flow"
-     * with multiple transform steps and different coroutine dispatchers.
+     * Test converting PDF to TIFF using DSL
      *
      * Steps:
      * 1. Read PDF file (IO intensive)
@@ -28,20 +40,11 @@ class PdfToTiffConversionTest {
      * 4. Write TIFF file (IO intensive)
      */
     @Test
-    fun `test converting spring-boot-reference pdf to tiff`() = runBlocking {
-        // Define input and output file paths
-        val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
-        val outputTiff = File("build/test-pdf-to-tiff-dsl.tiff")
-
+    fun `test converting pdf to tiff`() = runBlocking {
         // Check if input file exists
         assertTrue(inputPdf.exists(), "Input PDF file does not exist: ${inputPdf.absolutePath}")
 
-        logger.info("Converting PDF to TIFF...")
-        logger.info("Input: {}", inputPdf.absolutePath)
-        logger.info("Output: {}", outputTiff.absolutePath)
-        logger.info("Input size: {} KB", inputPdf.length() / 1024)
-
-        // Use the new simplified PDF to TIFF conversion DSL
+        // Use the simplified PDF to TIFF conversion DSL
         pdfToTiff(
             pdfConfig = { dpi = 100f },
             tiffConfig = {
@@ -53,8 +56,5 @@ class PdfToTiffConversionTest {
         // Verify that output file was created
         assertTrue(outputTiff.exists(), "Output TIFF file was not created")
         assertTrue(outputTiff.length() > 0, "Output TIFF file is empty")
-
-        logger.info("Conversion completed successfully!")
-        logger.info("Output size: {} KB", outputTiff.length() / 1024)
     }
 }
