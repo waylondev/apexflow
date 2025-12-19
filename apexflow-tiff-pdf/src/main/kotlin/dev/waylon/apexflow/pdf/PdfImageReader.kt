@@ -2,6 +2,7 @@ package dev.waylon.apexflow.pdf
 
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
@@ -18,52 +19,37 @@ class PdfImageReaderConfig {
      */
     var dpi: Float = 150f
 
-    /**
-     * Page numbers to render (0-based index)
-     * If empty, all pages will be rendered
-     */
-    var pageNumbers: List<Int> = emptyList()
 
-    /**
-     * Whether to skip blank pages during rendering
-     */
-    var skipBlankPages: Boolean = false
-
-    /**
-     * Image type to use for rendering
-     */
-    var imageType: ImageType = ImageType.RGB
-
-    /**
-     * Image type enumeration for PDF rendering
-     */
-    enum class ImageType {
-        /** RGB color space with 8 bits per component */
-        RGB,
-
-        /** Grayscale color space with 8 bits per component */
-        GRAY,
-
-        /** Binary (black and white) color space */
-        BINARY
-    }
 }
 
 /**
  * PDF image reader implementation using PDFBox library
  *
- * Supports reading from File
+ * Supports reading from InputStream with streaming behavior
  */
 class PdfImageReader(
-    private val inputFile: File,
-    config: PdfImageReaderConfig = PdfImageReaderConfig()
+    private val inputStream: InputStream,
+    private val config: PdfImageReaderConfig = PdfImageReaderConfig()
 ) {
 
+    constructor(
+        inputStream: InputStream,
+        config: PdfImageReaderConfig.() -> Unit
+    ) : this(inputStream, PdfImageReaderConfig().apply(config))
+
+    constructor(
+        file: File
+    ) : this(file.inputStream())
+
+    constructor(
+        file: File,
+        config: PdfImageReaderConfig.() -> Unit
+    ) : this(file.inputStream(), config)
+
     private val logger = LoggerFactory.getLogger(PdfImageReader::class.java)
-    private val config = config
 
     /**
-     * Read PDF pages and return a Flow of BufferedImage
+     * Read PDF pages and return a Flow of BufferedImage with streaming behavior
      *
      * Each page is rendered as a separate BufferedImage with the configured DPI
      *
@@ -72,19 +58,16 @@ class PdfImageReader(
     fun read(): Flow<BufferedImage> = flow {
         logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
-        // Load PDF document from file
-        Loader.loadPDF(inputFile).use { document ->
+        // PDFBox 3.0.1 supports ByteArray, so we'll convert InputStream to ByteArray
+        val bytes = inputStream.use { it.readAllBytes() }
+        Loader.loadPDF(bytes).use { document ->
             logger.debug("Loaded PDF document successfully")
 
             val renderer = PDFRenderer(document)
-            val pageCount = document.pages.count
+            val pageCount = document.numberOfPages
             logger.info("Found {} pages in PDF document", pageCount)
 
-            val pagesToRender = if (config.pageNumbers.isEmpty()) {
-                0 until pageCount
-            } else {
-                config.pageNumbers.filter { it in 0 until pageCount }
-            }
+            val pagesToRender = 0 until pageCount
 
             pagesToRender.forEach { pageIndex ->
                 logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
@@ -101,6 +84,13 @@ class PdfImageReader(
         }
 
         logger.info("Completed PDF reading process successfully")
+    }
 
+    /**
+     * Configure PDF reader settings
+     */
+    fun configure(block: PdfImageReaderConfig.() -> Unit) {
+        block(config)
+        logger.debug("Configured PDF reader with DPI: {}", config.dpi)
     }
 }

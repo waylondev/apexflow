@@ -2,6 +2,7 @@ package dev.waylon.apexflow.tiff
 
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.OutputStream
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
@@ -58,29 +59,39 @@ class TiffWriterConfig {
 /**
  * TIFF writer implementation using TwelveMonkeys ImageIO library
  *
- * Supports writing to OutputStream with configurable options
+ * Supports writing to OutputStream with direct streaming behavior
  * Writes BufferedImage to TIFF files
  */
 class TiffWriter(
-    private val outputFile: File,
-    tiffConfig: TiffWriterConfig = TiffWriterConfig()
+    private val outputStream: OutputStream,
+    private val config: TiffWriterConfig = TiffWriterConfig()
 ) {
+
+    constructor(
+        outputStream: OutputStream,
+        config: TiffWriterConfig.() -> Unit
+    ) : this(outputStream, TiffWriterConfig().apply(config))
+
+    constructor(
+        file: File
+    ) : this(file.outputStream())
+
+    constructor(
+        file: File,
+        config: TiffWriterConfig.() -> Unit
+    ) : this(file.outputStream(), config)
 
     private val logger = LoggerFactory.getLogger(TiffWriter::class.java)
 
-    // Configuration instance
-    private val config = tiffConfig
-
     /**
-     * Write BufferedImage flow to TIFF OutputStream
+     * Write BufferedImage flow to TIFF OutputStream with direct streaming behavior
      *
      * @param data Flow of BufferedImage to write
      */
     suspend fun write(data: Flow<BufferedImage>) {
         logger.info("Starting TIFF writing process")
 
-        // Create ImageOutputStream from the provided OutputStream
-        ImageIO.createImageOutputStream(outputFile).use { imageOutputStream ->
+        ImageIO.createImageOutputStream(outputStream).use { imageOutputStream ->
             // Get TIFF ImageWriter
             val writerIterator = ImageIO.getImageWritersByFormatName("tiff")
 
