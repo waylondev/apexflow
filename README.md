@@ -1,57 +1,21 @@
 # ApexFlow
 
-A modern, high-performance, and highly extensible framework for document processing and conversion, built with Kotlin and cutting-edge technologies.
+A modern, high-performance framework for document processing, conversion, and workflow orchestration, built with Kotlin and cutting-edge technologies.
 
-## 🚀 Key Features
+## 🎯 Core Design Philosophy
 
-### Modern Architecture
-- **Kotlin-First Design**: Leverages Kotlin's concise syntax, null safety, and functional programming capabilities
-- **Coroutine-Powered**: Built on Kotlin Coroutines for efficient asynchronous processing
-- **Flow-Based API**: Uses Flow API for reactive, backpressure-aware stream processing
-- **DSL-Friendly**: Fluent Domain-Specific Languages for intuitive usage
+At the heart of ApexFlow lies a simple yet powerful principle: **"Everything is Flow"**.
 
-### High Performance
-- **Stream-Based Processing**: Core design emphasizes stream processing to minimize memory footprint
-- **Efficient I/O Handling**: Optimized for large file processing with minimal buffering
-- **Parallel Execution**: Smart parallelization of CPU-intensive tasks
-- **Low Overhead**: Minimal framework overhead for maximum throughput
-
-### Highly Extensible
-- **Modular Architecture**: Clean separation of concerns with pluggable components
-- **Configuration-Driven**: Flexible configuration system for easy customization
-- **Extension Functions**: Rich set of extension functions for enhanced usability
-- **Customizable Processors**: Easy to add custom conversion logic and processors
-
-### Cutting-Edge Technology Stack
-- **Kotlin 1.9+**: Latest Kotlin features including sealed classes, data classes, and type aliases
-- **Kotlin Coroutines**: Asynchronous programming with structured concurrency
-- **Flow API**: Reactive streams with backpressure support
-- **PDFBox**: Industry-standard PDF processing library
-- **TwelveMonkeys ImageIO**: High-performance image processing with TIFF support
-
-## 📋 Core Functionalities
-
-### Document Conversion
-- **PDF to TIFF**: High-quality PDF to TIFF conversion with customizable DPI and compression
-- **TIFF to PDF**: Efficient TIFF to PDF conversion with support for multi-page TIFFs
-- **Bidirectional Support**: Seamless conversion in both directions
-
-### Input/Output Flexibility
-- **File Support**: Direct file-to-file conversion
-- **Stream Support**: InputStream/OutputStream for in-memory processing
-- **Path Support**: String paths for convenient usage
-- **Flow Support**: Flow-based processing for reactive pipelines
-
-### Configuration Options
-- **PDF Configuration**: DPI, page filtering, blank page skipping
-- **TIFF Configuration**: Compression type, quality, color mode
-- **PDF Writing**: JPEG quality, compression, PDF version
-- **Runtime Customization**: Configure processing parameters at runtime
+### Key Design Principles
+- **Component-Based**: Build complex workflows from simple, reusable components
+- **Declarative**: Focus on "what to do" rather than "how to do it"
+- **Type-Safe**: Complete compile-time type checking
+- **Asynchronous**: Built on Kotlin Coroutines for efficient async processing
+- **Reactive**: Leverage Kotlin Flow for backpressure-aware stream processing
 
 ## 🏗️ Architecture
 
 ### Core Components
-
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    ApexFlow Framework                   │
@@ -60,23 +24,52 @@ A modern, high-performance, and highly extensible framework for document process
 │                   │                   │   Pipelines     │
 ├───────────────────┼───────────────────┼─────────────────┤
 │ - pdfToTiff()     │ - PdfImageReader  │ - ApexFlow Core │
-│ - tiffToPdf()     │ - TiffWriter      │ - TransformOnIO │
-│ - Extension Funcs │ - TiffReader      │ - WithTiming    │
+│ - tiffToPdf()     │ - TiffWriter      │ - Component     │
+│                   │ - TiffReader      │   Composition   │
 │                   │ - PdfImageWriter  │                 │
 └───────────────────┴───────────────────┴─────────────────┘
 ```
 
-### Processing Pipeline
+### Architecture Highlights
+- **Kotlin-First Design**: Leverages Kotlin's modern features
+- **Modular Design**: Clean separation of concerns
+- **Simple Composition**: Use `+` operator to combine components
+- **Low Overhead**: Minimal framework overhead
 
-1. **Input Handling**: Read from File, InputStream, or String path
-2. **Conversion Stage**: Transform data using specialized processors
-3. **Output Handling**: Write to File, OutputStream, or String path
-4. **Monitoring**: Built-in timing and logging for performance analysis
+## 🚀 Key Features
 
-## 💡 Usage Examples
+### ApexFlow Core - Workflow Orchestration
+- **Powerful Component Composition**: Build complex workflows by combining simple components using the `+` operator
+  - Example: `validation + dbQuery + apiCall + mergeResults + response`
+  - Benefits: Reusability, maintainability, and clear flow visualization
+- **Type-Safe DSL**: Intuitive DSL with complete compile-time type checking
+- **Parallel Processing**: Easy implementation of parallel execution patterns
+- **Testable Components**: Each component can be tested independently for reliability
 
-### Basic PDF to TIFF Conversion
+### Component Composition - Key Advantage
+ApexFlow's component composition enables:
+- **Modular Development**: Build workflows from small, focused components
+- **Reusability**: Components can be reused across multiple workflows
+- **Maintainability**: Easy to modify or extend workflows by adding/removing components
+- **Readability**: Clear, declarative syntax that shows the workflow structure at a glance
+- **Type Safety**: Compile-time checks ensure component compatibility
 
+### Document Processing
+- **PDF ↔ TIFF Conversion**: High-quality bidirectional conversion
+- **Customizable**: Configure DPI, compression, and more
+- **Stream-Based**: Optimized for large files with minimal memory usage
+- **Extensible**: Easy to add custom conversion logic
+
+### Modern Technology Stack
+- **Kotlin 1.9+**: Latest Kotlin features
+- **Kotlin Coroutines**: Asynchronous programming
+- **Flow API**: Reactive streams
+- **PDFBox**: Industry-standard PDF processing
+- **TwelveMonkeys ImageIO**: High-performance image processing
+
+## 💡 Quick Start
+
+### Basic Usage
 ```kotlin
 import dev.waylon.apexflow.conversion.pdfToTiff
 import java.io.File
@@ -86,71 +79,40 @@ fun main() = runBlocking {
     val inputFile = File("input.pdf")
     val outputFile = File("output.tiff")
     
-    // Simple conversion with default settings
+    // Simple PDF to TIFF conversion
     pdfToTiff().convert(inputFile, outputFile)
 }
 ```
 
-### Custom Configuration
-
+### Workflow Example - Reusable Components
 ```kotlin
-pdfToTiff(
-    pdfConfig = { 
-        dpi = 300f
-        skipBlankPages = true
-    },
-    tiffConfig = { 
-        compressionType = "LZW"
-        compressionQuality = 100f
-    }
-).convert(inputFile, outputFile)
+// Step 1: Define reusable components
+val validation = apexFlow { map(::validatedRequest) }           // Reusable validation component
+val dbQuery = apexFlow { map { queryDb(it) } }                 // Reusable DB query component
+val apiCall = apexFlow { map { callThirdPartyApi(it) } }       // Reusable API call component
+val mergeResults = apexFlow { map { (db, api) -> MergedResult(db.id, db.dbData, api.apiData) } } // Reusable merge component
+val successResponse = apexFlow { map { Response(it.id, "SUCCESS", it) } } // Reusable response component
+
+// Step 2: Compose workflow from reusable components
+val mainWorkflow = validation + dbQuery + apiCall + mergeResults + successResponse
+
+// Step 3: Create another workflow reusing the same components
+val quickWorkflow = validation + dbQuery + successResponse // Reuse existing components
+
+// Step 4: Execute workflows
+val mainResult = mainWorkflow.execute(request).first()
+val quickResult = quickWorkflow.execute(request).first()
 ```
 
-### Extension Functions
-
-```kotlin
-// File extension functions
-File("input.pdf").toTiff(File("output.tiff"))
-File("input.tiff").toPdf(File("output.pdf"))
-
-// InputStream/OutputStream
-inputStream.toTiff(outputStream)
-inputStream.toPdf(outputStream)
-```
-
-### String Paths
-
-```kotlin
-pdfToTiff().convert("input.pdf", "output.tiff")
-tiffToPdf().convert("input.tiff", "output.pdf")
-```
-
-## 🎯 Design Principles
-
-### Simplicity First
-- Intuitive API design with minimal boilerplate
-- Clear, concise documentation
-- Easy to learn, hard to misuse
-
-### Type Safety
-- No `Any` types in public APIs
-- Compile-time type checking
-- Strongly typed configurations
-
-### Robust Error Handling
-- Comprehensive exception handling
-- Clear error messages
-- Graceful degradation
-
-### Performance-Oriented
-- Stream-based processing by default
-- Efficient memory usage
-- Optimized for large files
+### Component Reuse Benefits
+- **Reduced Code Duplication**: Define components once, use them across multiple workflows
+- **Consistent Behavior**: Ensure consistent validation, error handling, etc. across workflows
+- **Easy Updates**: Modify a component once to update all workflows using it
+- **Faster Development**: Build new workflows by assembling existing components
 
 ## 🔧 Getting Started
 
 ### Installation
-
 Add the dependency to your `build.gradle.kts`:
 
 ```kotlin
@@ -160,49 +122,19 @@ dependencies {
 ```
 
 ### Prerequisites
-
-- Java 11+ (required for PDFBox)
+- Java 11+
 - Kotlin 1.9+
-
-## 📊 Performance Characteristics
-
-- **Memory Usage**: Constant memory footprint for large files
-- **Throughput**: Optimized for high-speed conversion
-- **Scalability**: Handles files of any size
-- **Concurrent Processing**: Safe for concurrent usage
 
 ## 🎨 Use Cases
 
-### Business Applications
 - **Document Archiving**: Convert scanned documents to searchable PDFs
-- **Print Workflows**: Prepare documents for printing with optimal formatting
-- **Content Management**: Process and transform documents in CMS systems
-- **E-commerce**: Generate product catalogs and brochures
-
-### Enterprise Integration
-- **Workflow Automation**: Integrate with workflow engines for automated document processing
-- **Microservices**: Deploy as lightweight microservices for document conversion
+- **Workflow Automation**: Automated document processing pipelines
+- **Microservices**: Lightweight document conversion services
 - **Batch Processing**: Process large volumes of documents efficiently
-
-## 🔮 Future Roadmap
-
-- [ ] Support for more document formats (PNG, JPEG, etc.)
-- [ ] OCR integration for text extraction
-- [ ] Cloud-native deployment options
-- [ ] WebSocket support for real-time processing
-- [ ] GUI tools for interactive configuration
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
 
 ## 📄 License
 
 Apache License 2.0
-
-## 📞 Support
-
-For questions, issues, or feedback, please create an issue in the GitHub repository.
 
 ---
 
