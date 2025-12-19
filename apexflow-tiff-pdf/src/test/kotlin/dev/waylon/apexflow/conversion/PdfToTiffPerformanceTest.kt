@@ -35,7 +35,7 @@ class PdfToTiffPerformanceTest {
 
         try {
             logger.info("Starting conversion of large PDF file (${largePdfFile.length() / 1024 / 1024} MB)")
-            
+
             // Record start time
             val startTime = System.currentTimeMillis()
 
@@ -44,11 +44,11 @@ class PdfToTiffPerformanceTest {
 
             // Calculate duration
             val duration = System.currentTimeMillis() - startTime
-            
+
             logger.info("✓ Large PDF to TIFF conversion completed in ${duration}ms")
             logger.info("  Output file size: ${outputFile.length() / 1024 / 1024} MB")
             logger.info("  Conversion speed: ${(largePdfFile.length() / 1024) / (duration / 1000.0)} KB/s")
-            
+
         } finally {
             // Clean up
             outputFile.delete()
@@ -70,25 +70,25 @@ class PdfToTiffPerformanceTest {
 
         // Test with various DPI settings
         val dpiSettings = listOf(72f, 150f, 300f)
-        
+
         dpiSettings.forEach { dpi ->
             val outputFile = File.createTempFile("dpi-test-${dpi}", ".tiff")
-            
+
             try {
                 logger.info("Testing with DPI: ${dpi}")
-                
+
                 val startTime = System.currentTimeMillis()
-                
+
                 pdfToTiff(
                     pdfConfig = {
                         this.dpi = dpi
                     }
                 ).convert(testPdfFile, outputFile)
-                
+
                 val duration = System.currentTimeMillis() - startTime
-                
+
                 logger.info("  ✓ DPI ${dpi}: ${duration}ms, Output size: ${outputFile.length() / 1024} KB")
-                
+
             } finally {
                 outputFile.delete()
             }
@@ -113,7 +113,7 @@ class PdfToTiffPerformanceTest {
 
         try {
             logger.info("Starting conversion of large TIFF file (${largeTiffFile.length() / 1024 / 1024} MB)")
-            
+
             // Record start time
             val startTime = System.currentTimeMillis()
 
@@ -122,11 +122,11 @@ class PdfToTiffPerformanceTest {
 
             // Calculate duration
             val duration = System.currentTimeMillis() - startTime
-            
+
             logger.info("✓ Large TIFF to PDF conversion completed in ${duration}ms")
             logger.info("  Output file size: ${outputFile.length() / 1024 / 1024} MB")
             logger.info("  Conversion speed: ${(largeTiffFile.length() / 1024) / (duration / 1000.0)} KB/s")
-            
+
         } finally {
             // Clean up
             outputFile.delete()
