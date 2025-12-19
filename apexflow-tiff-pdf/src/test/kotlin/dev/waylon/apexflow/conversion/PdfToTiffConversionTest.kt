@@ -58,14 +58,15 @@ class PdfToTiffConversionTest {
         // Step 1: PDF Reading - As an independent ApexFlow instance
         val pdfReadFlow = apexFlow<Pair<File, File>, Pair<File, Flow<BufferedImage>>> {
             transformOnIO { (pdfFile, tiffFile) ->
-                logger.info("Starting PDF reading step")
-                logger.info("Processing file: {}", pdfFile.name)
+                logger.info("Starting PDF reading step. file: {}", pdfFile.name)
 
                 // Step 1: Read PDF on IO dispatcher (reader handles its own coroutines)
                 val imagesFlow = PdfImageReader(pdfFile) {
                     dpi = 100f
                 }.read()
+                    .withTiming("dev.waylon.apexflow.pdf.reader")
                     .flowOn(Dispatchers.IO)
+
 
                 // Return the pair of tiffFile and imagesFlow
                 Pair(tiffFile, imagesFlow)
@@ -77,8 +78,7 @@ class PdfToTiffConversionTest {
         // Step 2: TIFF Writing - As an independent ApexFlow instance
         val tiffWriteFlow = apexFlow<Pair<File, Flow<BufferedImage>>, Unit> {
             transformOnIO { (tiffFile, imagesFlow) ->
-                logger.info("Starting TIFF writing step")
-                logger.info("Processing file: {}", tiffFile.name)
+                logger.info("Starting TIFF writing step. file: {}", tiffFile.name)
 
                 // Step 2: Write TIFF on IO dispatcher (writer handles its own coroutines)
                 TiffWriter(tiffFile) {
