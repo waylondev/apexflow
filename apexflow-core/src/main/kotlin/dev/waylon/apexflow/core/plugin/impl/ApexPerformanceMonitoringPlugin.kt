@@ -3,13 +3,13 @@ package dev.waylon.apexflow.core.plugin.impl
 import com.sun.management.OperatingSystemMXBean
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
+import dev.waylon.apexflow.core.util.createLogger
 import java.lang.management.ManagementFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import dev.waylon.apexflow.core.util.createLogger
 import org.slf4j.Logger
 
 /**
@@ -54,7 +54,7 @@ class ApexPerformanceMonitoringPlugin(
                         logStartMetrics()
                     }
                     .let { originalFlow -> flow.transform(originalFlow) }
-                    .onEach { output ->
+                    .onEach { _ ->
                         val currentTime = System.currentTimeMillis()
                         if (currentTime - lastSampleTime >= samplingIntervalMs) {
                             logSampleMetrics(currentTime)
@@ -147,7 +147,7 @@ class ApexPerformanceMonitoringPlugin(
         val cpuUsed = getProcessCpuTime() - initialCpuTime
         val cpuUsagePercent = if (elapsedTime > 0) (cpuUsed.toDouble() / elapsedTime) * 100 else 0.0
         val processCpuLoad = osBean.processCpuLoad * 100
-        val systemCpuLoad = osBean.systemCpuLoad * 100
+        val systemCpuLoad = osBean.cpuLoad * 100
 
         logger.debug(
             "CPU Usage: ${cpuUsagePercent.format(2)}% (process), ${processCpuLoad.format(2)}% (system), ${
@@ -219,17 +219,13 @@ class ApexPerformanceMonitoringPlugin(
 
         stateCounts.forEach { (state, threads) ->
             if (state != null && threads.isNotEmpty()) {
-                logger.debug("Thread State ${state}: ${threads.size} threads")
+                logger.debug("Thread State {}: {} threads", state, threads.size)
             }
         }
     }
 
     private fun getProcessCpuTime(): Long {
-        return if (osBean is OperatingSystemMXBean) {
-            (osBean as OperatingSystemMXBean).processCpuTime / 1_000_000 // Convert nanoseconds to milliseconds
-        } else {
-            threadBean.currentThreadCpuTime / 1_000_000 // Fallback to current thread CPU time
-        }
+        return osBean.processCpuTime / 1_000_000
     }
 
     private fun getTotalGcCount(): Long {

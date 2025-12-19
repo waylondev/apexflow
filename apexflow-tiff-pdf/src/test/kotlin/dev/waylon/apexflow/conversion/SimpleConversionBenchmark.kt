@@ -1,13 +1,13 @@
 package dev.waylon.apexflow.conversion
 
 
+import dev.waylon.apexflow.core.util.createLogger
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.time.Duration
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import dev.waylon.apexflow.core.util.logger
 
 /**
  * Simple benchmark test for PDF to TIFF and TIFF to PDF conversion
@@ -15,7 +15,7 @@ import dev.waylon.apexflow.core.util.logger
  */
 class SimpleConversionBenchmark {
 
-    private val logger = logger
+    private val logger = createLogger<SimpleConversionBenchmark>()
 
     // Test PDF file path
     private val testPdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")

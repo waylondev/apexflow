@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.tiff
 
-import dev.waylon.apexflow.core.util.logger
+import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
 import java.io.File
@@ -41,7 +41,7 @@ class TiffReader @JvmOverloads constructor(
     ) : this(file.inputStream(), config)
 
     // Logger instance using unified logging utility
-    private val logger = logger
+    private val logger = createLogger<TiffReader>()
 
     /**
      * Read TIFF data from InputStream and return a Flow of BufferedImage

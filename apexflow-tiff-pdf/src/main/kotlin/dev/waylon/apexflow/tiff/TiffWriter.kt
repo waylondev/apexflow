@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.tiff
 
-import dev.waylon.apexflow.core.util.logger
+import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageWriter
 import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
@@ -81,7 +81,7 @@ class TiffWriter @JvmOverloads constructor(
         config: TiffWriterConfig = TiffWriterConfig()
     ) : this(file.outputStream(), config)
 
-    private val logger = logger
+    private val logger = createLogger<TiffWriter>()
 
     /**
      * Write BufferedImage flow to TIFF OutputStream with direct streaming behavior

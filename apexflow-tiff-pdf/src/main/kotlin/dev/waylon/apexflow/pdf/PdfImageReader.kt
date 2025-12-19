@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.core.util.logger
+import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageReader
 import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
@@ -75,7 +75,7 @@ class PdfImageReader @JvmOverloads constructor(
         config: PdfImageReaderConfig = PdfImageReaderConfig()
     ) : this(file.inputStream(), config)
 
-    private val logger = logger
+    private val logger = createLogger<PdfImageReader>()
 
     /**
      * Read PDF pages and return a Flow of BufferedImage with streaming behavior

@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.core.util.logger
+import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageWriter
 import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
@@ -69,7 +69,7 @@ class PdfImageWriter @JvmOverloads constructor(
         config: PdfImageWriterConfig = PdfImageWriterConfig()
     ) : this(file.outputStream(), config)
 
-    private val logger = logger
+    private val logger = createLogger<PdfImageWriter>()
 
 
     /**
