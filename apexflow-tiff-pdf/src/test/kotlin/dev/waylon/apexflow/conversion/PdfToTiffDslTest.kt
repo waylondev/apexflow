@@ -21,10 +21,10 @@ class PdfToTiffDslTest {
     private val logger = LoggerFactory.getLogger(PdfToTiffDslTest::class.java)
 
     // Test PDF file path
-    private val testPdfFile = File("build/test-pdf-to-tiff-dsl.pdf")
+    private val testPdfFile = File("dist/test-pdf-to-tiff-dsl.pdf")
 
     // Test TIFF file path (will be created during test)
-    private val testTiffFile = File("build/test-pdf-to-tiff-dsl.tiff")
+    private val testTiffFile = File("dist/test-pdf-to-tiff-dsl-output.tiff")
 
     /**
      * Test basic PDF to TIFF conversion using DSL function

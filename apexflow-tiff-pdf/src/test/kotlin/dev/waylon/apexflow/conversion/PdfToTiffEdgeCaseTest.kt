@@ -24,10 +24,10 @@ class PdfToTiffEdgeCaseTest {
     private val logger = LoggerFactory.getLogger(PdfToTiffEdgeCaseTest::class.java)
 
     // Test PDF file path
-    private val testPdfFile = File("build/test-pdf-to-tiff-dsl.pdf")
+    private val testPdfFile = File("dist/test-pdf-to-tiff-dsl.pdf")
 
     // Test TIFF file path (will be created during test)
-    private val testTiffFile = File("build/test-pdf-to-tiff-edge-case.tiff")
+    private val testTiffFile = File("dist/test-pdf-to-tiff-edge-case.tiff")
 
     /**
      * Test PDF to TIFF conversion with different DPI settings
@@ -40,7 +40,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(testPdfFile.exists(), "Test PDF file does not exist")
 
         // Test with low DPI
-        val lowDpiTiff = File("build/test-pdf-to-tiff-low-dpi.tiff")
+        val lowDpiTiff = File("dist/test-pdf-to-tiff-low-dpi.tiff")
         pdfToTiff(
             pdfConfig = { dpi = 72f },
             tiffConfig = { compressionType = "JPEG" }
@@ -49,7 +49,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(lowDpiTiff.length() > 0, "Low DPI TIFF file is empty")
 
         // Test with high DPI
-        val highDpiTiff = File("build/test-pdf-to-tiff-high-dpi.tiff")
+        val highDpiTiff = File("dist/test-pdf-to-tiff-high-dpi.tiff")
         pdfToTiff(
             pdfConfig = { dpi = 300f },
             tiffConfig = { compressionType = "JPEG" }
@@ -82,7 +82,7 @@ class PdfToTiffEdgeCaseTest {
         
         compressionTypes.forEach { compressionType ->
             logger.info("Testing compression type: $compressionType")
-            val outputFile = File("build/test-pdf-to-tiff-$compressionType.tiff")
+            val outputFile = File("dist/test-pdf-to-tiff-$compressionType.tiff")
             
             pdfToTiff(
                 tiffConfig = { 
@@ -112,7 +112,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(testPdfFile.exists(), "Test PDF file does not exist")
 
         // Test with specific page range
-        val pageRangeTiff = File("build/test-pdf-to-tiff-page-range.tiff")
+        val pageRangeTiff = File("dist/test-pdf-to-tiff-page-range.tiff")
         pdfToTiff(
             pdfConfig = { 
                 pageNumbers = listOf(0, 1) // First two pages
@@ -124,7 +124,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(pageRangeTiff.length() > 0, "Page range TIFF file is empty")
 
         // Test with invalid page numbers (should be filtered out)
-        val invalidPageRangeTiff = File("build/test-pdf-to-tiff-invalid-page-range.tiff")
+        val invalidPageRangeTiff = File("dist/test-pdf-to-tiff-invalid-page-range.tiff")
         pdfToTiff(
             pdfConfig = { 
                 pageNumbers = listOf(0, 1000, -1) // Some invalid pages
@@ -153,7 +153,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(testPdfFile.exists(), "Test PDF file does not exist")
 
         // Test with RGB image type
-        val rgbTiff = File("build/test-pdf-to-tiff-rgb.tiff")
+        val rgbTiff = File("dist/test-pdf-to-tiff-rgb.tiff")
         pdfToTiff(
             pdfConfig = { 
                 imageType = dev.waylon.apexflow.pdf.PdfImageReaderConfig.ImageType.RGB
@@ -165,7 +165,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(rgbTiff.length() > 0, "RGB TIFF file is empty")
 
         // Test with GRAY image type
-        val grayTiff = File("build/test-pdf-to-tiff-gray.tiff")
+        val grayTiff = File("dist/test-pdf-to-tiff-gray.tiff")
         pdfToTiff(
             pdfConfig = { 
                 imageType = dev.waylon.apexflow.pdf.PdfImageReaderConfig.ImageType.GRAY
@@ -194,7 +194,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(testPdfFile.exists(), "Test PDF file does not exist")
 
         // Test with skip blank pages enabled
-        val skipBlankTiff = File("build/test-pdf-to-tiff-skip-blank.tiff")
+        val skipBlankTiff = File("dist/test-pdf-to-tiff-skip-blank.tiff")
         pdfToTiff(
             pdfConfig = { 
                 skipBlankPages = true
@@ -222,7 +222,7 @@ class PdfToTiffEdgeCaseTest {
         assertTrue(testPdfFile.exists(), "Test PDF file does not exist")
 
         // Test with parallel writing enabled
-        val parallelTiff = File("build/test-pdf-to-tiff-parallel.tiff")
+        val parallelTiff = File("dist/test-pdf-to-tiff-parallel.tiff")
         pdfToTiff(
             tiffConfig = { 
                 compressionType = "JPEG"

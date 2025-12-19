@@ -30,8 +30,8 @@ class PdfToTiffConversionTest {
     @Test
     fun `test converting spring-boot-reference pdf to tiff`() = runBlocking {
         // Define input and output file paths
-        val inputPdf = File("build/spring-boot-reference-406.pdf")
-        val outputTiff = File("build/spring-boot-reference-406.tiff")
+        val inputPdf = File("dist/test-pdf-to-tiff-dsl.pdf")
+        val outputTiff = File("dist/test-pdf-to-tiff-dsl.tiff")
 
         // Check if input file exists
         assertTrue(inputPdf.exists(), "Input PDF file does not exist: ${inputPdf.absolutePath}")
