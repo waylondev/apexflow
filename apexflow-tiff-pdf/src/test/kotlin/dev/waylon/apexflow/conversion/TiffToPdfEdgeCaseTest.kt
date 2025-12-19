@@ -129,7 +129,7 @@ class TiffToPdfEdgeCaseTest {
         logger.info("=== Test: Conversion with invalid PDF version configuration ===")
 
         // Check if test TIFF exists
-        val testTiffFile = File("dist/test-tiff-to-pdf-dsl.tiff")
+        val testTiffFile = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
         if (!testTiffFile.exists()) {
             logger.warn("Test TIFF file not found, skipping test")
             return@runBlocking

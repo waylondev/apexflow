@@ -25,13 +25,13 @@ class PdfToTiffPerformanceTest {
         logger.info("=== Performance Test: Large PDF to TIFF conversion ===")
 
         // Use a larger PDF file for performance testing
-        val largePdfFile = File("dist/spring-boot-reference-406.pdf")
+        val largePdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
         if (!largePdfFile.exists()) {
             logger.warn("Large test PDF not found, skipping performance test")
             return@runBlocking
         }
 
-        val outputFile = File.createTempFile("large-pdf", ".tiff")
+        val outputFile = File("build/large-pdf.tiff")
 
         try {
             logger.info("Starting conversion of large PDF file (${largePdfFile.length() / 1024 / 1024} MB)")
@@ -62,7 +62,7 @@ class PdfToTiffPerformanceTest {
     fun `test performance with different dpi settings`() = runBlocking {
         logger.info("=== Performance Test: Different DPI settings ===")
 
-        val testPdfFile = File("dist/test-pdf-to-tiff-dsl.pdf")
+        val testPdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
         if (!testPdfFile.exists()) {
             logger.warn("Test PDF not found, skipping DPI performance test")
             return@runBlocking
@@ -103,13 +103,13 @@ class PdfToTiffPerformanceTest {
         logger.info("=== Performance Test: TIFF to PDF conversion ===")
 
         // Use a larger TIFF file for performance testing
-        val largeTiffFile = File("dist/test-tiff-to-pdf-dsl.tiff")
+        val largeTiffFile = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
         if (!largeTiffFile.exists()) {
             logger.warn("Large test TIFF not found, skipping performance test")
             return@runBlocking
         }
 
-        val outputFile = File.createTempFile("large-tiff", ".pdf")
+        val outputFile = File("build/large-tiff.pdf")
 
         try {
             logger.info("Starting conversion of large TIFF file (${largeTiffFile.length() / 1024 / 1024} MB)")

@@ -20,10 +20,10 @@ class TiffToPdfDslTest {
     private val logger = LoggerFactory.getLogger(TiffToPdfDslTest::class.java)
 
     // Test TIFF file path (will be created during test)
-    private val testTiffFile = File("dist/test-tiff-to-pdf-dsl.tiff")
+    private val testTiffFile = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
 
     // Temporary output file for testing
-    private val tempOutputFile = File("dist/test-tiff-to-pdf-dsl-output.pdf")
+    private val tempOutputFile = File("build/test-tiff-to-pdf-dsl-output.pdf")
 
     /**
      * Ensure we have a test TIFF file by converting from PDF if needed

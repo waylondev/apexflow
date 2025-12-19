@@ -8,6 +8,7 @@ import java.io.InputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.slf4j.LoggerFactory
 
@@ -87,8 +88,7 @@ class PdfImageReader @JvmOverloads constructor(
         logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
         // PDFBox 3.0.1 supports ByteArray, so we'll convert InputStream to ByteArray
-        val bytes = inputStream.use { it.readAllBytes() }
-        Loader.loadPDF(bytes).use { document ->
+        Loader.loadPDF(RandomAccessReadBuffer(inputStream)).use { document ->
             logger.debug("Loaded PDF document successfully")
 
             val renderer = PDFRenderer(document)

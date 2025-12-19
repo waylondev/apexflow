@@ -24,7 +24,7 @@ class PdfToTiffEdgeCaseTest {
     private val logger = LoggerFactory.getLogger(PdfToTiffEdgeCaseTest::class.java)
 
     // Small test PDF file
-    private val smallTestPdfFile = File("dist/test-pdf-to-tiff-dsl.pdf")
+    private val smallTestPdfFile = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
 
     /**
      * Test conversion with invalid PDF file
