@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.map
 
 /**
  * Cache node for caching transformation results
- * Typical FlowNode implementation demonstrating state management and caching functionality
+ * Typical ApexFlowNode implementation demonstrating state management and caching functionality
  * @param I Input type
  * @param O Output type
  * @property transformer Transformation function
  */
-class CacheFlowNode<I, O>(
+class ApexCacheFlowNode<I, O>(
     private val transformer: suspend (I) -> O
 ) : ApexFlowNode<I, O> {
 

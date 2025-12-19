@@ -3,8 +3,8 @@ package dev.waylon.apexflow.core.dsl
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
-import dev.waylon.apexflow.core.plugin.impl.LoggingPlugin
-import dev.waylon.apexflow.core.plugin.impl.TimingPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexTimingPlugin
 
 /**
  * Extension function: wrap flow with plugin
@@ -45,7 +45,7 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
  */
 @ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"): ApexFlow<I, O> {
-    return withPlugin(LoggingPlugin(loggerName))
+    return withPlugin(ApexLoggingPlugin(loggerName))
 }
 
 /**
@@ -65,5 +65,5 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"
  */
 @ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.timing"): ApexFlow<I, O> {
-    return withPlugin(TimingPlugin(loggerName))
+    return withPlugin(ApexTimingPlugin(loggerName))
 }

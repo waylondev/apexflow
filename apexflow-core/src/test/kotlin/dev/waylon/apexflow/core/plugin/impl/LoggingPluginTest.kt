@@ -14,17 +14,17 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
- * Test suite for LoggingPlugin functionality
+ * Test suite for ApexLoggingPlugin functionality
  *
  * This test covers:
  * - Basic logging plugin usage
  * - withLogging convenience function
  * - Plugin integration with apexFlow DSL
  */
-class LoggingPluginTest {
+class ApexLoggingPluginTest {
 
     /**
-     * Test basic LoggingPlugin functionality
+     * Test basic ApexLoggingPlugin functionality
      */
     @Test
     fun `test basic logging plugin`() = runBlocking {
@@ -32,7 +32,7 @@ class LoggingPluginTest {
             map { "Processed: $it" }
         }
 
-        val loggingWorkflow = workflow.withPlugin(LoggingPlugin())
+        val loggingWorkflow = workflow.withPlugin(ApexLoggingPlugin())
         val result = loggingWorkflow.transform(flowOf(42)).toList()
 
         assertEquals(listOf("Processed: 42"), result)
@@ -64,7 +64,7 @@ class LoggingPluginTest {
             map { "Processed: $it" }
         }
 
-        val loggingWorkflow = workflow.withPlugin(LoggingPlugin("custom.logger"))
+        val loggingWorkflow = workflow.withPlugin(ApexLoggingPlugin("custom.logger"))
         val result = loggingWorkflow.transform(flowOf(42)).toList()
 
         assertEquals(listOf("Processed: 42"), result)

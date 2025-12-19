@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
- * Test suite for TimingPlugin functionality
+ * Test suite for ApexTimingPlugin functionality
  *
  * This test covers:
  * - Basic timing plugin usage
  * - withTiming convenience function
  * - Integration with other plugins
  */
-class TimingPluginTest {
+class ApexTimingPluginTest {
 
     /**
-     * Test basic TimingPlugin functionality
+     * Test basic ApexTimingPlugin functionality
      */
     @Test
     fun `test basic timing plugin`() = runBlocking {
@@ -32,7 +32,7 @@ class TimingPluginTest {
         }
 
         // Create timing plugin instance
-        val timingPlugin = TimingPlugin()
+        val timingPlugin = ApexTimingPlugin()
         val timedWorkflow = timingPlugin.wrap(workflow)
 
         // Execute the workflow
@@ -96,7 +96,7 @@ class TimingPluginTest {
         val composedWorkflow = workflow
             .withTiming()
             .withLogging()
-            .withPlugin(TimingPlugin())
+            .withPlugin(ApexTimingPlugin())
 
         // Execute the workflow
         val result = composedWorkflow.transform(flowOf(42)).toList()

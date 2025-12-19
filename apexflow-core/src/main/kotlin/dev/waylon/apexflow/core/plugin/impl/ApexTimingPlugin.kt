@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
  * Timing plugin for measuring flow execution time
  * This plugin records the execution time of each flow and logs it using SLF4J
  */
-class TimingPlugin(
+class ApexTimingPlugin(
     private val loggerName: String = "dev.waylon.apexflow.timing"
 ) : ApexFlowPlugin {
 

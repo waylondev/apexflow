@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
- * Test suite for CacheFlowNode functionality
+ * Test suite for ApexCacheFlowNode functionality
  *
  * This test covers:
  * - Basic caching functionality
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
  * - Cache clearing
  * - Cache size tracking
  */
-class CacheFlowNodeTest {
+class ApexCacheFlowNodeTest {
 
     /**
      * Test basic caching functionality
@@ -25,7 +25,7 @@ class CacheFlowNodeTest {
     fun `test basic caching`() = runBlocking {
         var transformationCount = 0
 
-        val cacheNode = CacheFlowNode<Int, String> {
+        val cacheNode = ApexCacheFlowNode<Int, String> {
             transformationCount++
             "Processed: $it"
         }
@@ -48,7 +48,7 @@ class CacheFlowNodeTest {
     fun `test cache hit`() = runBlocking {
         var transformationCount = 0
 
-        val cacheNode = CacheFlowNode<Int, Int> {
+        val cacheNode = ApexCacheFlowNode<Int, Int> {
             transformationCount++
             it * 2
         }
@@ -75,7 +75,7 @@ class CacheFlowNodeTest {
     fun `test cache clearing`() = runBlocking {
         var transformationCount = 0
 
-        val cacheNode = CacheFlowNode<Int, String> {
+        val cacheNode = ApexCacheFlowNode<Int, String> {
             transformationCount++
             "Transformed: $it"
         }
@@ -104,7 +104,7 @@ class CacheFlowNodeTest {
     fun `test cache size tracking`() = runBlocking {
         var transformationCount = 0
 
-        val cacheNode = CacheFlowNode<Int, String> {
+        val cacheNode = ApexCacheFlowNode<Int, String> {
             transformationCount++
             "Value: $it"
         }
@@ -136,7 +136,7 @@ class CacheFlowNodeTest {
     fun `test caching with null values`() = runBlocking {
         var transformationCount = 0
 
-        val cacheNode = CacheFlowNode<Int, String?> {
+        val cacheNode = ApexCacheFlowNode<Int, String?> {
             transformationCount++
             if (it == 0) null else "Value: $it"
         }
