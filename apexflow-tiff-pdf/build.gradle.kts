@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
     id("java-library")
-    id("me.champeau.jmh") version "0.7.2"
+    id("org.jetbrains.kotlinx.benchmark") version "0.5.0"
 }
 
 group = "dev.waylon.apexflow"
@@ -37,20 +37,10 @@ compileTestKotlin.compilerOptions {
     languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
 }
 
-// Configure JMH Kotlin compiler options
-val compileJmhKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
-compileJmhKotlin.compilerOptions {
-    freeCompilerArgs.addAll(listOf("-Xskip-prerelease-check"))
-    apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
-    languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3)
-}
-
-
 repositories {
     mavenCentral()
     mavenLocal() // Add local Maven repository to resolve core module
 }
-
 
 dependencies {
     // Core dependencies - using version catalog for consistency
@@ -70,11 +60,9 @@ dependencies {
     // Test dependencies
     testImplementation(libs.kotlin.test)
     
-    // JMH Benchmark dependencies
-    jmhImplementation("org.openjdk.jmh:jmh-core:1.37")
-    jmhImplementation("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-    jmhImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    jmhImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    // Benchmark dependencies
+    benchmarkImplementation(libs.kotlinx.benchmark.runtime)
+    benchmarkImplementation(kotlin("test"))
 }
 
 // Use the Kotlin test runner instead of JUnit to avoid dependency issues
@@ -82,6 +70,42 @@ tasks.test {
     useJUnitPlatform()
     // Increase heap size for testing large files
     jvmArgs = listOf("-Xmx4g", "-Xms2g")
+}
+
+// Benchmark configuration
+benchmark {
+    targets {
+        register("main") {
+            mode = "throughput"
+            iterations = 5
+            warmups = 2
+            timeUnit = "ms"
+        }
+    }
+    configurations {
+        named("main") {
+            jvmArgs = listOf("-Xmx4g", "-Xms2g")
+        }
+    }
+}
+
+// Add benchmark source set
+sourceSets {
+    create("benchmark") {
+        kotlin {
+            srcDir("src/benchmark/kotlin")
+        }
+        resources {
+            srcDir("src/benchmark/resources")
+        }
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+// Configure benchmark compilation
+val compileBenchmarkKotlin by tasks.getting(JavaCompile::class) {
+    dependsOn(compileKotlin)
 }
 
 // Configure Maven publishing

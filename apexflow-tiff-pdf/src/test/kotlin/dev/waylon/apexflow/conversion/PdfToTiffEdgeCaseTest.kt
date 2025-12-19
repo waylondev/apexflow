@@ -113,20 +113,17 @@ class PdfToTiffEdgeCaseTest {
 
         val outputFile = File.createTempFile("output", ".tiff")
 
-        try {
-            // This should either fail or handle gracefully with minimum DPI
-            pdfToTiff(
-                pdfConfig = {
-                    dpi = 0f // Invalid DPI
-                }
-            ).convert(smallTestPdfFile, outputFile)
+        // This should either fail or handle gracefully with minimum DPI
+        pdfToTiff(
+            pdfConfig = {
+                dpi = 0f // Invalid DPI
+            }
+        ).convert(smallTestPdfFile, outputFile)
 
-            // If it doesn't throw, verify output was created
-            assert(outputFile.exists() && outputFile.length() > 0)
-        } catch (_: Exception) {
-            // Expected exception for invalid DPI
-        } finally {
-            outputFile.delete()
-        }
+        // If it doesn't throw, verify output was created
+        assert(outputFile.exists() && outputFile.length() > 0)
+
+        outputFile.delete()
     }
+
 }

@@ -111,20 +111,17 @@ class TiffToPdfEdgeCaseTest {
 
         val outputFile = File.createTempFile("output", ".pdf")
 
-        try {
-            // This should either fail or handle gracefully
-            tiffToPdf(
-                pdfConfig = {
-                    pdfVersion = "invalid-version" // Invalid PDF version
-                }
-            ).convert(testTiffFile, outputFile)
+        // This should either fail or handle gracefully
+        tiffToPdf(
+            pdfConfig = {
+                pdfVersion = "invalid-version" // Invalid PDF version
+            }
+        ).convert(testTiffFile, outputFile)
 
-            // If it doesn't throw, verify output was created
-            assert(outputFile.exists() && outputFile.length() > 0)
-        } catch (_: Exception) {
-            // Expected exception for invalid PDF version
-        } finally {
-            outputFile.delete()
-        }
+        // If it doesn't throw, verify output was created
+        assert(outputFile.exists() && outputFile.length() > 0)
+
+        outputFile.delete()
+
     }
 }

@@ -26,20 +26,11 @@ class PdfToTiffPerformanceTest {
 
         val outputFile = File("build/large-pdf.tiff")
 
-        try {
-            // Record start time
-            val startTime = System.currentTimeMillis()
+        // Convert with default settings
+        pdfToTiff().convert(largePdfFile, outputFile)
 
-            // Convert with default settings
-            pdfToTiff().convert(largePdfFile, outputFile)
-
-            // Calculate duration
-            val duration = System.currentTimeMillis() - startTime
-
-        } finally {
-            // Clean up
-            outputFile.delete()
-        }
+        // Clean up
+        outputFile.delete()
     }
 
     /**
@@ -58,22 +49,15 @@ class PdfToTiffPerformanceTest {
         dpiSettings.forEach { dpi ->
             val outputFile = File.createTempFile("dpi-test-${dpi}", ".tiff")
 
-            try {
-                // Record start time
-                val startTime = System.currentTimeMillis()
+            // Convert with specified DPI
+            pdfToTiff(
+                pdfConfig = {
+                    this.dpi = dpi
+                }
+            ).convert(testPdfFile, outputFile)
 
-                pdfToTiff(
-                    pdfConfig = {
-                        this.dpi = dpi
-                    }
-                ).convert(testPdfFile, outputFile)
-
-                // Calculate duration
-                val duration = System.currentTimeMillis() - startTime
-
-            } finally {
-                outputFile.delete()
-            }
+            // Clean up using use block for automatic resource management
+            outputFile.delete()
         }
     }
 
@@ -90,19 +74,10 @@ class PdfToTiffPerformanceTest {
 
         val outputFile = File("build/large-tiff.pdf")
 
-        try {
-            // Record start time
-            val startTime = System.currentTimeMillis()
+        // Convert with default settings
+        tiffToPdf().convert(largeTiffFile, outputFile)
 
-            // Convert with default settings
-            tiffToPdf().convert(largeTiffFile, outputFile)
-
-            // Calculate duration
-            val duration = System.currentTimeMillis() - startTime
-
-        } finally {
-            // Clean up
-            outputFile.delete()
-        }
+        // Clean up
+        outputFile.delete()
     }
 }
