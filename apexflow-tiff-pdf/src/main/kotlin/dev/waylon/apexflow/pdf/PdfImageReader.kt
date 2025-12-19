@@ -1,7 +1,7 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.image.ImageConstants
 import dev.waylon.apexflow.image.ApexImageReader
+import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream

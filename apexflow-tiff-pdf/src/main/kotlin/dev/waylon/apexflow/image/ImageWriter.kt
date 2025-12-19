@@ -2,7 +2,6 @@ package dev.waylon.apexflow.image
 
 import java.awt.image.BufferedImage
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 
 /**
  * ApexFlow图像写入器接口
