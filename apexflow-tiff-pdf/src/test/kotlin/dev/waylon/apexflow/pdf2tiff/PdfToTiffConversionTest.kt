@@ -16,8 +16,9 @@ import org.junit.jupiter.api.Test
 class PdfToTiffConversionTest {
 
     // Define input and output file paths
-    private val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
-    private val outputTiff = File("build/test-pdf-to-tiff-dsl.tiff")
+    private val inputPdf = File("build/spring-boot-reference-406.pdf")
+    private val outputTiff = File("build/test-pdf-to-tiff-dsl-406.tiff")
+
 
     @BeforeEach
     fun setUp() {

@@ -7,7 +7,6 @@ import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -90,7 +89,7 @@ class BusinessFlowComparisonTest {
 
     /**
      * ApexFlow implementation of business flow - Component-based Best Practice
-     * 
+     *
      * Demonstrates core advantages of ApexFlow (compared to using Flow directly):
      * 1. Component-based design - Split complex flow into independent, reusable components
      * 2. Simple composition - Easily combine components using + operator
@@ -112,7 +111,7 @@ class BusinessFlowComparisonTest {
                     // Execute database query and API call in parallel
                     val dbDeferred = async { queryDb(validated) } // Database query task
                     val apiDeferred = async { callThirdPartyApi(validated) } // API call task
-                    
+
                     // Wait for both tasks to complete and return results as a pair
                     Pair(dbDeferred.await(), apiDeferred.await())
                 }
