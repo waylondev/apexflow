@@ -4,6 +4,7 @@ import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexPerformanceMonitoringPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexTimingPlugin
 
 /**
@@ -66,4 +67,24 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"
 @ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.timing"): ApexFlow<I, O> {
     return withPlugin(ApexTimingPlugin(loggerName))
+}
+
+/**
+ * Extension function: add performance monitoring plugin
+ *
+ * Convenience function for adding system resource monitoring to ApexFlow instances.
+ * Tracks CPU usage, memory consumption, and thread count during flow execution.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val monitoredFlow = flow.withPerformanceMonitoring("my-monitored-flow")
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.performance)
+ * @return ApexFlow instance with performance monitoring enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPerformanceMonitoring(loggerName: String = "dev.waylon.apexflow.performance"): ApexFlow<I, O> {
+    return withPlugin(ApexPerformanceMonitoringPlugin(loggerName))
 }

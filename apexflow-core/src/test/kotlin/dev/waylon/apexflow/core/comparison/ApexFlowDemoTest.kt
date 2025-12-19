@@ -3,6 +3,7 @@ package dev.waylon.apexflow.core.comparison
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
+import dev.waylon.apexflow.core.dsl.withPerformanceMonitoring
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -161,8 +162,8 @@ class BusinessFlowComparisonTest {
             assertEquals("SUCCESS", response.status)
         }
 
-        // Test ApexFlow implementation
-        val apexFlow = createApexFlow()
+        // Test ApexFlow implementation with performance monitoring
+        val apexFlow = createApexFlow().withPerformanceMonitoring("business-flow-performance")
         val apexFlowTime = measureTimeMillis {
             val response = apexFlow.execute(request).toList().first()
             assertEquals("SUCCESS", response.status)

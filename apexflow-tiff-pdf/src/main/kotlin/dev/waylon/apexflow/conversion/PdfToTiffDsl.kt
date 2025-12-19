@@ -2,6 +2,7 @@ package dev.waylon.apexflow.conversion
 
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.transformOnIO
+import dev.waylon.apexflow.core.dsl.withPerformanceMonitoring
 import dev.waylon.apexflow.core.dsl.withTiming
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageReaderConfig
@@ -124,6 +125,7 @@ class PdfToTiffConverter internal constructor(
         // Combine stages into complete flow
         val pdfToTiffFlow = pdfReadFlow + tiffWriteFlow
             .withTiming("Total PDF to TIFF Conversion")
+            .withPerformanceMonitoring("PDF to TIFF Performance")
 
         // Execute the combined flow
         pdfToTiffFlow.transform(inputFlow).toList()
