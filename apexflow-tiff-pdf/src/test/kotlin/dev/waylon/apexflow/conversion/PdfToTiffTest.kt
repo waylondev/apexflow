@@ -32,7 +32,7 @@ class PdfToTiffTest {
                 outputTiff,
                 pdfConfig = {
                     dpi = 100f // Balanced resolution for speed and quality
-                    bufferSize = 64
+//                    bufferSize = 5
                 },
                 tiffConfig = {
                     compressionType = "JPEG" // Fast compression
