@@ -4,11 +4,7 @@ import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.ApexFlowConstants
 import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexPerformanceMonitoringPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexSlowOperationDetectorPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexThroughputPlugin
-import dev.waylon.apexflow.core.plugin.impl.ApexTracePlugin
+import dev.waylon.apexflow.core.plugin.impl.*
 import java.time.Duration
 
 /**
@@ -167,6 +163,100 @@ fun <I, O> ApexFlow<I, O>.withPluginThroughput(
     samplingInterval: Duration = Duration.ofSeconds(1)
 ): ApexFlow<I, O> {
     return withPlugin(ApexThroughputPlugin(loggerName, samplingInterval))
+}
+
+/**
+ * Extension function: add error context plugin
+ *
+ * Provides detailed error context, including the component where the error occurred,
+ * input data summary, and execution stack. Helps quickly locate and fix errors.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val errorHandledFlow = flow.withPluginErrorContext()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.error-context)
+ * @return ApexFlow instance with error context functionality enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginErrorContext(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.error-context"
+): ApexFlow<I, O> {
+    return withPlugin(ApexErrorContextPlugin(loggerName))
+}
+
+/**
+ * Extension function: add memory monitoring plugin
+ *
+ * Monitors memory usage, including memory peaks, garbage collection frequency,
+ * and object creation statistics. Helps detect memory leaks or excessive usage.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val memoryMonitoredFlow = flow.withPluginMemoryMonitoring()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.memory-monitoring)
+ * @param samplingInterval Sampling interval for memory metrics (default: 2 seconds)
+ * @return ApexFlow instance with memory monitoring enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginMemoryMonitoring(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.memory-monitoring",
+    samplingInterval: Duration = Duration.ofSeconds(2)
+): ApexFlow<I, O> {
+    return withPlugin(ApexMemoryMonitoringPlugin(loggerName, samplingInterval))
+}
+
+/**
+ * Extension function: add resource utilization plugin
+ *
+ * Monitors system resource usage, including CPU, disk I/O, network I/O, and thread count.
+ * Helps understand the impact of flows on system resources and identify I/O or CPU bottlenecks.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val monitoredFlow = flow.withPluginResourceUtilization()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.resource-utilization)
+ * @param samplingInterval Sampling interval for resource metrics (default: 5 seconds)
+ * @return ApexFlow instance with resource utilization monitoring enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginResourceUtilization(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.resource-utilization",
+    samplingInterval: Duration = Duration.ofSeconds(5)
+): ApexFlow<I, O> {
+    return withPlugin(ApexResourceUtilizationPlugin(loggerName, samplingInterval))
+}
+
+/**
+ * Extension function: add flow visualization plugin
+ *
+ * Generates flow diagrams or execution trace graphs, intuitively displaying data flow between components.
+ * Helps understand complex flows through visualization.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val visualizedFlow = flow.withPluginFlowVisualization()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.flow-visualization)
+ * @param outputFormat Visualization output format (default: TEXT)
+ * @return ApexFlow instance with flow visualization enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginFlowVisualization(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.flow-visualization",
+    outputFormat: ApexFlowVisualizationPlugin.VisualizationFormat = ApexFlowVisualizationPlugin.VisualizationFormat.TEXT
+): ApexFlow<I, O> {
+    return withPlugin(ApexFlowVisualizationPlugin(loggerName, outputFormat))
 }
 
 
