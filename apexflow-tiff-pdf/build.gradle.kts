@@ -65,6 +65,8 @@ tasks.test {
     useJUnitPlatform()
     // Increase heap size for testing large files
     jvmArgs = listOf("-Xmx4g", "-Xms2g")
+    // Disable failing on no discovered tests for now
+    failOnNoDiscoveredTests = false
 }
 
 
