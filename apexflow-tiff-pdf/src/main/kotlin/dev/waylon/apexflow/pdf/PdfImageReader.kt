@@ -102,11 +102,11 @@ class PdfImageReader @JvmOverloads constructor(
 
             // Sequential rendering for clean, simple implementation
             for (pageIndex in pagesToRender) {
-                logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
+                logger.trace("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
                 val image = renderer.renderImageWithDPI(pageIndex, config.dpi)
                 emit(image)
                 image.flush()
-                logger.debug("Successfully rendered PDF page")
+                logger.debug("Successfully rendered PDF page {}/{}", pageIndex + 1, pageCount)
             }
         }
 

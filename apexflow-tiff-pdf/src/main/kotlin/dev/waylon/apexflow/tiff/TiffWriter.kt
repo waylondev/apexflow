@@ -112,7 +112,7 @@ class TiffWriter @JvmOverloads constructor(
                 // Create IIOImage from BufferedImage
                 val iioImage = IIOImage(image, null, null)
 
-                logger.debug("Writing TIFF page {}", pageIndex)
+                logger.trace("Writing TIFF page {}", pageIndex)
 
                 // Step 2: Write each image to the sequence immediately as it arrives
                 // This ensures each image is added as a new page in the TIFF file

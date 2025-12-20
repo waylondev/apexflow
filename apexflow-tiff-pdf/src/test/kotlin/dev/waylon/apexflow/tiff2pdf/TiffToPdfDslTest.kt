@@ -36,8 +36,10 @@ class TiffToPdfDslTest {
 
     @AfterEach
     fun tearDown() {
-        // Clean up temporary files
-        tempOutputFile.delete()
+        // Clean up temporary files using non-blocking approach
+        if (tempOutputFile.exists()) {
+            tempOutputFile.delete()
+        }
     }
 
     /**

@@ -99,11 +99,11 @@ class PdfImageWriter @JvmOverloads constructor(
             // Process Flow elements one by one, respecting backpressure
             data.collect { image ->
                 pageIndex++
-                logger.debug("Adding page {} to PDF document", pageIndex)
+                logger.trace("Adding page {} to PDF document", pageIndex)
 
                 val page = PDPage()
                 document.addPage(page)
-                logger.debug("Created PDF page {}", pageIndex)
+                logger.trace("Created PDF page {}", pageIndex)
 
                 PDPageContentStream(document, page).use {
                     val pdImage = JPEGFactory.createFromImage(document, image, quality)

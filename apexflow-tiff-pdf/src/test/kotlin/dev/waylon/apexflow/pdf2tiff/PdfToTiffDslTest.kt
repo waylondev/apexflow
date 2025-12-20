@@ -35,8 +35,10 @@ class PdfToTiffDslTest {
 
     @AfterEach
     fun tearDown() {
-        // Clean up test files
-        testTiffFile.delete()
+        // Clean up test files using non-blocking approach
+        if (testTiffFile.exists()) {
+            testTiffFile.delete()
+        }
     }
 
     /**

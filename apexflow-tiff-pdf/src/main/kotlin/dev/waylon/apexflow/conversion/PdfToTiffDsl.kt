@@ -130,7 +130,9 @@ class PdfToTiffConverter internal constructor(
         // PDF Reading Flow Component
         val pdfReaderFlow = apexFlow<InputStream, BufferedImage> {
             flatMapMerge { input ->
-                PdfImageReader(input, pdfConfig).read()
+                PdfImageReader(input, pdfConfig)
+                    .read()
+                    .withPluginTiming()
                     .flowOn(Dispatchers.IO)
             }
         }

@@ -31,8 +31,10 @@ class PdfToTiffPerformanceTest {
         // Convert with default settings
         pdfToTiff().convert(largePdfFile, outputFile)
 
-        // Clean up
-        outputFile.delete()
+        // Clean up using non-blocking approach
+        if (outputFile.exists()) {
+            outputFile.delete()
+        }
     }
 
     /**
@@ -58,8 +60,10 @@ class PdfToTiffPerformanceTest {
                 }
             ).convert(testPdfFile, outputFile)
 
-            // Clean up using use block for automatic resource management
-            outputFile.delete()
+            // Clean up using non-blocking approach
+            if (outputFile.exists()) {
+                outputFile.delete()
+            }
         }
     }
 
@@ -79,7 +83,9 @@ class PdfToTiffPerformanceTest {
         // Convert with default settings
         tiffToPdf().convert(largeTiffFile, outputFile)
 
-        // Clean up
-        outputFile.delete()
+        // Clean up using non-blocking approach
+        if (outputFile.exists()) {
+            outputFile.delete()
+        }
     }
 }

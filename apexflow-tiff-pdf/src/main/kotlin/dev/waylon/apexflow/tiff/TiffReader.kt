@@ -64,11 +64,11 @@ class TiffReader @JvmOverloads constructor(
 
                 // Sequential reading for clean, simple implementation
                 for (pageIndex in 0 until numPages) {
-                    logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
+                    logger.trace("Reading TIFF page {}/{}", pageIndex + 1, numPages)
                     val image = reader.read(pageIndex, readParam)
                     emit(image)
                     image.flush()
-                    logger.debug("Successfully read TIFF page")
+                    logger.debug("Successfully read TIFF page {}/{}", pageIndex + 1, numPages)
                 }
             }
         }
