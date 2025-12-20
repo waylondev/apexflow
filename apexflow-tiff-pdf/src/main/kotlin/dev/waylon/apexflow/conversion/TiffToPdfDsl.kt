@@ -91,7 +91,7 @@ class TiffToPdfConverter internal constructor(
         // Simplified conversion implementation
         val reader = TiffReader(inputStream, tiffConfig)
         val writer = PdfImageWriter(outputStream, pdfConfig)
-        
+
         // Read TIFF pages as flow and write to PDF
         writer.write(reader.read())
     }

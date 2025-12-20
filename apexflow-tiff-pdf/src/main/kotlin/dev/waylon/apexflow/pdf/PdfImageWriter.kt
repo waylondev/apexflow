@@ -6,12 +6,12 @@ import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.OutputStream
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
 
 /**
  * PDF image writer configuration
@@ -37,12 +37,12 @@ class PdfImageWriterConfig {
      * Metadata for the PDF document
      */
     var metadata: PdfMetadata = PdfMetadata()
-    
+
     /**
      * Whether to write pages in parallel
      */
     var parallelWriting: Boolean = false
-    
+
     /**
      * Maximum number of pages to write in parallel
      */
@@ -93,35 +93,35 @@ class PdfImageWriter @JvmOverloads constructor(
 
         val quality = config.jpegQuality / 100f
         val document = PDDocument()
-        
+
         try {
             logger.debug("Created new PDF document")
             val images = data.toList()
             var pageIndex = 0
-            
+
             logger.debug("Writing {} images to PDF", images.size)
-                
+
             images.forEach { image ->
                 pageIndex++
                 logger.debug("Adding page {} to PDF document")
-                
+
                 val page = PDPage()
                 document.addPage(page)
                 logger.debug("Created PDF page {}", pageIndex)
-                
+
                 val contentStream = PDPageContentStream(document, page)
-                
+
                 try {
                     val pdImage = JPEGFactory.createFromImage(document, image, quality)
                     contentStream.drawImage(pdImage, 0f, 0f)
                 } finally {
                     contentStream.close()
                 }
-                
+
                 image.flush()
                 logger.debug("Successfully wrote PDF page {}", pageIndex)
             }
-            
+
             // Save the document to output stream
             document.save(outputStream)
         } finally {

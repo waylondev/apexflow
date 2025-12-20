@@ -2,8 +2,8 @@ package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.withPluginLogging
 import dev.waylon.apexflow.core.dsl.withPlugin
+import dev.waylon.apexflow.core.dsl.withPluginLogging
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

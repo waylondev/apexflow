@@ -44,16 +44,6 @@ class PdfImageReaderConfig {
     var imageType: ImageType = ImageType.RGB
 
     /**
-     * Whether to read pages in parallel
-     */
-    var parallelReading: Boolean = false
-
-    /**
-     * Maximum number of pages to read in parallel
-     */
-    var parallelism: Int = Runtime.getRuntime().availableProcessors()
-
-    /**
      * Image type sealed class for PDF rendering
      * Provides type-safe extensibility for different image types
      */
@@ -101,44 +91,31 @@ class PdfImageReader @JvmOverloads constructor(
      * @return Flow<BufferedImage> Flow of rendered pages in original order
      */
     override fun read(): Flow<BufferedImage> = flow {
-        logger.info("Starting PDF reading process with DPI: {}, parallelism: {}", 
-                   config.dpi, config.parallelism)
+        logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
-        // Read all bytes first to make input thread-safe for multiple PDFRenderer instances
         val pdfBytes = inputStream.readAllBytes()
         logger.debug("Read {} bytes from input stream", pdfBytes.size)
 
-        // Create initial document to get page count
+        // Create a single document and renderer for sequential rendering
         Loader.loadPDF(RandomAccessReadBuffer(pdfBytes)).use { document ->
             val pageCount = document.numberOfPages
             logger.info("Found {} pages in PDF document", pageCount)
-
+            
+            val renderer = PDFRenderer(document)
             val pagesToRender = if (config.pageNumbers.isEmpty()) {
                 0 until pageCount
             } else {
                 config.pageNumbers.filter { it in 0 until pageCount }
             }
-
-            // Use direct flatMapMerge for parallel processing with thread-safe PDFRenderer per coroutine
-            pagesToRender.asFlow()
-                .flatMapMerge(config.parallelism) {
-                    pageIndex ->
-                        flow {
-                            logger.debug("Rendering PDF page {}/{} in thread {}", 
-                                        pageIndex + 1, pageCount, Thread.currentThread().name)
-                            // Create a new PDFRenderer per coroutine (PDFBox renderers are not thread-safe)
-                            Loader.loadPDF(RandomAccessReadBuffer(pdfBytes)).use { threadDocument ->
-                                val threadRenderer = PDFRenderer(threadDocument)
-                                emit(threadRenderer.renderImageWithDPI(pageIndex, config.dpi))
-                            }
-                        }.flowOn(Dispatchers.IO)
-                }
-                .collect {
-                    image ->
-                        emit(image)
-                        image.flush()
-                        logger.debug("Successfully rendered PDF page")
-                }
+            
+            // Sequential rendering for clean, simple implementation
+            for (pageIndex in pagesToRender) {
+                logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)
+                val image = renderer.renderImageWithDPI(pageIndex, config.dpi)
+                emit(image)
+                image.flush()
+                logger.debug("Successfully rendered PDF page")
+            }
         }
 
         logger.info("Completed PDF reading process successfully")
