@@ -36,6 +36,61 @@ At the heart of ApexFlow lies a simple yet powerful principle: **"Everything is 
 - **Simple Composition**: Use `+` operator to combine components
 - **Low Overhead**: Minimal framework overhead
 
+## ⚡ Performance Advantage
+
+### Traditional Sequential Processing
+In traditional document conversion:
+1. **Read all PDF pages first** (50s for 406-page PDF)
+2. **Then write all TIFF pages** (40s for 406 pages)
+3. **Total Time**: 50s + 40s = **90s**
+
+```
+┌───────────────────────────────────────────────┐
+│              Traditional Processing           │
+├───────────────────────────────────────────────┤
+│  1. Read PDF Pages (50s)                      │
+│     ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│     │ Page 1   │ │ Page 2   │ │ Page N   │ │
+│     └───────────┘ └───────────┘ └───────────┘ │
+│                                               │
+│  2. Write TIFF Pages (40s)                    │
+│     ┌───────────┐ ┌───────────┐ ┌───────────┐ │
+│     │ Tiff 1   │ │ Tiff 2   │ │ Tiff N   │ │
+│     └───────────┘ └───────────┘ └───────────┘ │
+└───────────────────────────────────────────────┘
+                    Total: 90s
+```
+
+### ApexFlow Streaming Processing
+With ApexFlow's "Everything is Flow" design:
+1. **Read pages one by one**
+2. **Write pages immediately as they're read**
+3. **Overlapping operations** reduce total time
+4. **Total Time**: ~50s (time of the longest operation)
+
+```
+┌───────────────────────────────────────────────┐
+│             ApexFlow Streaming                │
+├───────────────────────────────────────────────┤
+│  Read Page 1 → Write Tiff 1                   │
+│  Read Page 2 → Write Tiff 2                   │
+│  Read Page 3 → Write Tiff 3                   │
+│  ...                                          │
+│  Read Page N → Write Tiff N                   │
+│                                               │
+│  ┌─────────┐    ┌─────────┐    ┌─────────┐    │
+│  │ Read    │→→→│ Process │→→→│ Write   │    │
+│  └─────────┘    └─────────┘    └─────────┘    │
+└───────────────────────────────────────────────┘
+                    Total: ~50s
+```
+
+### Why This Matters
+- **Reduced Latency**: Faster time-to-result for end users
+- **Lower Memory Usage**: No need to store all pages in memory
+- **Better Resource Utilization**: Overlapping I/O operations
+- **Scalability**: Handles large files efficiently
+
 ## 🚀 Key Features
 
 ### ApexFlow Core - Workflow Orchestration

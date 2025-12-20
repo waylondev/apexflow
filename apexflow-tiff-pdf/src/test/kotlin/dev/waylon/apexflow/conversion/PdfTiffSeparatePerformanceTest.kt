@@ -6,7 +6,6 @@ import dev.waylon.apexflow.pdf.ApexPdfReader
 import dev.waylon.apexflow.pdf.PdfConfig
 import dev.waylon.apexflow.tiff.ApexTiffWriter
 import dev.waylon.apexflow.tiff.TiffConfig
-import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.flow.collect
@@ -72,9 +71,9 @@ class PdfTiffSeparatePerformanceTest {
             bufferSize = 0 // No buffering for accurate measurement
         }
 
-        // Create TIFF writer to ByteArrayOutputStream (no disk I/O) with performance monitoring
-        val outputStream = ByteArrayOutputStream()
-        val tiffWriter = ApexTiffWriter.toOutputStream(outputStream, tiffConfig)
+        // Create temporary file for TIFF output to avoid memory issues
+        val tempFile = File.createTempFile("test-output", ".tiff").apply { deleteOnExit() }
+        val tiffWriter = ApexTiffWriter.toFile(tempFile, tiffConfig)
             .withPluginPerformanceMonitoring(
                 loggerName = "dev.waylon.apexflow.performance.tiff.writing",
                 samplingIntervalMs = 1000,
@@ -87,7 +86,7 @@ class PdfTiffSeparatePerformanceTest {
         }
 
         println("Total TIFF Writing Time: ${totalTime} ms")
-        println("Output size: ${outputStream.size() / 1024 / 1024} MB")
+        println("Output size: ${tempFile.length() / 1024 / 1024} MB")
         println("==================================")
     }
 
@@ -99,12 +98,12 @@ class PdfTiffSeparatePerformanceTest {
         println("=== COMBINED PDF TO TIFF PERFORMANCE TEST ===")
 
         // Use same configuration for fair comparison
-        val pdfConfig = PdfConfig().apply {
+        PdfConfig().apply {
             dpi = 150f
             bufferSize = 0
         }
 
-        val tiffConfig = TiffConfig().apply {
+        TiffConfig().apply {
             compressionType = "JPEG"
             compressionQuality = 70f
             bufferSize = 0
