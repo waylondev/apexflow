@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.onStart
  * This is a core plugin provided by the framework, demonstrating how to implement ApexFlowPlugin
  * Clients can use this plugin directly or as a reference for creating custom plugins
  */
-class ApexLoggingPlugin(private val loggerName: String = "dev.waylon.apexflow") : ApexFlowPlugin {
+class ApexLoggingPlugin(private val loggerName: String = "dev.waylon.apexflow.plugin.logging") : ApexFlowPlugin {
 
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {
         // Create SLF4J logger

@@ -1,6 +1,10 @@
 package dev.waylon.apexflow.conversion
 
 import dev.waylon.apexflow.core.dsl.apexFlow
+import dev.waylon.apexflow.core.dsl.execute
+import dev.waylon.apexflow.core.dsl.withPluginLogging
+import dev.waylon.apexflow.core.dsl.withPluginPerformanceMonitoring
+import dev.waylon.apexflow.core.dsl.withPluginTiming
 import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.pdf.PdfImageWriter
 import dev.waylon.apexflow.pdf.PdfImageWriterConfig
@@ -13,7 +17,6 @@ import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -131,15 +134,13 @@ class TiffToPdfConverter internal constructor(
         // DEMONSTRATION: COMPLETE FLOW PIPELINE    //
         ///////////////////////////////////////////
 
-        // Create input flow - EVERYTHING STARTS AS FLOW
-        val inputFlow = flowOf(inputStream)
-
         // Compose complete pipeline by chaining all Flow components
         // This demonstrates the full "Everything is Flow" principle
-        val completeImageFlow = inputFlow
-            .let { tiffReaderFlow.transform(it) }        // Stage 1: Read TIFF pages
-            .let { imageProcessorFlow.transform(it) }   // Stage 2: Process images
-
+        val completeImageFlow = tiffReaderFlow + imageProcessorFlow// Stage 2: Process images
+        val resultFlow = completeImageFlow.withPluginTiming()
+            .withPluginLogging()
+            .withPluginPerformanceMonitoring()
+            .execute(inputStream)
         ///////////////////////////////////////////
         // EXECUTION: SINGLE COLLECT CALL         //
         ///////////////////////////////////////////
@@ -152,16 +153,9 @@ class TiffToPdfConverter internal constructor(
         // Write the complete flow using PdfImageWriter's Flow support
         logger.info("Writing PDF file using Flow component")
         val writer = PdfImageWriter(outputStream, pdfConfig)
-        writer.write(completeImageFlow) // Write the entire flow
+        writer.write(resultFlow) // Write the entire flow
         logger.info("Completed PDF writing using Flow component")
 
-        logger.info("Completed TIFF to PDF conversion")
-        logger.info("ApexFlow advantages demonstrated:")
-        logger.info("1. Everything is Flow - All operations use Flow API, including writing")
-        logger.info("2. Reusable components - Created modular, shareable flow components")
-        logger.info("3. Declarative composition - Clear, intuitive pipeline building")
-        logger.info("4. Easy extensibility - Added processing stages with minimal code")
-        logger.info("5. Single execution point - One collect() call runs the entire pipeline")
     }
 
     /**

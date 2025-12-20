@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
  * This plugin records the execution time of each flow and logs it using SLF4J
  */
 class ApexTimingPlugin(
-    private val loggerName: String = "dev.waylon.apexflow.timing"
+    private val loggerName: String = "dev.waylon.apexflow.plugin.timing"
 ) : ApexFlowPlugin {
 
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {

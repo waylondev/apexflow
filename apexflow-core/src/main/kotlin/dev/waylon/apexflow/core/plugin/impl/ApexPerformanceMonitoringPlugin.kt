@@ -28,7 +28,7 @@ import org.slf4j.Logger
  * Uses more effective JMX APIs and reduces logging overhead
  */
 class ApexPerformanceMonitoringPlugin(
-    private val loggerName: String = "dev.waylon.apexflow.performance",
+    private val loggerName: String = "dev.waylon.apexflow.plugin.performance",
     private val samplingIntervalMs: Long = 5000,
     private val enableDetailedMetrics: Boolean = false
 ) : ApexFlowPlugin {

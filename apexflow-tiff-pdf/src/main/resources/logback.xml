@@ -23,5 +23,5 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <logger name="dev.waylon.apexflow" level="INFO"/>
+    <logger name="dev.waylon.apexflow" level="DEBUG"/>
 </configuration>

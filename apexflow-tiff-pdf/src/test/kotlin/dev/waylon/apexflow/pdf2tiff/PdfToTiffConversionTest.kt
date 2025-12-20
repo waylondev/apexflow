@@ -17,7 +17,7 @@ class PdfToTiffConversionTest {
 
     // Define input and output file paths
     private val inputPdf = File("dist/test-pdf-to-tiff-dsl.pdf")
-    private val outputTiff = File("build/test-pdf-to-tiff-dsl.tiff")
+    private val outputTiff = File("build/test-pdf-to-tiff-dsl-output.tiff")
 
     @BeforeEach
     fun setUp() {

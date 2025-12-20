@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.onStart
  * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.standard-flow.timing)
  * @return Flow instance with execution time measurement enabled
  */
-fun <T> Flow<T>.withPluginTiming(loggerName: String = "dev.waylon.apexflow.standard-flow.timing"): Flow<T> {
+fun <T> Flow<T>.withPluginTiming(loggerName: String = "dev.waylon.apexflow.standard.plugin.timing"): Flow<T> {
     val logger = createLogger(loggerName)
     var startTime: Long = 0
 
