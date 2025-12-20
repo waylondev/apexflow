@@ -18,16 +18,40 @@ Every operation in ApexFlow is represented as a `Flow<T>`, enabling seamless com
 
 ### Traditional Sequential Processing
 ```
-Read All Pages (50s) → Wait → Write All Pages (40s) = 90s
+┌───────────────────────────────────────────────────────┐
+│                    Traditional Approach               │
+├───────────────────────────────────────────────────────┤
+│  1. Read All Pages (50s)                              │
+│     ┌───────────┐ ┌───────────┐ ┌───────────┐        │
+│     │ Page 1   │ │ Page 2   │ │ Page N   │        │
+│     └───────────┘ └───────────┘ └───────────┘        │
+│                                                      │
+│  2. Wait for reading to complete                     │
+│                                                      │
+│  3. Write All Pages (40s)                            │
+│     ┌───────────┐ ┌───────────┐ ┌───────────┐        │
+│     │ Tiff 1   │ │ Tiff 2   │ │ Tiff N   │        │
+│     └───────────┘ └───────────┘ └───────────┘        │
+└───────────────────────────────────────────────────────┘
+                        Total Time: 90s
 ```
 
 ### ApexFlow Streaming Processing
 ```
-Read Page 1 → Write Page 1
-Read Page 2 → Write Page 2
-Read Page 3 → Write Page 3
-...
-Total Time ≈ Longest Operation (50s)
+┌───────────────────────────────────────────────────────┐
+│                  ApexFlow Approach                   │
+├───────────────────────────────────────────────────────┤
+│  Read Page 1 → Write Page 1                          │
+│  Read Page 2 → Write Page 2                          │
+│  Read Page 3 → Write Page 3                          │
+│  ...                                                 │
+│  Read Page N → Write Page N                          │
+│                                                      │
+│  ┌─────────┐    ┌─────────┐    ┌─────────┐           │
+│  │ Read    │→→→│ Process │→→→│ Write   │           │
+│  └─────────┘    └─────────┘    └─────────┘           │
+└───────────────────────────────────────────────────────┘
+                        Total Time: ~50s
 ```
 
 ### Scaling Advantage
