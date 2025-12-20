@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /**
- * TIFF to PDF conversion DSL
+ * ApexFlow TIFF to PDF conversion DSL
  *
  * Provides a fluent API for converting TIFF files to PDF format
  * with support for multiple input/output types and flexible configurations.
@@ -33,20 +33,23 @@ import kotlinx.coroutines.flow.map
  * - Comprehensive extension functions for easy integration
  * - True ApexFlow "Everything is Flow" design
  * - Direct implementation of ApexFlow interface
+ * - Flow composition using + operator
+ * - Automatic resource management
+ * - Plugin support for monitoring and logging
  *
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
- * tiffToPdf(
- *     tiffConfig = { /* TIFF config */ },
- *     pdfConfig = { dpi = 300f; jpegQuality = 0.95f }
+ * apexTiffToPdf(
+ *     tiffConfig = { compressionType = "DEFLATE" },
+ *     pdfConfig = { jpegQuality = 0.95f }
  * ).convert(inputFile, outputFile)
  *
  * // Convert from String path to String path with default settings
- * tiffToPdf().convert("input.tiff", "output.pdf")
+ * apexTiffToPdf().convert("input.tiff", "output.pdf")
  *
  * // Convert from InputStream to OutputStream
- * tiffToPdf().convert(inputStream, outputStream)
+ * apexTiffToPdf().convert(inputStream, outputStream)
  *
  * // Use extension functions for concise syntax
  * inputFile.toPdf(outputFile)
@@ -63,7 +66,10 @@ fun apexTiffToPdf(
 }
 
 /**
- * TIFF to PDF converter implementation
+ * ApexFlow TIFF to PDF converter implementation
+ *
+ * Core implementation of TIFF to PDF conversion using ApexFlow components.
+ * Uses proper Flow composition with + operator and plugin support.
  */
 class TiffToPdfConverter internal constructor(
     private val tiffConfig: TiffConfig,
