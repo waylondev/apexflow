@@ -1,12 +1,24 @@
 package dev.waylon.apexflow.conversion
 
+import dev.waylon.apexflow.core.dsl.apexFlow
+import dev.waylon.apexflow.core.dsl.execute
+import dev.waylon.apexflow.core.dsl.withPluginLogging
+import dev.waylon.apexflow.core.dsl.withPluginPerformanceMonitoring
+import dev.waylon.apexflow.core.dsl.withPluginTiming
+import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.pdf.PdfImageReader
 import dev.waylon.apexflow.pdf.PdfImageReaderConfig
 import dev.waylon.apexflow.tiff.TiffWriter
 import dev.waylon.apexflow.tiff.TiffWriterConfig
+import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 /**
  * PDF to TIFF conversion DSL
@@ -64,6 +76,8 @@ class PdfToTiffConverter internal constructor(
     private val pdfConfig: PdfImageReaderConfig,
     private val tiffConfig: TiffWriterConfig
 ) {
+    /** Logger instance for this converter */
+    private val logger = createLogger<PdfToTiffConverter>()
 
     /**
      * Convert PDF file to TIFF file
@@ -81,18 +95,84 @@ class PdfToTiffConverter internal constructor(
     }
 
     /**
-     * Convert PDF InputStream to TIFF OutputStream
+     * Convert PDF InputStream to TIFF OutputStream using apexFlow DSL
+     *
+     * This implementation demonstrates apexFlow's core advantages:
+     * 1. "Everything is Flow" - All components and operations are Flow-based
+     * 2. Reusable components - Create modular, composable flow components
+     * 3. Declarative DSL - Intuitive way to compose complex pipelines
+     * 4. Clear separation of concerns - Each stage has a single responsibility
+     * 5. Easy extensibility - Simple to add new processing steps
+     * 6. Reusability - Components can be shared across different pipelines
      *
      * @param inputStream Input PDF InputStream
      * @param outputStream Output TIFF OutputStream
      */
+    /**
+     * Convert PDF InputStream to TIFF OutputStream using apexFlow DSL
+     *
+     * This implementation demonstrates the complete "Everything is Flow" principle,
+     * including wrapping the writing operation as a Flow component.
+     *
+     * @param inputStream Input PDF InputStream
+     * @param outputStream Output TIFF OutputStream
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun convert(inputStream: InputStream, outputStream: OutputStream) {
-        // Simplified conversion implementation
-        val reader = PdfImageReader(inputStream, pdfConfig)
-        val writer = TiffWriter(outputStream, tiffConfig)
+        logger.info("Starting PDF to TIFF conversion using apexFlow DSL")
 
-        // Read PDF pages as flow and write to TIFF
-        writer.write(reader.read())
+        ///////////////////////////////////////////
+        // DEMONSTRATION: EVERYTHING IS FLOW       //
+        ///////////////////////////////////////////
+
+        // 1. Create reusable Flow components
+
+        // PDF Reading Flow Component
+        val pdfReaderFlow = apexFlow<InputStream, BufferedImage> {
+            flatMapMerge { input ->
+                PdfImageReader(input, pdfConfig).read()
+                    .flowOn(Dispatchers.IO)
+            }
+        }
+
+        // Image Processing Flow Component
+        val imageProcessorFlow = apexFlow<BufferedImage, BufferedImage> {
+            map { image ->
+                // Example processing: resize, filter, enhance
+                image // Identity for now
+            }
+        }
+
+        ///////////////////////////////////////////
+        // DEMONSTRATION: COMPLETE FLOW PIPELINE    //
+        ///////////////////////////////////////////
+
+        // Create input flow - EVERYTHING STARTS AS FLOW
+
+        // Compose complete pipeline by chaining all Flow components
+        // This demonstrates the full "Everything is Flow" principle
+        val completeImageFlow = pdfReaderFlow + imageProcessorFlow   // Stage 2: Process images
+        val resultFlow = completeImageFlow.withPluginTiming()
+            .withPluginLogging()
+            .withPluginPerformanceMonitoring()
+            .execute(inputStream)
+
+        ///////////////////////////////////////////
+        // EXECUTION: SINGLE COLLECT CALL         //
+        ///////////////////////////////////////////
+
+        // Single collect() call executes the entire pipeline
+        // This demonstrates the simplicity and power of Flow execution
+        logger.info("Executing complete conversion pipeline")
+
+        // TIFF Writing - EVERYTHING IS FLOW, including writing!
+        // Write the complete flow using TiffWriter's Flow support
+        logger.info("Writing TIFF file using Flow component")
+        val writer = TiffWriter(outputStream, tiffConfig)
+        writer.write(resultFlow) // Write the entire flow
+        logger.info("Completed TIFF writing using Flow component")
+
+        logger.info("Completed PDF to TIFF conversion")
     }
 
     /**

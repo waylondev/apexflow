@@ -6,13 +6,8 @@ import dev.waylon.apexflow.image.ImageConstants
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.rendering.PDFRenderer
@@ -100,14 +95,14 @@ class PdfImageReader @JvmOverloads constructor(
         Loader.loadPDF(RandomAccessReadBuffer(pdfBytes)).use { document ->
             val pageCount = document.numberOfPages
             logger.info("Found {} pages in PDF document", pageCount)
-            
+
             val renderer = PDFRenderer(document)
             val pagesToRender = if (config.pageNumbers.isEmpty()) {
                 0 until pageCount
             } else {
                 config.pageNumbers.filter { it in 0 until pageCount }
             }
-            
+
             // Sequential rendering for clean, simple implementation
             for (pageIndex in pagesToRender) {
                 logger.debug("Rendering PDF page {}/{}", pageIndex + 1, pageCount)

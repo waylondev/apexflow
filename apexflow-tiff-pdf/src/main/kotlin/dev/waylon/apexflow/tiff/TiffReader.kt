@@ -10,13 +10,8 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageReadParam
 import javax.imageio.ImageReader
 import javax.imageio.stream.ImageInputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 
 /**
  * TIFF reader configuration
@@ -68,9 +63,9 @@ class TiffReader @JvmOverloads constructor(
                     reader.input = imageInputStream
                     val numPages = reader.getNumImages(true)
                     logger.info("Found {} pages in TIFF file", numPages)
-                    
+
                     val readParam = config.readParam ?: reader.defaultReadParam
-                    
+
                     // Sequential reading for clean, simple implementation
                     for (pageIndex in 0 until numPages) {
                         logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
