@@ -6,18 +6,18 @@ import dev.waylon.apexflow.core.dsl.withPluginLogging
 import dev.waylon.apexflow.core.dsl.withPluginPerformanceMonitoring
 import dev.waylon.apexflow.core.dsl.withPluginTiming
 import dev.waylon.apexflow.core.util.createLogger
-import dev.waylon.apexflow.pdf.PdfImageWriter
-import dev.waylon.apexflow.pdf.PdfImageWriterConfig
-import dev.waylon.apexflow.tiff.TiffReader
-import dev.waylon.apexflow.tiff.TiffReaderConfig
+import dev.waylon.apexflow.pdf.ApexPdfWriter
+import dev.waylon.apexflow.pdf.PdfConfig
+import dev.waylon.apexflow.tiff.ApexTiffReader
+import dev.waylon.apexflow.tiff.TiffConfig
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /**
@@ -29,17 +29,19 @@ import kotlinx.coroutines.flow.map
  * Core features:
  * - Type-safe DSL with clear configuration options
  * - Support for File, InputStream, OutputStream, and String paths
- * - Configurable JPEG quality, PDF version, and compression settings
+ * - Configurable DPI, compression, and other conversion settings
  * - Asynchronous processing using Kotlin coroutines
  * - Stream-based processing for efficient memory usage
  * - Comprehensive extension functions for easy integration
+ * - True ApexFlow "Everything is Flow" design
+ * - Direct implementation of ApexFlow interface
  *
  * Usage examples:
  * ```kotlin
  * // Convert from File to File with custom settings
  * tiffToPdf(
- *     tiffConfig = { /* TIFF reader config */ },
- *     pdfConfig = { jpegQuality = 90f; compressContent = true; pdfVersion = "1.7" }
+ *     tiffConfig = { /* TIFF config */ },
+ *     pdfConfig = { dpi = 300f; jpegQuality = 0.95f }
  * ).convert(inputFile, outputFile)
  *
  * // Convert from String path to String path with default settings
@@ -51,22 +53,14 @@ import kotlinx.coroutines.flow.map
  * // Use extension functions for concise syntax
  * inputFile.toPdf(outputFile)
  * inputStream.toPdf(outputStream)
- *
- * // With custom configurations using extension functions
- * inputFile.toPdf(outputFile) {
- *     // TIFF config options
- * } pdfConfig {
- *     jpegQuality = 85f
- *     compressContent = true
- * }
  * ```
  */
 fun tiffToPdf(
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ): TiffToPdfConverter {
-    val readerConfig = TiffReaderConfig().apply(tiffConfig)
-    val writerConfig = PdfImageWriterConfig().apply(pdfConfig)
+    val readerConfig = TiffConfig().apply(tiffConfig)
+    val writerConfig = PdfConfig().apply(pdfConfig)
     return TiffToPdfConverter(readerConfig, writerConfig)
 }
 
@@ -74,8 +68,8 @@ fun tiffToPdf(
  * TIFF to PDF converter implementation
  */
 class TiffToPdfConverter internal constructor(
-    private val tiffConfig: TiffReaderConfig,
-    private val pdfConfig: PdfImageWriterConfig
+    private val tiffConfig: TiffConfig,
+    private val pdfConfig: PdfConfig
 ) {
     /** Logger instance for this converter */
     private val logger = createLogger<TiffToPdfConverter>()
@@ -87,75 +81,11 @@ class TiffToPdfConverter internal constructor(
      * @param outputFile Output PDF file
      */
     suspend fun convert(inputFile: File, outputFile: File) {
-        // Delegate to stream version - reduce code duplication
         inputFile.inputStream().use { inputStream ->
             outputFile.outputStream().use { outputStream ->
                 convert(inputStream, outputStream)
             }
         }
-    }
-
-    /**
-     * Convert TIFF InputStream to PDF OutputStream using apexFlow DSL
-     *
-     * This implementation demonstrates the complete "Everything is Flow" principle,
-     * including wrapping the writing operation as a Flow component.
-     *
-     * @param inputStream Input TIFF InputStream
-     * @param outputStream Output PDF OutputStream
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun convert(inputStream: InputStream, outputStream: OutputStream) {
-        logger.info("Starting TIFF to PDF conversion using apexFlow DSL")
-
-        ///////////////////////////////////////////
-        // DEMONSTRATION: EVERYTHING IS FLOW       //
-        ///////////////////////////////////////////
-
-        // 1. Create reusable Flow components
-
-        // TIFF Reading Flow Component
-        val tiffReaderFlow = apexFlow<InputStream, BufferedImage> {
-            flatMapMerge { input ->
-                TiffReader(input, tiffConfig).read()
-                    .flowOn(Dispatchers.IO)
-            }
-        }
-
-        // Image Processing Flow Component
-        val imageProcessorFlow = apexFlow<BufferedImage, BufferedImage> {
-            map { image ->
-                // Example processing: resize, filter, enhance
-                image // Identity for now
-            }
-        }
-
-        ///////////////////////////////////////////
-        // DEMONSTRATION: COMPLETE FLOW PIPELINE    //
-        ///////////////////////////////////////////
-
-        // Compose complete pipeline by chaining all Flow components
-        // This demonstrates the full "Everything is Flow" principle
-        val completeImageFlow = tiffReaderFlow + imageProcessorFlow// Stage 2: Process images
-        val resultFlow = completeImageFlow.withPluginTiming()
-            .withPluginLogging()
-            .withPluginPerformanceMonitoring()
-            .execute(inputStream)
-        ///////////////////////////////////////////
-        // EXECUTION: SINGLE COLLECT CALL         //
-        ///////////////////////////////////////////
-
-        // Single collect() call executes the entire pipeline
-        // This demonstrates the simplicity and power of Flow execution
-        logger.info("Executing complete conversion pipeline")
-
-        // PDF Writing - EVERYTHING IS FLOW, including writing!
-        // Write the complete flow using PdfImageWriter's Flow support
-        logger.info("Writing PDF file using Flow component")
-        val writer = PdfImageWriter(outputStream, pdfConfig)
-        writer.write(resultFlow) // Write the entire flow
-        logger.info("Completed PDF writing using Flow component")
-
     }
 
     /**
@@ -169,6 +99,64 @@ class TiffToPdfConverter internal constructor(
         val outputFile = File(outputPath)
         convert(inputFile, outputFile)
     }
+
+    /**
+     * Convert TIFF InputStream to PDF OutputStream using proper ApexFlow design
+     *
+     * This implementation demonstrates the true "Everything is Flow" principle
+     * with proper ApexFlow components that can be composed using the + operator.
+     *
+     * @param inputStream Input TIFF InputStream
+     * @param outputStream Output PDF OutputStream
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun convert(inputStream: InputStream, outputStream: OutputStream) {
+        logger.info("Starting TIFF to PDF conversion with ApexFlow components")
+
+        ///////////////////////////////////////////
+        // APEXFLOW COMPONENTS                      //
+        ///////////////////////////////////////////
+
+        // 1. TIFF Reading Component - Flow<Unit> -> Flow<BufferedImage>
+        val tiffReader = ApexTiffReader.fromInputStream(inputStream, tiffConfig)
+
+        // 2. Image Processing Component - Flow<BufferedImage> -> Flow<BufferedImage>
+        val imageProcessor = apexFlow<BufferedImage, BufferedImage> {
+            map { image ->
+                // Example processing: resize, filter, enhance
+                image // Identity for now
+            }
+        }
+
+        // 3. PDF Writing Component - Flow<BufferedImage> -> Flow<Unit>
+        val pdfWriter = ApexPdfWriter.toOutputStream(outputStream, pdfConfig)
+
+        ///////////////////////////////////////////
+        // FLOW COMPOSITION                         //
+        ///////////////////////////////////////////
+
+        // Compose complete pipeline using + operator - TRUE APEXFLOW COMPOSITION
+        val completePipeline = tiffReader + imageProcessor + pdfWriter
+
+        // Apply plugins to the complete pipeline
+        val pipelineWithPlugins = completePipeline.withPluginTiming()
+            .withPluginLogging()
+            .withPluginPerformanceMonitoring()
+
+        ///////////////////////////////////////////
+        // EXECUTION                                 //
+        ///////////////////////////////////////////
+
+        // Execute the complete pipeline with a trigger flow
+        val triggerFlow = flowOf(Unit)
+        
+        logger.info("Executing ApexFlow pipeline")
+        
+        // Execute the pipeline
+        pipelineWithPlugins.execute(triggerFlow)
+
+        logger.info("Completed TIFF to PDF conversion with ApexFlow")
+    }
 }
 
 /**
@@ -180,8 +168,8 @@ class TiffToPdfConverter internal constructor(
  */
 suspend fun File.toPdf(
     outputFile: File,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile)
 }
@@ -195,8 +183,8 @@ suspend fun File.toPdf(
  */
 suspend fun File.toPdf(
     outputStream: OutputStream,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this.inputStream(), outputStream)
 }
@@ -210,8 +198,8 @@ suspend fun File.toPdf(
  */
 suspend fun File.toPdf(
     outputPath: String,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath))
 }
@@ -225,8 +213,8 @@ suspend fun File.toPdf(
  */
 suspend fun InputStream.toPdf(
     outputFile: File,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile.outputStream())
 }
@@ -240,8 +228,8 @@ suspend fun InputStream.toPdf(
  */
 suspend fun InputStream.toPdf(
     outputStream: OutputStream,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this, outputStream)
 }
@@ -255,8 +243,8 @@ suspend fun InputStream.toPdf(
  */
 suspend fun InputStream.toPdf(
     outputPath: String,
-    tiffConfig: TiffReaderConfig.() -> Unit = {},
-    pdfConfig: PdfImageWriterConfig.() -> Unit = {}
+    tiffConfig: TiffConfig.() -> Unit = {},
+    pdfConfig: PdfConfig.() -> Unit = {}
 ) {
     tiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath).outputStream())
 }

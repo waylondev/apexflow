@@ -27,9 +27,9 @@ class ApexLoggingPlugin(private val loggerName: String = "dev.waylon.apexflow.pl
                 // Use SLF4J to record logs at different stages of flow execution
                 return input
                     .onStart { logger.info("Flow execution started") }
-                    .onEach { data: I -> logger.debug("Processing input: {}", data) }
+                    .onEach { data: I -> logger.trace("Processing input: {}", data) }
                     .let { originalFlow -> flow.transform(originalFlow) }
-                    .onEach { data: O -> logger.debug("Processed output: {}", data) }
+                    .onEach { data: O -> logger.trace("Processed output: {}", data) }
                     .catch { e -> logger.error("Flow execution failed with exception", e) }
                     .onCompletion { exception: Throwable? ->
                         if (exception == null) {
