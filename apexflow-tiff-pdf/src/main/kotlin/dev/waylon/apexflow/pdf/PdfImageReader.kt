@@ -88,11 +88,8 @@ class PdfImageReader @JvmOverloads constructor(
     override fun read(): Flow<BufferedImage> = flow {
         logger.info("Starting PDF reading process with DPI: {}", config.dpi)
 
-        val pdfBytes = inputStream.readAllBytes()
-        logger.debug("Read {} bytes from input stream", pdfBytes.size)
-
-        // Create a single document and renderer for sequential rendering
-        Loader.loadPDF(RandomAccessReadBuffer(pdfBytes)).use { document ->
+        // Load PDF document using RandomAccessRead
+        Loader.loadPDF(RandomAccessReadBuffer(inputStream)).use { document ->
             val pageCount = document.numberOfPages
             logger.info("Found {} pages in PDF document", pageCount)
 

@@ -3,7 +3,6 @@ package dev.waylon.apexflow.tiff
 import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.image.ApexImageReader
 import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import javax.imageio.ImageIO
@@ -53,27 +52,23 @@ class TiffReader @JvmOverloads constructor(
     override fun read(): Flow<BufferedImage> = flow {
         logger.info("Starting TIFF reading process")
 
-        val inputBytes = inputStream.readAllBytes()
-        logger.debug("Read {} bytes from input stream", inputBytes.size)
+        // Directly use InputStream without reading all bytes into memory
+        // This prevents blocking and reduces memory usage for large files
+        ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
+            getImageReader(imageInputStream).use { reader ->
+                reader.input = imageInputStream
+                val numPages = reader.getNumImages(true)
+                logger.info("Found {} pages in TIFF file", numPages)
 
-        // Create a single ImageInputStream and reader for sequential reading
-        ByteArrayInputStream(inputBytes).use { byteStream ->
-            ImageIO.createImageInputStream(byteStream).use { imageInputStream ->
-                getImageReader(imageInputStream).use { reader ->
-                    reader.input = imageInputStream
-                    val numPages = reader.getNumImages(true)
-                    logger.info("Found {} pages in TIFF file", numPages)
+                val readParam = config.readParam ?: reader.defaultReadParam
 
-                    val readParam = config.readParam ?: reader.defaultReadParam
-
-                    // Sequential reading for clean, simple implementation
-                    for (pageIndex in 0 until numPages) {
-                        logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
-                        val image = reader.read(pageIndex, readParam)
-                        emit(image)
-                        image.flush()
-                        logger.debug("Successfully read TIFF page")
-                    }
+                // Sequential reading for clean, simple implementation
+                for (pageIndex in 0 until numPages) {
+                    logger.debug("Reading TIFF page {}/{}", pageIndex + 1, numPages)
+                    val image = reader.read(pageIndex, readParam)
+                    emit(image)
+                    image.flush()
+                    logger.debug("Successfully read TIFF page")
                 }
             }
         }

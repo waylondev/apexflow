@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -92,30 +91,23 @@ class PdfImageWriter @JvmOverloads constructor(
         logger.info("Starting PDF writing process with JPEG quality: {}", config.jpegQuality)
 
         val quality = config.jpegQuality / 100f
-        val document = PDDocument()
 
-        try {
+        PDDocument().use { document ->
             logger.debug("Created new PDF document")
-            val images = data.toList()
             var pageIndex = 0
 
-            logger.debug("Writing {} images to PDF", images.size)
-
-            images.forEach { image ->
+            // Process Flow elements one by one, respecting backpressure
+            data.collect { image ->
                 pageIndex++
-                logger.debug("Adding page {} to PDF document")
+                logger.debug("Adding page {} to PDF document", pageIndex)
 
                 val page = PDPage()
                 document.addPage(page)
                 logger.debug("Created PDF page {}", pageIndex)
 
-                val contentStream = PDPageContentStream(document, page)
-
-                try {
+                PDPageContentStream(document, page).use {
                     val pdImage = JPEGFactory.createFromImage(document, image, quality)
-                    contentStream.drawImage(pdImage, 0f, 0f)
-                } finally {
-                    contentStream.close()
+                    it.drawImage(pdImage, 0f, 0f)
                 }
 
                 image.flush()
@@ -124,8 +116,6 @@ class PdfImageWriter @JvmOverloads constructor(
 
             // Save the document to output stream
             document.save(outputStream)
-        } finally {
-            document.close()
         }
 
         logger.info("Completed PDF writing process successfully")
