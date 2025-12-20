@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
  */
 class PdfToTiffTest {
     // Use existing test PDF
-    val inputPdf = File("dist/spring-boot-reference-406.pdf")
+    val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
     val outputTiff = File("build/test-pdf-to-tiff-dsl-406-output.tiff")
 
     /**
