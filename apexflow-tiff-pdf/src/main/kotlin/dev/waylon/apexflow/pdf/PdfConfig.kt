@@ -1,7 +1,6 @@
 package dev.waylon.apexflow.pdf
 
 import dev.waylon.apexflow.image.ImageConstants
-import org.apache.pdfbox.pdmodel.common.PDRectangle
 
 /**
  * PDF configuration for both reading and writing
@@ -16,8 +15,16 @@ class PdfConfig {
     var skipBlankPages: Boolean = false
 
     /** JPEG compression quality for PDF writing (0-1) */
-    var jpegQuality: Float = ImageConstants.DEFAULT_JPEG_QUALITY
+    var jpegQuality: Float = 0.95f
 
     /** PDF page size */
-    var pageSize: PDRectangle = PDRectangle.A4
+    var pageSize: org.apache.pdfbox.pdmodel.common.PDRectangle = org.apache.pdfbox.pdmodel.common.PDRectangle.A4
+
+    /**
+     * Buffer size for flow processing
+     * 0: Disable buffering (true streaming)
+     * >0: Use specified buffer size
+     * Default: 0 (disabled) for true streaming processing
+     */
+    var bufferSize: Int = 0
 }

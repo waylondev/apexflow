@@ -20,4 +20,12 @@ class TiffConfig {
 
     /** Whether to write pages in parallel */
     var parallelWriting: Boolean = false
+
+    /**
+     * Buffer size for flow processing
+     * 0: Disable buffering (true streaming)
+     * >0: Use specified buffer size
+     * Default: 0 (disabled) for true streaming processing
+     */
+    var bufferSize: Int = 0
 }

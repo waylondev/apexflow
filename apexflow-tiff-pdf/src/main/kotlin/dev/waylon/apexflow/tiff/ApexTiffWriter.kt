@@ -77,13 +77,14 @@ class ApexTiffWriter private constructor(
                     val writer = writers.next()
                     writer.output = ios
 
-                    // Use client-provided writeParam if available, otherwise create default
-                    val writeParam = config.writeParam ?: writer.defaultWriteParam
-
-                    // Configure writeParam for compression
-                    writeParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
-                    writeParam.compressionType = config.compressionType
-                    writeParam.compressionQuality = config.compressionQuality / 100f
+                    // Use client-provided writeParam if available, otherwise create and configure default
+                    val writeParam = config.writeParam ?: writer.defaultWriteParam.apply {
+                        // Only configure compression if using default writeParam
+                        // Don't override client-provided writeParam settings
+                        compressionMode = ImageWriteParam.MODE_EXPLICIT
+                        compressionType = config.compressionType
+                        compressionQuality = config.compressionQuality / 100f
+                    }
 
                     // Proper sequence writing workflow for multi-page TIFF
                     writer.prepareWriteSequence(null)
@@ -91,7 +92,7 @@ class ApexTiffWriter private constructor(
                     var pageIndex = 0
                     // Write images as they are received - true streaming processing
                     input.collect { image ->
-                        logger.debug("Writing page {} to TIFF", pageIndex)
+                        logger.debug("Writing TIFF page {}", pageIndex)
                         val iioImage = IIOImage(image, null, null)
                         pageIndex++
 

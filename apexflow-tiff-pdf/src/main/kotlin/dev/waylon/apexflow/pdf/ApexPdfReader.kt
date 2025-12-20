@@ -7,6 +7,7 @@ import java.io.File
 import java.io.InputStream
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import org.apache.pdfbox.Loader
@@ -66,7 +67,7 @@ class ApexPdfReader private constructor(
     override fun transform(input: Flow<Unit>): Flow<BufferedImage> {
         return input.flatMapMerge {
             readImages()
-        }
+        }.buffer(config.bufferSize) // Directly use bufferSize from config
     }
 
     /**
