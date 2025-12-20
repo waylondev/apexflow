@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.tiff
 
-import dev.waylon.apexflow.core.ApexFlow
+import dev.waylon.apexflow.core.ApexFlowWriter
 import dev.waylon.apexflow.core.util.createLogger
 import java.awt.image.BufferedImage
 import java.io.File
@@ -18,74 +18,83 @@ import kotlinx.coroutines.flow.flow
  * 
  * Flow<BufferedImage> -> Flow<Unit>
  * 
- * Direct implementation of ApexFlow interface for TIFF writing
+ * Direct implementation of ApexFlowWriter interface with complete TIFF writing logic
+ * Optimized to write pages as images are received, using writeInsert for all pages
  */
 class ApexTiffWriter private constructor(
-    private val outputStream: OutputStream? = null,
-    private val filePath: String? = null,
+    private val outputProvider: () -> OutputStream,
     private val config: TiffConfig = TiffConfig()
-) : ApexFlow<BufferedImage, Unit> {
+) : ApexFlowWriter<BufferedImage> {
     
     companion object {
         /**
          * Create a TIFF writer to file path
          */
-        fun toFile(filePath: String, config: TiffConfig = TiffConfig()): ApexTiffWriter {
-            return ApexTiffWriter(null, filePath, config)
+        fun toPath(filePath: String, config: TiffConfig = TiffConfig()): ApexTiffWriter {
+            return ApexTiffWriter({ File(filePath).outputStream() }, config)
+        }
+        
+        /**
+         * Create a TIFF writer to file
+         */
+        fun toFile(file: File, config: TiffConfig = TiffConfig()): ApexTiffWriter {
+            return ApexTiffWriter({ file.outputStream() }, config)
         }
         
         /**
          * Create a TIFF writer to output stream
          */
         fun toOutputStream(outputStream: OutputStream, config: TiffConfig = TiffConfig()): ApexTiffWriter {
-            return ApexTiffWriter(outputStream, null, config)
+            return ApexTiffWriter({ outputStream }, config)
         }
     }
     
     private val logger = createLogger<ApexTiffWriter>()
     
+    override fun toFile(file: File): ApexFlowWriter<BufferedImage> {
+        return toFile(file, config)
+    }
+    
+    override fun toOutputStream(outputStream: OutputStream): ApexFlowWriter<BufferedImage> {
+        return toOutputStream(outputStream, config)
+    }
+    
+    override fun toPath(filePath: String): ApexFlowWriter<BufferedImage> {
+        return toPath(filePath, config)
+    }
+    
     override fun transform(input: Flow<BufferedImage>): Flow<Unit> {
         return flow { 
             logger.info("ApexFlow TIFF writing started with compression: ${config.compressionType}")
             
-            val imageOutputStream: ImageOutputStream = when {
-                this@ApexTiffWriter.outputStream != null -> ImageIO.createImageOutputStream(this@ApexTiffWriter.outputStream)
-                filePath != null -> ImageIO.createImageOutputStream(File(filePath))
-                else -> throw IllegalArgumentException("No output destination specified")
-            }
-            
-            try {
-                val writers = ImageIO.getImageWritersByFormatName("TIFF")
-                if (!writers.hasNext()) {
-                    throw IllegalArgumentException("No TIFF writer found")
-                }
-                
-                val writer = writers.next()
-                writer.output = imageOutputStream
-                
-                val writeParam = config.writeParam ?: writer.defaultWriteParam
-                writeParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
-                writeParam.compressionType = config.compressionType
-                writeParam.compressionQuality = config.compressionQuality / 100f
-                
-                val images = mutableListOf<BufferedImage>()
-                
-                input.collect { image ->
-                    images.add(image)
-                    emit(Unit)
-                }
-                
-                if (images.isNotEmpty()) {
-                    writer.write(null, IIOImage(images[0], null, null), writeParam)
+            // Use use() for automatic resource management
+            outputProvider().use { outputStream ->
+                ImageIO.createImageOutputStream(outputStream).use { imageOutputStream ->
+                    val writers = ImageIO.getImageWritersByFormatName("TIFF")
+                    check(writers.hasNext()) { "No TIFF writer found" }
                     
-                    for (i in 1 until images.size) {
-                        writer.writeInsert(i, IIOImage(images[i], null, null), writeParam)
+                    val writer = writers.next()
+                    writer.output = imageOutputStream
+                    
+                    // Use client-provided writeParam if available, otherwise create default
+                    val writeParam = config.writeParam ?: writer.defaultWriteParam
+                    
+                    var pageIndex = 0
+                    
+                    // Write all pages using writeInsert - simpler and more consistent
+                    input.collect { image ->
+                        logger.info("Writing page $pageIndex to TIFF")
+                        
+                        // Use writeInsert for all pages, including the first one
+                        // For an empty stream, writeInsert(0, ...) is equivalent to write(...)
+                        writer.writeInsert(pageIndex, IIOImage(image, null, null), writeParam)
+                        
+                        pageIndex++
+                        emit(Unit) // Signal completion for this page
                     }
                     
-                    logger.info("ApexFlow TIFF writing completed, wrote ${images.size} pages")
+                    logger.info("ApexFlow TIFF writing completed, wrote $pageIndex pages")
                 }
-            } finally {
-                imageOutputStream.close()
             }
         }
     }

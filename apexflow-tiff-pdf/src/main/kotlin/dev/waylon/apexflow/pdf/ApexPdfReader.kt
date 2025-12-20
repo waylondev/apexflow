@@ -1,6 +1,6 @@
 package dev.waylon.apexflow.pdf
 
-import dev.waylon.apexflow.core.ApexFlow
+import dev.waylon.apexflow.core.ApexFlowReader
 import dev.waylon.apexflow.core.util.createLogger
 import java.awt.image.BufferedImage
 import java.io.File
@@ -18,31 +18,49 @@ import org.apache.pdfbox.rendering.PDFRenderer
  *
  * Flow<Unit> -> Flow<BufferedImage>
  *
- * Direct implementation of ApexFlow interface for PDF reading
+ * Direct implementation of ApexFlowReader interface with complete PDF reading logic
  */
 class ApexPdfReader private constructor(
-    private val inputStream: InputStream? = null,
-    private val filePath: String? = null,
+    private val input: () -> InputStream,
     private val config: PdfConfig = PdfConfig()
-) : ApexFlow<Unit, BufferedImage> {
+) : ApexFlowReader<BufferedImage> {
 
     companion object {
         /**
          * Create a PDF reader from file path
          */
-        fun fromFile(filePath: String, config: PdfConfig = PdfConfig()): ApexPdfReader {
-            return ApexPdfReader(null, filePath, config)
+        fun fromPath(filePath: String, config: PdfConfig = PdfConfig()): ApexPdfReader {
+            return ApexPdfReader({ File(filePath).inputStream() }, config)
+        }
+
+        /**
+         * Create a PDF reader from file
+         */
+        fun fromFile(file: File, config: PdfConfig = PdfConfig()): ApexPdfReader {
+            return ApexPdfReader({ file.inputStream() }, config)
         }
 
         /**
          * Create a PDF reader from input stream
          */
         fun fromInputStream(inputStream: InputStream, config: PdfConfig = PdfConfig()): ApexPdfReader {
-            return ApexPdfReader(inputStream, null, config)
+            return ApexPdfReader({ inputStream }, config)
         }
     }
 
     private val logger = createLogger<ApexPdfReader>()
+
+    override fun fromFile(file: File): ApexFlowReader<BufferedImage> {
+        return fromFile(file, config)
+    }
+
+    override fun fromInputStream(inputStream: InputStream): ApexFlowReader<BufferedImage> {
+        return fromInputStream(inputStream, config)
+    }
+
+    override fun fromPath(filePath: String): ApexFlowReader<BufferedImage> {
+        return fromPath(filePath, config)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun transform(input: Flow<Unit>): Flow<BufferedImage> {
@@ -53,27 +71,26 @@ class ApexPdfReader private constructor(
 
     /**
      * Read images from PDF as a flow
+     * Uses use() for automatic resource management
+     * No try-catch blocks, relying on resource management
      */
     private fun readImages(): Flow<BufferedImage> {
         return flow {
             logger.info("ApexFlow PDF reading started with DPI: ${config.dpi}")
 
-            val input: InputStream = when {
-                inputStream != null -> inputStream
-                filePath != null -> File(filePath).inputStream()
-                else -> throw IllegalArgumentException("Either inputStream or filePath must be provided")
-            }
+            // Use use() for automatic resource management
+            input().use { stream ->
+                Loader.loadPDF(RandomAccessReadBuffer(stream)).use { document ->
+                    val renderer = PDFRenderer(document)
+                    val pageCount = document.numberOfPages
 
-            Loader.loadPDF(RandomAccessReadBuffer(input)).use { document ->
-                val renderer = PDFRenderer(document)
-                val pageCount = document.numberOfPages
+                    logger.info("Found $pageCount pages in PDF")
 
-                logger.info("Found $pageCount pages in PDF")
-
-                for (pageIndex in 0 until pageCount) {
-                    logger.info("Rendering page $pageIndex")
-                    val image = renderer.renderImageWithDPI(pageIndex, config.dpi)
-                    emit(image)
+                    for (pageIndex in 0 until pageCount) {
+                        logger.info("Rendering page $pageIndex")
+                        val image = renderer.renderImageWithDPI(pageIndex, config.dpi)
+                        emit(image)
+                    }
                 }
             }
         }

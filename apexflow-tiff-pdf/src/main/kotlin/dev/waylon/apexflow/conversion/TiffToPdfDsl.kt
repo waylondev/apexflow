@@ -15,8 +15,6 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -149,9 +147,9 @@ class TiffToPdfConverter internal constructor(
 
         // Execute the complete pipeline with a trigger flow
         val triggerFlow = flowOf(Unit)
-        
+
         logger.info("Executing ApexFlow pipeline")
-        
+
         // Execute the pipeline
         pipelineWithPlugins.execute(triggerFlow)
 
