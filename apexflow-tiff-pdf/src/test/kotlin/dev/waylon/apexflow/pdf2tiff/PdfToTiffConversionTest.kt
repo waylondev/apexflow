@@ -28,7 +28,9 @@ class PdfToTiffConversionTest {
     @AfterEach
     fun tearDown() {
         // Clean up test files
-        outputTiff.delete()
+        if (outputTiff.exists()) {
+            outputTiff.delete()
+        }
     }
 
     /**
