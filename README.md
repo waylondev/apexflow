@@ -16,64 +16,75 @@ Every operation in ApexFlow is represented as a `Flow<T>`, enabling seamless com
 
 ## ⚡ Performance Advantage
 
-### Traditional Sequential Processing
+### Streaming vs Sequential Processing
+
+**Traditional Sequential Approach**
 ```
-┌───────────────────────────────────────────────────────┐
-│                    Traditional Approach               │
-├───────────────────────────────────────────────────────┤
-│  1. Read All Pages (50s)                              │
-│     ┌───────────┐ ┌───────────┐ ┌───────────┐        │
-│     │ Page 1   │ │ Page 2   │ │ Page N   │        │
-│     └───────────┘ └───────────┘ └───────────┘        │
-│                                                      │
-│  2. Wait for reading to complete                     │
-│                                                      │
-│  3. Write All Pages (40s)                            │
-│     ┌───────────┐ ┌───────────┐ ┌───────────┐        │
-│     │ Tiff 1   │ │ Tiff 2   │ │ Tiff N   │        │
-│     └───────────┘ └───────────┘ └───────────┘        │
-└───────────────────────────────────────────────────────┘
-                        Total Time: 90s
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Read All  │    │    Wait     │    │   Write All │
+│   Pages     │────│   (Idle)    │────│   Pages     │
+│   (T1)      │    │             │    │   (T2)      │
+└─────────────┘    └─────────────┘    └─────────────┘
+
+Total Time: T1 + T2
 ```
 
-### ApexFlow Streaming Processing
+**ApexFlow Streaming Approach**
 ```
-┌───────────────────────────────────────────────────────┐
-│                  ApexFlow Approach                   │
-├───────────────────────────────────────────────────────┤
-│  Read Page 1 → Write Page 1                          │
-│  Read Page 2 → Write Page 2                          │
-│  Read Page 3 → Write Page 3                          │
-│  ...                                                 │
-│  Read Page N → Write Page N                          │
-│                                                      │
-│  ┌─────────┐    ┌─────────┐    ┌─────────┐           │
-│  │ Read    │→→→│ Process │→→→│ Write   │           │
-│  └─────────┘    └─────────┘    └─────────┘           │
-└───────────────────────────────────────────────────────┘
-                        Total Time: ~50s
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Read      │    │   Process   │    │   Write     │
+│  Page 1     │────│   Page 1    │────│   Page 1    │
+└─────────────┘    └─────────────┘    └─────────────┘
+        │                │                │
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Read      │    │   Process   │    │   Write     │
+│  Page 2     │────│   Page 2    │────│   Page 2    │
+└─────────────┘    └─────────────┘    └─────────────┘
+        │                │                │
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Read      │    │   Process   │    │   Write     │
+│  Page 3     │────│   Page 3    │────│   Page 3    │
+└─────────────┘    └─────────────┘    └─────────────┘
+
+Total Time: max(T1, T2)
 ```
 
-### Scaling Advantage
-As workflow complexity increases, the performance advantage grows exponentially:
+### Key Performance Benefits
 
-| Steps | Traditional | ApexFlow | Advantage |
-|-------|-------------|----------|-----------|
-| 2 steps | 90s | 50s | 1.8x |
-| 5 steps | 250s | 50s | 5x |
-| 10 steps | 500s | 50s | 10x |
+**Theoretical Performance Gain**
+```
+📊 Example: 406-page PDF conversion
+- Traditional: 90s (50s reading + 40s writing)
+- ApexFlow: 50s (reading and writing overlap)
+- Theoretical Gain: 1.8x faster
+```
+
+**Scaling with Complexity**
+
+As workflows become more complex, ApexFlow's advantage grows exponentially:
+
+| Workflow Steps | Traditional | ApexFlow | Theoretical Gain |
+|----------------|-------------|----------|------------------|
+| 2 steps        | T1 + T2     | max(T1,T2) | (T1+T2)/max(T1,T2) |
+| 5 steps        | Σ(T1..T5)   | max(T1..T5) | Σ(T1..T5)/max(T1..T5) |
+| N steps        | Σ(T1..TN)   | max(T1..TN) | Σ(T1..TN)/max(T1..TN) |
+
+**Why This Works**
+- **No Idle Time**: Reading and writing happen simultaneously
+- **Reduced Memory Footprint**: Process pages one at a time
+- **Backpressure Handling**: Automatic flow control
+- **Parallel Execution**: Leverage modern hardware efficiently
 
 ## 🏗️ Architecture
 
 ### Component Composition
 ```kotlin
-// Simple composition with + operator
+// Simple flow composition with + operator
 val pipeline = pdfReader + imageProcessor + tiffWriter
 
-// Complex workflows with plugins
-val advancedPipeline = pipeline
+// Enhance with plugins
+val monitoredPipeline = pipeline
     .withPluginTiming()
-    .withPluginLogging()
     .withPluginPerformanceMonitoring()
 ```
 
@@ -91,23 +102,52 @@ val advancedPipeline = pipeline
 - **Error Handling**: Resilient stream processing
 - **Concurrent Execution**: Parallel processing with coroutines
 
-### Type-Safe DSL
+### Simple & Intuitive API
+
+**Basic Conversion**
 ```kotlin
-// Declarative workflow definition
-val conversionFlow = apexFlow {
-    pdfToTiff(inputFile, outputFile) {
-        bufferSize = 8192
-        compression = Compression.LZW
-    }
-}
+// PDF to TIFF
+file.toTiff(outputFile)
+
+// TIFF to PDF  
+file.toPdf(outputFile)
+
+// With custom configuration
+file.toTiff(
+    outputFile,
+    pdfConfig = { dpi = 300f, skipBlankPages = true },
+    tiffConfig = { compressionType = "JPEG", compressionQuality = 90f }
+)
+
+file.toPdf(
+    outputFile,
+    tiffConfig = { bufferSize = 10 },
+    pdfConfig = { jpegQuality = 0.95f }
+)
+```
+
+### Advanced Usage
+```kotlin
+// Using ApexFlow DSL for more control
+val converter = apexPdfToTiff(
+    pdfConfig = { dpi = 300f },
+    tiffConfig = { compressionType = "JPEG" }
+)
+converter.convert(inputFile, outputFile)
+
+// Component composition with + operator
+val pdfReader = ApexPdfReader.fromFile(inputFile)
+val tiffWriter = ApexTiffWriter.toFile(outputFile)
+val pipeline = pdfReader + tiffWriter
+pipeline.execute()
 ```
 
 ## 📈 Benefits
 
 ### Performance
 - **Reduced Latency**: Stream processing eliminates wait times
-- **Memory Efficiency**: No need to load entire datasets
-- **Scalability**: Linear performance scaling with workflow complexity
+- **Memory Efficiency**: Process pages one at a time, no full dataset loading
+- **Scalability**: Performance scales with workflow complexity
 
 ### Development Experience
 - **Clean Code**: Minimal boilerplate, maximum clarity
