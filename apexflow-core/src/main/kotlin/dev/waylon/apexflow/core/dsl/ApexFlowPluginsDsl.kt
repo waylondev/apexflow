@@ -6,6 +6,10 @@ import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexPerformanceMonitoringPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexSlowOperationDetectorPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexThroughputPlugin
+import dev.waylon.apexflow.core.plugin.impl.ApexTracePlugin
+import java.time.Duration
 
 /**
  * Extension function: wrap flow with plugin
@@ -93,6 +97,76 @@ fun <I, O> ApexFlow<I, O>.withPluginPerformanceMonitoring(
     enableDetailedMetrics: Boolean = false
 ): ApexFlow<I, O> {
     return withPlugin(ApexPerformanceMonitoringPlugin(loggerName, samplingIntervalMs, enableDetailedMetrics))
+}
+
+/**
+ * Extension function: add trace plugin
+ *
+ * Provides detailed execution tracing, logging each component's execution flow,
+ * including input/output samples, timestamps, and execution context.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val tracedFlow = flow.withPluginTrace()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.trace)
+ * @return ApexFlow instance with trace functionality enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginTrace(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.trace"
+): ApexFlow<I, O> {
+    return withPlugin(ApexTracePlugin(loggerName))
+}
+
+/**
+ * Extension function: add slow operation detector plugin
+ *
+ * Automatically detects and reports operations that take longer than a specified threshold.
+ * Helps identify performance bottlenecks without manual analysis.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val monitoredFlow = flow.withPluginSlowOperationDetector(Duration.ofSeconds(1))
+ * ```
+ *
+ * @param threshold Duration threshold for slow operations (default: 1 second)
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.slow-operation)
+ * @return ApexFlow instance with slow operation detection enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginSlowOperationDetector(
+    threshold: Duration = Duration.ofSeconds(1),
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.slow-operation"
+): ApexFlow<I, O> {
+    return withPlugin(ApexSlowOperationDetectorPlugin(threshold, loggerName))
+}
+
+/**
+ * Extension function: add throughput monitoring plugin
+ *
+ * Monitors the number of items processed per unit time, calculating average and peak throughput.
+ * Helps understand flow processing capacity and evaluate system performance under high load.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val flow = apexFlow { ... }
+ * val monitoredFlow = flow.withPluginThroughput()
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.plugin.throughput)
+ * @param samplingInterval Sampling interval for throughput calculation (default: 1 second)
+ * @return ApexFlow instance with throughput monitoring enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withPluginThroughput(
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.throughput",
+    samplingInterval: Duration = Duration.ofSeconds(1)
+): ApexFlow<I, O> {
+    return withPlugin(ApexThroughputPlugin(loggerName, samplingInterval))
 }
 
 
