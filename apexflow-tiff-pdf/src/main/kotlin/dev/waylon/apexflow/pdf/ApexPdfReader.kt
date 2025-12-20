@@ -87,7 +87,7 @@ class ApexPdfReader private constructor(
                     logger.info("Found $pageCount pages in PDF")
 
                     for (pageIndex in 0 until pageCount) {
-                        logger.info("Rendering page $pageIndex")
+                        logger.debug("Rendering page $pageIndex")
                         val image = renderer.renderImageWithDPI(pageIndex, config.dpi)
                         emit(image)
                     }

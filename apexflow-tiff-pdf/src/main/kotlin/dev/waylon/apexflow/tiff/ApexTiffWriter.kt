@@ -88,10 +88,12 @@ class ApexTiffWriter private constructor(
                     // Proper sequence writing workflow for multi-page TIFF
                     writer.prepareWriteSequence(null)
 
+                    var pageIndex = 0
                     // Write images as they are received - true streaming processing
                     input.collect { image ->
-                        logger.info("Writing page to TIFF")
+                        logger.debug("Writing page {} to TIFF", pageIndex)
                         val iioImage = IIOImage(image, null, null)
+                        pageIndex++
 
                         // Use writeToSequence for all pages in the sequence
                         writer.writeToSequence(iioImage, writeParam)

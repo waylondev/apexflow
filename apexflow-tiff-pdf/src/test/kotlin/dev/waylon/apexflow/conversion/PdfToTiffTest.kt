@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test
  */
 class PdfToTiffTest {
     // Use existing test PDF
-    val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
-    val outputTiff = File("build/test-pdf-to-tiff-dsl-output.tiff")
+    val inputPdf = File("dist/spring-boot-reference-406.pdf")
+    val outputTiff = File("build/test-pdf-to-tiff-dsl-406-output.tiff")
 
     /**
      * Test optimal PDF to TIFF conversion performance
@@ -31,7 +31,7 @@ class PdfToTiffTest {
             inputPdf.toTiff(
                 outputTiff,
                 pdfConfig = {
-                    dpi = 150f // Balanced resolution for speed and quality
+                    dpi = 100f // Balanced resolution for speed and quality
                 },
                 tiffConfig = {
                     compressionType = "JPEG" // Fast compression
