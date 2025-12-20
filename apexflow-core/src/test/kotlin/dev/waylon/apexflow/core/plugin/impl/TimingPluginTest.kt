@@ -1,8 +1,8 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.withLogging
-import dev.waylon.apexflow.core.dsl.withPlugin
+import dev.waylon.apexflow.core.dsl.withPluginLogging
+import dev.waylon.apexflow.core.dsl.withPluginTiming
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -52,7 +52,7 @@ class ApexTimingPluginTest {
         }
 
         // Use the timing plugin
-        val timedWorkflow = workflow.withPlugin(ApexTimingPlugin())
+        val timedWorkflow = workflow.withPluginTiming("dev.waylon.apexflow.timing")
 
         // Execute the workflow
         val result = timedWorkflow.transform(flowOf(42)).toList()
@@ -72,7 +72,7 @@ class ApexTimingPluginTest {
         }
 
         // Use the timing plugin with custom logger
-        val timedWorkflow = workflow.withPlugin(ApexTimingPlugin("custom.timing.logger"))
+        val timedWorkflow = workflow.withPluginTiming("dev.waylon.apexflow.timing")
 
         // Execute the workflow
         val result = timedWorkflow.transform(flowOf(42)).toList()
@@ -93,9 +93,9 @@ class ApexTimingPluginTest {
 
         // Apply multiple plugins
         val composedWorkflow = workflow
-            .withPlugin(ApexTimingPlugin())
-            .withLogging()
-            .withPlugin(ApexTimingPlugin("second.timing.logger"))
+            .withPluginTiming("dev.waylon.apexflow.timing")
+            .withPluginLogging()
+            .withPluginTiming("second.timing.logger")
 
         // Execute the workflow
         val result = composedWorkflow.transform(flowOf(42)).toList()

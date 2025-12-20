@@ -37,14 +37,14 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
  * Usage Example:
  * ```kotlin
  * val flow = apexFlow { ... }
- * val loggedFlow = flow.withLogging("my-flow")
+ * val loggedFlow = flow.withPluginLogging("my-flow")
  * ```
  *
  * @param loggerName SLF4J logger name (default: dev.waylon.apexflow)
  * @return ApexFlow instance with logging enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow.plugin.logging"): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, O>.withPluginLogging(loggerName: String = "dev.waylon.apexflow.plugin.logging"): ApexFlow<I, O> {
     return withPlugin(ApexLoggingPlugin(loggerName))
 }
 
@@ -57,14 +57,14 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow.
  * Usage Example:
  * ```kotlin
  * val myFlow = apexFlow { ... }
- * val timedFlow = myFlow.withTiming("my-flow")
+ * val timedFlow = myFlow.withPluginTiming("my-flow")
  * ```
  *
  * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.flow-timing)
  * @return ApexFlow instance with execution time measurement enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.plugin.timing"): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, O>.withPluginTiming(loggerName: String = "dev.waylon.apexflow.plugin.timing"): ApexFlow<I, O> {
     return this.withPlugin(ApexLoggingPlugin(loggerName))
 }
 
@@ -77,7 +77,7 @@ fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.p
  * Usage Example:
  * ```kotlin
  * val flow = apexFlow { ... }
- * val monitoredFlow = flow.withPerformanceMonitoring("my-flow")
+ * val monitoredFlow = flow.withPluginPerformanceMonitoring("my-flow")
  * ```
  *
  * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.performance)
@@ -86,7 +86,7 @@ fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.p
  * @return ApexFlow instance with performance monitoring enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withPerformanceMonitoring(
+fun <I, O> ApexFlow<I, O>.withPluginPerformanceMonitoring(
     loggerName: String = "dev.waylon.apexflow.plugin.performance",
     samplingIntervalMs: Long = 5000,
     enableDetailedMetrics: Boolean = false

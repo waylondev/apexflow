@@ -2,7 +2,7 @@ package dev.waylon.apexflow.core.comparison
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.withPerformanceMonitoring
+import dev.waylon.apexflow.core.dsl.withPluginPerformanceMonitoring
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.sin
 import kotlin.system.measureTimeMillis
@@ -179,7 +179,7 @@ class ApexFlowAdvancedDemoTest {
 
         // 🌟 Advantage 1: Easy plugin integration for monitoring
         val apexFlow = createAdvancedApexFlow()
-            .withPerformanceMonitoring("real-time-pipeline")
+            .withPluginPerformanceMonitoring("real-time-pipeline")
 
         val startTime = System.currentTimeMillis()
         val results = dataStream
@@ -256,7 +256,7 @@ class ApexFlowAdvancedDemoTest {
         )
 
         val apexFlow = createAdvancedApexFlow()
-            .withPerformanceMonitoring("error-recovery-pipeline")
+            .withPluginPerformanceMonitoring("error-recovery-pipeline")
 
         val results = testData.asFlow()
             .let { stream -> apexFlow.transform(stream) }
@@ -298,7 +298,7 @@ class ApexFlowAdvancedDemoTest {
 
         // ApexFlow approach
         val apexFlow = createAdvancedApexFlow()
-            .withPerformanceMonitoring("performance-comparison")
+            .withPluginPerformanceMonitoring("performance-comparison")
 
         val apexFlowTime = measureTimeMillis {
             val results = testData.asFlow()

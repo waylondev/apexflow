@@ -2,7 +2,7 @@ package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.withLogging
+import dev.waylon.apexflow.core.dsl.withPluginLogging
 import dev.waylon.apexflow.core.dsl.withPlugin
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +49,7 @@ class ApexLoggingPluginTest {
             map { "Processed: $it" }
         }
 
-        val loggingWorkflow = workflow.withLogging()
+        val loggingWorkflow = workflow.withPluginLogging()
         val result = loggingWorkflow.transform(flowOf(42)).toList()
 
         assertEquals(listOf("Processed: 42"), result)
@@ -79,7 +79,7 @@ class ApexLoggingPluginTest {
             map { it * 2 }
         }
 
-        val loggingWorkflow = workflow.withLogging()
+        val loggingWorkflow = workflow.withPluginLogging()
         val result = loggingWorkflow.transform(flowOf(1, 2, 3, 4, 5)).toList()
 
         assertEquals(listOf(2, 4, 6, 8, 10), result)
@@ -107,7 +107,7 @@ class ApexLoggingPluginTest {
         }
 
         val composedWorkflow = workflow
-            .withLogging()
+            .withPluginLogging()
             .withPlugin(PrefixPlugin("Prefixed: "))
 
         val result = composedWorkflow.transform(flowOf(42)).toList()

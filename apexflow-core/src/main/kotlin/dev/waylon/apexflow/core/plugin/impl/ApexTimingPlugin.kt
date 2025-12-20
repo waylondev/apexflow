@@ -1,7 +1,7 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.dsl.withTiming
+import dev.waylon.apexflow.core.dsl.withPluginTiming
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import kotlinx.coroutines.flow.Flow
 
@@ -18,7 +18,7 @@ class ApexTimingPlugin(
             override fun transform(input: Flow<I>): Flow<O> {
                 return input
                     .let { originalFlow -> flow.transform(originalFlow) }
-                    .withTiming(loggerName)
+                    .withPluginTiming(loggerName)
             }
         }
     }
