@@ -1,7 +1,10 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.dsl.apexFlow
+import dev.waylon.apexflow.core.dsl.withPluginErrorContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
