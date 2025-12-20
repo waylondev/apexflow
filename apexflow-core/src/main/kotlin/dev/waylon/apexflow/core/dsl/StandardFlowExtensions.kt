@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.core.dsl
 
+import dev.waylon.apexflow.core.ApexFlowConstants
 import dev.waylon.apexflow.core.util.createLogger
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -26,10 +27,10 @@ import kotlinx.coroutines.flow.onStart
  * val timedFlow = standardFlow.withTiming("my-standard-flow")
  * ```
  *
- * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.standard-flow.timing)
+ * @param loggerName SLF4J logger name (default: ${ApexFlowConstants.APEXFLOW_NAMESPACE}.standard-flow.timing)
  * @return Flow instance with execution time measurement enabled
  */
-fun <T> Flow<T>.withPluginTiming(loggerName: String = "dev.waylon.apexflow.standard.plugin.timing"): Flow<T> {
+fun <T> Flow<T>.withPluginTiming(loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.standard.plugin.timing"): Flow<T> {
     val logger = createLogger(loggerName)
     var startTime: Long = 0
 

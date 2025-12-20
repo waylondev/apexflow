@@ -1,5 +1,6 @@
 package dev.waylon.apexflow.conversion
 
+import dev.waylon.apexflow.core.ApexFlowConstants
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
 import dev.waylon.apexflow.core.dsl.withPluginLogging
@@ -122,6 +123,7 @@ class PdfToTiffConverter internal constructor(
 
         // 1. PDF Reading Component - Flow<Unit> -> Flow<BufferedImage>
         val pdfReader = ApexPdfReader.fromInputStream(inputStream, pdfConfig)
+            .withPluginPerformanceMonitoring("${ApexFlowConstants.APEXFLOW_NAMESPACE}.pdf.to.tiff.pdf.reader")
 
         // 2. Image Processing Component - Flow<BufferedImage> -> Flow<BufferedImage>
         val imageProcessor = apexFlow<BufferedImage, BufferedImage> {
@@ -133,6 +135,7 @@ class PdfToTiffConverter internal constructor(
 
         // 3. TIFF Writing Component - Flow<BufferedImage> -> Flow<Unit>
         val tiffWriter = ApexTiffWriter.toOutputStream(outputStream, tiffConfig)
+            .withPluginPerformanceMonitoring("${ApexFlowConstants.APEXFLOW_NAMESPACE}.pdf.to.tiff.tiff.writer")
 
         ///////////////////////////////////////////
         // FLOW COMPOSITION                         //
@@ -144,7 +147,7 @@ class PdfToTiffConverter internal constructor(
         // Apply plugins to the complete pipeline
         val pipelineWithPlugins = completePipeline.withPluginTiming()
             .withPluginLogging()
-            .withPluginPerformanceMonitoring()
+            .withPluginPerformanceMonitoring("${ApexFlowConstants.APEXFLOW_NAMESPACE}.pdf.to.tiff")
 
         ///////////////////////////////////////////
         // EXECUTION                                 //

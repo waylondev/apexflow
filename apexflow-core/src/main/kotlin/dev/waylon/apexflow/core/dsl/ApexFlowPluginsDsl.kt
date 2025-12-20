@@ -1,6 +1,7 @@
 package dev.waylon.apexflow.core.dsl
 
 import dev.waylon.apexflow.core.ApexFlow
+import dev.waylon.apexflow.core.ApexFlowConstants
 import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.plugin.impl.ApexLoggingPlugin
@@ -44,7 +45,7 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
  * @return ApexFlow instance with logging enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withPluginLogging(loggerName: String = "dev.waylon.apexflow.plugin.logging"): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, O>.withPluginLogging(loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.logging"): ApexFlow<I, O> {
     return withPlugin(ApexLoggingPlugin(loggerName))
 }
 
@@ -64,7 +65,7 @@ fun <I, O> ApexFlow<I, O>.withPluginLogging(loggerName: String = "dev.waylon.ape
  * @return ApexFlow instance with execution time measurement enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withPluginTiming(loggerName: String = "dev.waylon.apexflow.plugin.timing"): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, O>.withPluginTiming(loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.timing"): ApexFlow<I, O> {
     return this.withPlugin(ApexLoggingPlugin(loggerName))
 }
 
@@ -87,7 +88,7 @@ fun <I, O> ApexFlow<I, O>.withPluginTiming(loggerName: String = "dev.waylon.apex
  */
 @ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withPluginPerformanceMonitoring(
-    loggerName: String = "dev.waylon.apexflow.plugin.performance",
+    loggerName: String = "${ApexFlowConstants.APEXFLOW_NAMESPACE}.plugin.performance",
     samplingIntervalMs: Long = 5000,
     enableDetailedMetrics: Boolean = false
 ): ApexFlow<I, O> {
