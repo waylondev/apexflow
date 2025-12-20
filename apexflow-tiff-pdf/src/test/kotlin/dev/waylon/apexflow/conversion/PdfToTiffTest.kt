@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 class PdfToTiffTest {
     // Use existing test PDF
     val inputPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
-    val outputTiff = File("build/test-pdf-to-tiff-dsl-output.pdf")
+    val outputTiff = File("build/test-pdf-to-tiff-dsl-output.tiff")
 
     /**
      * Test optimal PDF to TIFF conversion performance

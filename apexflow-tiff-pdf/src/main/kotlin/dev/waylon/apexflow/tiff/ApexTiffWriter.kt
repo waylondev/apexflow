@@ -7,6 +7,7 @@ import java.io.File
 import java.io.OutputStream
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
+import javax.imageio.ImageWriteParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -66,33 +67,46 @@ class ApexTiffWriter private constructor(
 
             // Use use() for automatic resource management
             outputProvider().use { outputStream ->
-                ImageIO.createImageOutputStream(outputStream).use { imageOutputStream ->
+                val imageOutputStream = ImageIO.createImageOutputStream(outputStream)
+                checkNotNull(imageOutputStream) { "Failed to create image output stream" }
+
+                imageOutputStream.use { ios ->
                     val writers = ImageIO.getImageWritersByFormatName("TIFF")
                     check(writers.hasNext()) { "No TIFF writer found" }
 
                     val writer = writers.next()
-                    writer.output = imageOutputStream
+                    writer.output = ios
 
                     // Use client-provided writeParam if available, otherwise create default
                     val writeParam = config.writeParam ?: writer.defaultWriteParam
 
-                    var pageIndex = 0
+                    // Configure writeParam for compression
+                    writeParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
+                    writeParam.compressionType = config.compressionType
+                    writeParam.compressionQuality = config.compressionQuality / 100f
 
-                    // Write all pages using writeInsert - simpler and more consistent
+                    // Proper sequence writing workflow for multi-page TIFF
+                    writer.prepareWriteSequence(null)
+
+                    // Write images as they are received - true streaming processing
                     input.collect { image ->
-                        logger.info("Writing page $pageIndex to TIFF")
+                        logger.info("Writing page to TIFF")
+                        val iioImage = IIOImage(image, null, null)
 
-                        // Use writeInsert for all pages, including the first one
-                        // For an empty stream, writeInsert(0, ...) is equivalent to write(...)
-                        writer.writeInsert(pageIndex, IIOImage(image, null, null), writeParam)
+                        // Use writeToSequence for all pages in the sequence
+                        writer.writeToSequence(iioImage, writeParam)
 
-                        pageIndex++
                         emit(Unit) // Signal completion for this page
                     }
 
-                    logger.info("ApexFlow TIFF writing completed, wrote $pageIndex pages")
+                    // End the sequence properly
+                    writer.endWriteSequence()
+                    writer.dispose()
                 }
+
+                logger.info("ApexFlow TIFF writing completed")
             }
         }
     }
+
 }

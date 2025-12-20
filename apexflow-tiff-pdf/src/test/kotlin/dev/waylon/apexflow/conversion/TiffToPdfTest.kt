@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
  */
 class TiffToPdfTest {
     val inputTiff = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
-    val outputPdf = File("build/test-tiff-to-pdf-dsl-output.tiff")
+    val outputPdf = File("build/test-tiff-to-pdf-dsl-output.pdf")
 
 
     /**
