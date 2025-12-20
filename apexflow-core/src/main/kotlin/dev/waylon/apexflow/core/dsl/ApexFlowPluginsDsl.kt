@@ -44,8 +44,28 @@ fun <I, O> ApexFlow<I, O>.withPlugin(plugin: ApexFlowPlugin): ApexFlow<I, O> {
  * @return ApexFlow instance with logging enabled
  */
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow.plugin.logging"): ApexFlow<I, O> {
     return withPlugin(ApexLoggingPlugin(loggerName))
+}
+
+/**
+ * Extension function: add timing functionality to ApexFlow
+ *
+ * Measures and logs the execution time of ApexFlow operations.
+ * Uses SLF4J for logging execution duration.
+ *
+ * Usage Example:
+ * ```kotlin
+ * val myFlow = apexFlow { ... }
+ * val timedFlow = myFlow.withTiming("my-flow")
+ * ```
+ *
+ * @param loggerName SLF4J logger name (default: dev.waylon.apexflow.flow-timing)
+ * @return ApexFlow instance with execution time measurement enabled
+ */
+@ApexFlowDsl
+fun <I, O> ApexFlow<I, O>.withTiming(loggerName: String = "dev.waylon.apexflow.plugin.timing"): ApexFlow<I, O> {
+    return this.withPlugin(ApexLoggingPlugin(loggerName))
 }
 
 /**
@@ -67,7 +87,7 @@ fun <I, O> ApexFlow<I, O>.withLogging(loggerName: String = "dev.waylon.apexflow"
  */
 @ApexFlowDsl
 fun <I, O> ApexFlow<I, O>.withPerformanceMonitoring(
-    loggerName: String = "dev.waylon.apexflow.performance",
+    loggerName: String = "dev.waylon.apexflow.plugin.performance",
     samplingIntervalMs: Long = 5000,
     enableDetailedMetrics: Boolean = false
 ): ApexFlow<I, O> {

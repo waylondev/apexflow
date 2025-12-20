@@ -62,12 +62,9 @@ class TiffReader @JvmOverloads constructor(
      * @return Flow<BufferedImage> Flow of images from the TIFF data in original order
      */
     override fun read(): Flow<BufferedImage> = flow {
-        logger.info(
-            "Starting TIFF reading process, parallelReading: {}, parallelism: {}",
-            config.parallelReading, config.parallelism
-        )
+        logger.info("Starting TIFF reading process, parallelism: {}", config.parallelism)
 
-        // Read all bytes first from the input stream
+        // Read all bytes first from the input stream for thread-safe access
         val inputBytes = inputStream.readAllBytes()
         logger.debug("Read {} bytes from input stream", inputBytes.size)
 
@@ -87,33 +84,34 @@ class TiffReader @JvmOverloads constructor(
                     // Use custom read param if provided, otherwise default
                     val readParam = config.readParam ?: imageReader.defaultReadParam
 
-                    // Use Kotlin Flow's flatMapMerge to enable parallel reading while maintaining order
-                    (0 until numPages).asFlow()
-                        .flatMapMerge(config.parallelism) { pageIndex ->
-                            flow {
-                                logger.debug(
-                                    "Reading TIFF page {}/{} in thread {}",
-                                    pageIndex + 1, numPages, Thread.currentThread().name
-                                )
-
-                                // Create a new ImageReader instance for each thread (ImageReader is not thread-safe)
-                                ByteArrayInputStream(inputBytes).use { threadInputStream ->
-                                    ImageIO.createImageInputStream(threadInputStream).use { threadImageInputStream ->
-                                        getImageReader(threadImageInputStream).use { threadReader ->
-                                            threadReader.input = threadImageInputStream
-                                            val threadReadParam = config.readParam ?: threadReader.defaultReadParam
-                                            val image = threadReader.read(pageIndex, threadReadParam)
-                                            emit(image)
-                                        }
+                    // Use direct flatMapMerge for parallel reading
+            (0 until numPages).asFlow()
+                .flatMapMerge(config.parallelism) {
+                    pageIndex ->
+                        flow {
+                            logger.debug(
+                                "Reading TIFF page {}/{} in thread {}",
+                                pageIndex + 1, numPages, Thread.currentThread().name
+                            )
+                            
+                            // Create a new ImageReader instance for each thread (ImageReader is not thread-safe)
+                            ByteArrayInputStream(inputBytes).use { threadInputStream ->
+                                ImageIO.createImageInputStream(threadInputStream).use { threadImageInputStream ->
+                                    getImageReader(threadImageInputStream).use { threadReader ->
+                                        threadReader.input = threadImageInputStream
+                                        val threadReadParam = config.readParam ?: threadReader.defaultReadParam
+                                        emit(threadReader.read(pageIndex, threadReadParam))
                                     }
                                 }
-                            }.flowOn(Dispatchers.IO)  // Execute in IO thread pool to avoid blocking
-                        }
-                        .collect { image ->
-                            emit(image)
-                            image.flush()
-                            logger.debug("Successfully read TIFF page")
-                        }
+                            }
+                        }.flowOn(Dispatchers.IO)
+                }
+                .collect {
+                    image ->
+                        emit(image)
+                        image.flush()
+                        logger.debug("Successfully read TIFF page")
+                }
                 }
             }
         }

@@ -2,7 +2,7 @@ package dev.waylon.apexflow.core.dsl
 
 import dev.waylon.apexflow.core.ApexFlow
 import dev.waylon.apexflow.core.ApexFlowDsl
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
@@ -25,8 +25,11 @@ import kotlinx.coroutines.flow.flow
  * @param parallelism Degree of parallelism to use
  * @return ApexFlow instance with parallel processing enabled
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @ApexFlowDsl
-fun <I, O> ApexFlow<I, Flow<O>>.withParallelProcessing(parallelism: Int = Runtime.getRuntime().availableProcessors()): ApexFlow<I, O> {
+fun <I, O> ApexFlow<I, Flow<O>>.withParallelProcessing(
+    parallelism: Int = Runtime.getRuntime().availableProcessors()
+): ApexFlow<I, O> {
     return object : ApexFlow<I, O> {
         override fun transform(input: Flow<I>): Flow<O> {
             // Use flatMapMerge to enable parallel processing while maintaining order
@@ -52,6 +55,7 @@ fun <I, O> ApexFlow<I, Flow<O>>.withParallelProcessing(parallelism: Int = Runtim
  * @param processor Function to process each item
  * @return ApexFlow instance for parallel processing
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @ApexFlowDsl
 inline fun <I, O> parallelProcessor(
     parallelism: Int = Runtime.getRuntime().availableProcessors(),
