@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.waylon.apexflow"
-version = "0.0.2"
+version = "0.0.3"
 
 description = "ApexFlow PDF-PDFBox Library - PDF writing functionality using PDFBox"
 

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
  */
 class PdfTiffSeparatePerformanceTest {
 
-    private val testPdf = File("dist/spring-boot-reference-406.pdf")
+    private val testPdf = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
 
     /**
      * Test PDF reading performance only with performance monitoring

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
  * for converting large files using ApexFlow components.
  */
 class TiffToPdfTest {
-    val inputTiff = File("dist/test-tiff-to-pdf-dsl.tiff")
+    val inputTiff = File("src/test/resources/test-pdf-to-tiff-dsl.pdf")
     val outputPdf = File("build/test-tiff-to-pdf-dsl-output.pdf")
 
 

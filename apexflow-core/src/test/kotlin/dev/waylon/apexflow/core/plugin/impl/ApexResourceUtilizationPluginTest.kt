@@ -2,7 +2,6 @@ package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.withPluginResourceUtilization
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -22,7 +21,7 @@ class ApexResourceUtilizationPluginTest {
     fun `test resource utilization plugin works without affecting normal execution`() = runBlocking {
         // Create a normal flow
         val normalFlow = apexFlow<Int, Int> {
-            map { it -> it * 2 }
+            map { it * 2 }
         }
 
         // Wrap with Resource Utilization Plugin
@@ -43,7 +42,7 @@ class ApexResourceUtilizationPluginTest {
     fun `test resource utilization plugin works with different sampling intervals`() = runBlocking {
         // Create a flow with delay to allow sampling
         val delayFlow = apexFlow<Int, Int> {
-            map { it ->
+            map {
                 // Add a small delay to allow sampling to occur
                 Thread.sleep(150)
                 it * 2

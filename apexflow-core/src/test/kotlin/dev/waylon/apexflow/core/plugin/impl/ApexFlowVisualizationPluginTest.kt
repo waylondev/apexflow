@@ -1,9 +1,7 @@
 package dev.waylon.apexflow.core.plugin.impl
-package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.dsl.apexFlow
-import dev.waylon.apexflow.core.dsl.withPluginFlowVisualization
-import kotlinx.coroutines.flow.Flow
+import dev.waylon.apexflow.core.dsl.withPlugin
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -25,18 +23,18 @@ class ApexFlowVisualizationPluginTest {
         val normalFlow = apexFlow<Int, Int> {
             map { "Processed: $it" }.map { it.length }
         }
-        
+
         // Wrap with Flow Visualization Plugin using TEXT format
         val visualizedFlow = normalFlow.withPlugin(ApexFlowVisualizationPlugin())
-        
+
         // Execute normally
         val results = visualizedFlow.transform(flowOf(1, 2, 3)).toList()
-        
+
         // Verify results are correct
         assertEquals(3, results.size)
-        assertEquals(listOf(11, 11, 11), results)
+        assertEquals(listOf(12, 12, 12), results)
     }
-    
+
     /**
      * Test that Flow Visualization Plugin works with DOT output format
      */
@@ -46,20 +44,22 @@ class ApexFlowVisualizationPluginTest {
         val normalFlow = apexFlow<Int, Int> {
             map { it * 2 }
         }
-        
+
         // Wrap with Flow Visualization Plugin using DOT format
-        val visualizedFlow = normalFlow.withPlugin(ApexFlowVisualizationPlugin(
-            outputFormat = ApexFlowVisualizationPlugin.VisualizationFormat.DOT
-        ))
-        
+        val visualizedFlow = normalFlow.withPlugin(
+            ApexFlowVisualizationPlugin(
+                outputFormat = ApexFlowVisualizationPlugin.VisualizationFormat.DOT
+            )
+        )
+
         // Execute normally
         val results = visualizedFlow.transform(flowOf(1, 2, 3)).toList()
-        
+
         // Verify results are correct
         assertEquals(3, results.size)
         assertEquals(listOf(2, 4, 6), results)
     }
-    
+
     /**
      * Test that Flow Visualization Plugin works with composed flows
      */
@@ -75,19 +75,19 @@ class ApexFlowVisualizationPluginTest {
         val flow3 = apexFlow<Int, Int> {
             map { it * 3 }
         }
-        
+
         // Compose flows and wrap with Flow Visualization Plugin
         val composedFlow = (flow1 + flow2 + flow3).withPlugin(ApexFlowVisualizationPlugin())
-        
+
         // Execute normally
         val results = composedFlow.transform(flowOf(1, 2, 3)).toList()
-        
+
         // Verify results are correct
         assertEquals(3, results.size)
         // Expected: (1*2+1)*3 = 9, (2*2+1)*3 = 15, (3*2+1)*3 = 21
         assertEquals(listOf(9, 15, 21), results)
     }
-    
+
     /**
      * Test that Flow Visualization Plugin works with other plugins
      */
@@ -97,15 +97,15 @@ class ApexFlowVisualizationPluginTest {
         val normalFlow = apexFlow<Int, Int> {
             map { it * 2 }
         }
-        
+
         // Wrap with multiple plugins including Flow Visualization
         val multiPluginFlow = normalFlow
             .withPlugin(ApexLoggingPlugin())
             .withPlugin(ApexFlowVisualizationPlugin())
-        
+
         // Execute normally
         val results = multiPluginFlow.transform(flowOf(1, 2, 3)).toList()
-        
+
         // Verify results are correct
         assertEquals(3, results.size)
         assertEquals(listOf(2, 4, 6), results)

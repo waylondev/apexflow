@@ -2,7 +2,6 @@ package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.withPluginErrorContext
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -21,18 +20,18 @@ class ApexErrorContextPluginTest {
     @Test
     fun `test error context plugin provides detailed error information`() = runBlocking {
         // Create a flow that will throw an exception
-        val errorFlow = apexFlow<Int, Int> { 
-            map { it -> 
+        val errorFlow = apexFlow<Int, Int> {
+            map {
                 if (it == 2) {
                     throw RuntimeException("Test exception for value 2")
                 }
                 it * 2
             }
         }
-        
+
         // Wrap with Error Context Plugin
         val errorHandledFlow = errorFlow.withPluginErrorContext()
-        
+
         // Execute and catch the expected exception
         try {
             errorHandledFlow.transform(flowOf(1, 2, 3)).toList()
@@ -43,23 +42,23 @@ class ApexErrorContextPluginTest {
             assertEquals("Test exception for value 2", e.message)
         }
     }
-    
+
     /**
      * Test that Error Context Plugin works with normal flow execution
      */
     @Test
     fun `test error context plugin works with normal execution`() = runBlocking {
         // Create a normal flow
-        val normalFlow = apexFlow<Int, Int> { 
-            map { it -> it * 2 }
+        val normalFlow = apexFlow<Int, Int> {
+            map { it * 2 }
         }
-        
+
         // Wrap with Error Context Plugin
         val errorHandledFlow = normalFlow.withPluginErrorContext()
-        
+
         // Execute normally
         val results = errorHandledFlow.transform(flowOf(1, 2, 3)).toList()
-        
+
         // Verify results
         assertEquals(3, results.size)
         assertEquals(listOf(2, 4, 6), results)
