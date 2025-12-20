@@ -1,14 +1,13 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.util.createLogger
+import java.time.Instant
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onEach
-import java.time.Instant
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Error context plugin for ApexFlow
@@ -22,7 +21,8 @@ import java.util.concurrent.atomic.AtomicLong
  * val errorHandledFlow = flow.withPluginErrorContext()
  * ```
  */
-class ApexErrorContextPlugin(private val loggerName: String = "dev.waylon.apexflow.plugin.error-context") : ApexFlowPlugin {
+class ApexErrorContextPlugin(private val loggerName: String = "dev.waylon.apexflow.plugin.error-context") :
+    ApexFlowPlugin {
 
     override fun <I, O> wrap(flow: ApexFlow<I, O>): ApexFlow<I, O> {
         val logger = createLogger(loggerName)
@@ -49,7 +49,7 @@ class ApexErrorContextPlugin(private val loggerName: String = "dev.waylon.apexfl
                             appendLine("- Last Processed Input: $lastProcessedInput")
                             appendLine("- Error Message: ${e.message}")
                         }
-                        
+
                         logger.error(errorContext, e)
                         throw e // Re-throw to preserve original error handling
                     }

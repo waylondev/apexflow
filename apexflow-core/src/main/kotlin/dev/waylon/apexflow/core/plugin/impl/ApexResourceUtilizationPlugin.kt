@@ -1,16 +1,14 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.util.createLogger
+import java.lang.management.ManagementFactory
+import java.time.Duration
+import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import java.lang.management.ManagementFactory
-import java.lang.management.OperatingSystemMXBean
-import java.time.Duration
-import java.time.Instant
 
 /**
  * Resource utilization plugin for ApexFlow
@@ -43,7 +41,7 @@ class ApexResourceUtilizationPlugin(
                 val startCpuTime = getCpuTime()
 
                 return input
-                    .onStart { 
+                    .onStart {
                         logger.info(
                             "Resource utilization monitoring started for component '$componentName' at $startTime"
                         )
@@ -54,15 +52,15 @@ class ApexResourceUtilizationPlugin(
                         val endTime = Instant.now()
                         val endCpuTime = getCpuTime()
                         val totalTime = Duration.between(startTime, endTime)
-                        
+
                         logResourceSnapshot("Final", componentName)
-                        
+
                         // Calculate total CPU usage for the component
                         val cpuUsage = calculateCpuUsage(startCpuTime, endCpuTime, totalTime)
                         logger.info(
                             "Resource utilization summary for component '$componentName': " +
-                            "Total time: ${totalTime.seconds}s, " +
-                            "CPU Usage: ${String.format("%.2f", cpuUsage)}%"
+                                    "Total time: ${totalTime.seconds}s, " +
+                                    "CPU Usage: ${String.format("%.2f", cpuUsage)}%"
                         )
                     }
             }
@@ -79,9 +77,9 @@ class ApexResourceUtilizationPlugin(
 
                 logger.info(
                     "$phase resource snapshot for '$componentName': " +
-                    "CPU: ${String.format("%.2f", cpuLoad)}%, " +
-                    "Memory: $freeMemory MB free / $totalMemory MB total / $maxMemory MB max, " +
-                    "Threads: $threadCount"
+                            "CPU: ${String.format("%.2f", cpuLoad)}%, " +
+                            "Memory: $freeMemory MB free / $totalMemory MB total / $maxMemory MB max, " +
+                            "Threads: $threadCount"
                 )
             }
 

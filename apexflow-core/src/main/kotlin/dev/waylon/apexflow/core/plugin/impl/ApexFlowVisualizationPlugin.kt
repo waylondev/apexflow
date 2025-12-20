@@ -1,14 +1,13 @@
 package dev.waylon.apexflow.core.plugin.impl
 
 import dev.waylon.apexflow.core.ApexFlow
-import dev.waylon.apexflow.core.ApexFlowDsl
 import dev.waylon.apexflow.core.plugin.ApexFlowPlugin
 import dev.waylon.apexflow.core.util.createLogger
+import java.time.Instant
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import java.time.Instant
-import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Flow visualization plugin for ApexFlow
@@ -33,6 +32,7 @@ class ApexFlowVisualizationPlugin(
     enum class VisualizationFormat {
         /** Simple text-based visualization */
         TEXT,
+
         /** DOT format for graphviz visualization */
         DOT
     }
@@ -58,7 +58,7 @@ class ApexFlowVisualizationPlugin(
                 val componentName = flow.javaClass.simpleName.ifEmpty { "AnonymousComponent" }
 
                 return input
-                    .onStart { 
+                    .onStart {
                         executionTrace.add(
                             ExecutionEvent(
                                 componentName = componentName,
@@ -81,7 +81,7 @@ class ApexFlowVisualizationPlugin(
                                 )
                             )
                         )
-                        
+
                         // Generate and log visualization when flow completes
                         val visualization = generateVisualization()
                         logger.info("Flow Execution Visualization (ID: $executionId):\n$visualization")
@@ -109,7 +109,7 @@ class ApexFlowVisualizationPlugin(
         sb.appendLine("ID: $executionId")
         sb.appendLine("Timestamp: ${Instant.now()}")
         sb.appendLine("Events:")
-        
+
         executionTrace.forEachIndexed { index, event ->
             sb.appendLine("${index + 1}. [${event.timestamp}] ${event.eventType} - ${event.componentName}")
             if (event.metadata.isNotEmpty()) {
@@ -118,7 +118,7 @@ class ApexFlowVisualizationPlugin(
                 }
             }
         }
-        
+
         return sb.toString()
     }
 
@@ -131,19 +131,19 @@ class ApexFlowVisualizationPlugin(
         sb.appendLine("    rankdir=LR;")
         sb.appendLine("    node [shape=box, style=rounded];")
         sb.appendLine("    graph [label=\"ApexFlow Execution Trace ID: $executionId\", labelloc=top];")
-        
+
         // Add components as nodes
         val components = executionTrace.map { it.componentName }.toSet()
         components.forEach { component ->
             sb.appendLine("    \"$component\" [style=filled, fillcolor=lightblue];")
         }
-        
+
         // Add execution flow as edges
         executionTrace.windowed(2, step = 1, partialWindows = false).forEachIndexed { index, events ->
             val (first, second) = events
             sb.appendLine("    \"${first.componentName}\" -> \"${second.componentName}\" [label=\"Step ${index + 1}\"];")
         }
-        
+
         sb.appendLine("}")
         return sb.toString()
     }
