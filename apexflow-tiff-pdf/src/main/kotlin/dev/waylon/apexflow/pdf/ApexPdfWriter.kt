@@ -73,7 +73,7 @@ class ApexPdfWriter private constructor(
 
                     // Write pages as images are received - no need to collect all images first!
                     input.collect { image ->
-                        logger.info("Writing page $pageIndex to PDF")
+                        logger.debug("Writing PDF page {}", pageIndex)
 
                         // Create and add page
                         val page = PDPage(config.pageSize)

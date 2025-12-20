@@ -90,7 +90,7 @@ class ApexTiffReader private constructor(
                     logger.info("Found $pageCount pages in TIFF")
 
                     for (pageIndex in 0 until pageCount) {
-                        logger.info("Reading page $pageIndex")
+                        logger.debug("Reading page $pageIndex")
                         val image = reader.read(pageIndex)
                         emit(image)
                     }

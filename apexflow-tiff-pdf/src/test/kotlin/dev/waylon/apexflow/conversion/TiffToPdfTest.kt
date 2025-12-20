@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
  * for converting large files using ApexFlow components.
  */
 class TiffToPdfTest {
-    val inputTiff = File("src/test/resources/test-tiff-to-pdf-dsl.tiff")
+    val inputTiff = File("dist/test-pdf-to-tiff-dsl-406-output.tiff")
     val outputPdf = File("build/test-tiff-to-pdf-dsl-output.pdf")
 
 
@@ -34,6 +34,7 @@ class TiffToPdfTest {
                 tiffConfig = {
                     // TIFF config with optimal settings
                     // Empty config uses defaults, which are optimal for performance
+                    bufferSize = 64
                 },
                 pdfConfig = {
                     // PDF config with optimal settings
