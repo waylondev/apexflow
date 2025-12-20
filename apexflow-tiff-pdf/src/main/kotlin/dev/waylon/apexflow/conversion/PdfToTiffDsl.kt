@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.map
  * inputStream.toTiff(outputStream)
  * ```
  */
-fun pdfToTiff(
+fun apexPdfToTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ): PdfToTiffConverter {
@@ -169,7 +169,7 @@ suspend fun File.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this, outputFile)
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this, outputFile)
 }
 
 /**
@@ -184,7 +184,7 @@ suspend fun File.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this.inputStream(), outputStream)
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this.inputStream(), outputStream)
 }
 
 /**
@@ -199,7 +199,7 @@ suspend fun File.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this, File(outputPath))
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this, File(outputPath))
 }
 
 /**
@@ -214,7 +214,7 @@ suspend fun InputStream.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this, outputFile.outputStream())
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this, outputFile.outputStream())
 }
 
 /**
@@ -229,7 +229,7 @@ suspend fun InputStream.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this, outputStream)
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this, outputStream)
 }
 
 /**
@@ -244,5 +244,5 @@ suspend fun InputStream.toTiff(
     pdfConfig: PdfConfig.() -> Unit = {},
     tiffConfig: TiffConfig.() -> Unit = {}
 ) {
-    pdfToTiff(pdfConfig, tiffConfig).convert(this, File(outputPath).outputStream())
+    apexPdfToTiff(pdfConfig, tiffConfig).convert(this, File(outputPath).outputStream())
 }

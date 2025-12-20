@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.map
  * inputStream.toPdf(outputStream)
  * ```
  */
-fun tiffToPdf(
+fun apexTiffToPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ): TiffToPdfConverter {
@@ -169,7 +169,7 @@ suspend fun File.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile)
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile)
 }
 
 /**
@@ -184,7 +184,7 @@ suspend fun File.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this.inputStream(), outputStream)
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this.inputStream(), outputStream)
 }
 
 /**
@@ -199,7 +199,7 @@ suspend fun File.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath))
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath))
 }
 
 /**
@@ -214,7 +214,7 @@ suspend fun InputStream.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile.outputStream())
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this, outputFile.outputStream())
 }
 
 /**
@@ -229,7 +229,7 @@ suspend fun InputStream.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this, outputStream)
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this, outputStream)
 }
 
 /**
@@ -244,5 +244,5 @@ suspend fun InputStream.toPdf(
     tiffConfig: TiffConfig.() -> Unit = {},
     pdfConfig: PdfConfig.() -> Unit = {}
 ) {
-    tiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath).outputStream())
+    apexTiffToPdf(tiffConfig, pdfConfig).convert(this, File(outputPath).outputStream())
 }
