@@ -3,9 +3,16 @@ package dev.waylon.apexflow.conversion
 import dev.waylon.apexflow.core.ApexFlowConstants
 import dev.waylon.apexflow.core.dsl.apexFlow
 import dev.waylon.apexflow.core.dsl.execute
+import dev.waylon.apexflow.core.dsl.withPluginErrorContext
+import dev.waylon.apexflow.core.dsl.withPluginFlowVisualization
 import dev.waylon.apexflow.core.dsl.withPluginLogging
+import dev.waylon.apexflow.core.dsl.withPluginMemoryMonitoring
 import dev.waylon.apexflow.core.dsl.withPluginPerformanceMonitoring
+import dev.waylon.apexflow.core.dsl.withPluginResourceUtilization
+import dev.waylon.apexflow.core.dsl.withPluginSlowOperationDetector
+import dev.waylon.apexflow.core.dsl.withPluginThroughput
 import dev.waylon.apexflow.core.dsl.withPluginTiming
+import dev.waylon.apexflow.core.dsl.withPluginTrace
 import dev.waylon.apexflow.core.util.createLogger
 import dev.waylon.apexflow.pdf.ApexPdfWriter
 import dev.waylon.apexflow.pdf.PdfConfig
@@ -148,6 +155,13 @@ class TiffToPdfConverter internal constructor(
         val pipelineWithPlugins = completePipeline.withPluginTiming()
             .withPluginLogging()
             .withPluginPerformanceMonitoring("${ApexFlowConstants.APEXFLOW_NAMESPACE}.tiff.to.pdf")
+            .withPluginTrace()
+            .withPluginSlowOperationDetector()
+            .withPluginThroughput()
+            .withPluginErrorContext()
+            .withPluginMemoryMonitoring()
+            .withPluginResourceUtilization()
+            .withPluginFlowVisualization()
 
         ///////////////////////////////////////////
         // EXECUTION                                 //
